@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
+import StoreProvider from "@/components/commons/StoreProvider";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { PageTransition } from "@/components/PageTransition";
@@ -102,14 +102,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <Providers>
+        <StoreProvider>
           <Nav />
           <main id="main" className="flex-1 w-full mx-auto max-w-[1360px] px-4 sm:px-6 pb-28 md:pb-16">
             <PageTransition>{children}</PageTransition>
           </main>
           <Footer />
           <Konami />
-        </Providers>
+        </StoreProvider>
       </body>
     </html>
   );

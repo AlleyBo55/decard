@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { Activity, MarketplacePage } from "@/lib/types";
+import { useWalletActivity } from "@/hooks/pages/Wallet/useWalletActivity";
+import { useWalletHoldings } from "@/hooks/pages/Wallet/useWalletHoldings";
 import { shortAddr } from "@/lib/format";
 import { solscanAddr } from "@/lib/constants";
 import { knownLabel } from "@/lib/labels";
@@ -30,25 +30,9 @@ export function WalletView({ wallet }: { wallet: string }) {
   const custom = labels[wallet]?.label ?? "";
   const name = custom || known?.label || "Trainer";
 
-  const holdings = useQuery<MarketplacePage>({
-    queryKey: ["holdings", wallet],
-    queryFn: async () => {
-      const res = await fetch(`/api/scanner?ownerAddress=${wallet}&step=100&orderBy=priceDesc`);
-      if (!res.ok) throw new Error("holdings failed");
-      return res.json();
-    },
-  });
+  const holdings = useWalletHoldings(wallet);
 
-  const activity = useQuery<{ activity: Activity[] }>({
-    queryKey: ["wallet-activity", wallet],
-    queryFn: async () => {
-      const res = await fetch(`/api/activity?wallet=${wallet}&limit=25`);
-      if (!res.ok) throw new Error("activity failed");
-      return res.json();
-    },
-    enabled: tab === "activity",
-    refetchInterval: 30_000,
-  });
+  const activity = useWalletActivity(wallet, tab === "activity");
 
   const cards = useMemo(() => {
     const list = [...(holdings.data?.cards ?? [])];

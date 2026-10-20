@@ -1,20 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import type { SolPrice } from "@/lib/types";
+import { useSolPrice } from "@/hooks/useSolPrice";
 import { clsx } from "@/lib/clsx";
 
 export function SolTicker({ className }: { className?: string }) {
-  const { data } = useQuery<SolPrice>({
-    queryKey: ["sol-price"],
-    queryFn: async () => {
-      const res = await fetch("/api/sol-price");
-      if (!res.ok) throw new Error("sol price failed");
-      return res.json();
-    },
-    refetchInterval: 60_000,
-    staleTime: 60_000,
-  });
+  const { data } = useSolPrice();
 
   if (!data?.usd) return null;
   const up = data.change24h >= 0;

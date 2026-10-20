@@ -1,36 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { CountUp } from "@/components/motion";
+import { useMarket } from "@/hooks/pages/Home/useMarket";
 import { useSolPrice } from "@/lib/hooks";
+import type { MarketTop } from "@/services/Market/getMarket";
 
-export interface MarketTop {
-  price: number;
-  currency: string;
-  mint: string;
-  name: string;
-}
-
-interface Market {
-  listed: number;
-  floor: MarketTop | null;
-  ceiling: MarketTop | null;
-}
-
-export function useMarket(category: string, source: string) {
-  return useQuery<Market>({
-    queryKey: ["market", category, source],
-    queryFn: async () => {
-      const p = new URLSearchParams();
-      if (category) p.set("category", category);
-      if (source) p.set("source", source);
-      const res = await fetch(`/api/market?${p}`);
-      if (!res.ok) throw new Error("market failed");
-      return res.json();
-    },
-    refetchInterval: 30_000,
-  });
-}
+export type { MarketTop };
 
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (

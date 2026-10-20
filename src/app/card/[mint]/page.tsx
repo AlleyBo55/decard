@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense, cache } from "react";
 import { getCard, getCardMarket, getCardOffers } from "@/lib/cc";
 import { dealScore, fmtNum, fmtPct, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
 import { cardImage, ccAssetUrl, solscanAddr } from "@/lib/constants";
+import type { CardMarket, CardOffer } from "@/lib/types";
 import { CardFlip } from "@/components/card/CardFlip";
 import { CardActivity } from "@/components/card/CardActivity";
 import { WalletName } from "@/components/ActivityRow";
-import { GradePill, HPBar, Kicker, StatBar, TypeChip } from "@/components/ui";
+import { GradePill, HPBar, Kicker, Skeleton, StatBar, TypeChip } from "@/components/ui";
 
+// ISR: no card is prerendered at build; each one renders on its first visit,
+// is cached, and regenerates in the background at most every 10s. A failed
+// regeneration keeps serving the last good page.
 export const revalidate = 10;
+
+export function generateStaticParams(): { mint: string }[] {
+  return [];
+}
 
 const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
+/** One catalogue read per request, shared by generateMetadata and the page. */
+const loadCard = cache((mint: string) => getCard(mint));
+
 export async function generateMetadata({ params }: { params: Promise<{ mint: string }> }): Promise<Metadata> {
   const { mint } = await params;
-  const card = ADDRESS.test(mint) ? await getCard(mint) : null;
+  const card = ADDRESS.test(mint) ? await loadCard(mint) : null;
   if (!card) return { title: "Card not found" };
   const title = `${shortCardName(card.itemName)} ${gradeShort(card.gradingCompany, card.grade)}`.trim();
   const description = `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`;
@@ -52,21 +64,175 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
+// --- Live sections. Each awaits only its own data and streams in on its own,
+// so a slow Collector Crypt call never holds up the rest of the page. ---
+
+type MarketData = Promise<CardMarket | null>;
+/** Null when the offers couldn't be read (not the same as "no bids"). */
+type OffersData = Promise<CardOffer[] | null>;
+
+async function ListingPrice({ market }: { market: MarketData }) {
+  const listing = (await market)?.listing ?? null;
+  return (
+    <div>
+      <Kicker>{listing ? "Listed price" : "Not listed"}</Kicker>
+      <p className="mt-3 font-display font-bold text-5xl leading-none tabular-nums">
+        {listing ? (listing.currency === "USDC" ? fmtUsd(listing.price) : `${listing.price} SOL`) : "·"}
+      </p>
+      {listing && (
+        <p className="mt-2 text-sm text-ink-mute">
+          on {venueName(listing.marketplace)} · updated{" "}
+          {timeAgo(listing.updatedAt)} ago
+        </p>
+      )}
+    </div>
+  );
+}
+
+async function BestBid({ offers }: { offers: OffersData }) {
+  const list = await offers;
+  const bestBid = list?.[0] ? Number(list[0].price) : null;
+  return (
+    <div>
+      <span className="font-pixel text-[9px] text-ink-mute">BEST BID</span>
+      <p className="mt-2 font-display font-bold text-2xl text-warn">{bestBid ? fmtUsd(bestBid) : "·"}</p>
+    </div>
+  );
+}
+
+async function ListingVsInsured({ market, insuredValue }: { market: MarketData; insuredValue: string }) {
+  const listing = (await market)?.listing ?? null;
+  const insured = Number(insuredValue) || 0;
+  const score = listing?.currency === "USDC" ? dealScore(listing.price, insuredValue) : null;
+  const spread = listing?.currency === "USDC" && insured > 0 ? listing.price / insured - 1 : null;
+  return (
+    <>
+      {score != null && score > 0 && <HPBar value={score} className="max-w-md" />}
+      {spread != null && (
+        <p className={`font-bold ${spread < 0 ? "text-up" : "text-down"}`}>
+          {spread < 0
+            ? `${Math.round(-spread * 100)}% under insured value`
+            : `${Math.round(spread * 100)}% over insured value`}
+        </p>
+      )}
+    </>
+  );
+}
+
+async function LiveBids({ offers, insured }: { offers: OffersData; insured: number }) {
+  const list = await offers;
+  if (!list) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Kicker>Live bids</Kicker>
+        <p className="text-ink-mute">Live bids are unavailable right now. Check back in a moment.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      <Kicker>Live bids ({list.length})</Kicker>
+      {list.length === 0 ? (
+        <p className="text-ink-mute">No live bids. Be the first trainer to make an offer.</p>
+      ) : (
+        <ol className="dash-divide">
+          {list.slice(0, 8).map((o, i) => (
+            <li key={o.id} className="flex items-center gap-3 py-2.5">
+              <span className="font-pixel text-[9px] text-ink-mute w-5">{i + 1}</span>
+              <span className="font-display font-bold text-xl tabular-nums text-warn">{fmtUsd(Number(o.price))}</span>
+              {insured > 0 && (
+                <span className="text-xs text-ink-mute">{Math.round((Number(o.price) / insured) * 100)}% of ins</span>
+              )}
+              <span className="ml-auto flex items-center gap-2 text-xs text-ink-mute">
+                {ADDRESS.test(o.buyerId) && <WalletName address={o.buyerId} />}
+                {timeAgo(o.createdAt)} ago
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+async function Trainer({ market }: { market: MarketData }) {
+  const owner = (await market)?.owner ?? null;
+  return (
+    <div className="flex flex-col gap-3">
+      <Kicker>Trainer</Kicker>
+      {owner ? (
+        <div className="flex flex-col gap-2">
+          <span className="text-lg">
+            <WalletName address={owner.wallet} />
+          </span>
+          {owner.name && <span className="text-sm text-ink-mute">Collector Crypt name: {owner.name}</span>}
+          <Link href={`/wallet/${owner.wallet}`} className="text-sm font-extrabold text-azure-deep hover:text-poke-deep">
+            Open trainer card →
+          </Link>
+        </div>
+      ) : (
+        <p className="text-ink-mute">Owner unknown.</p>
+      )}
+    </div>
+  );
+}
+
+// --- Fallbacks, sized like what they stand in for. ---
+
+function ListingPriceSkeleton() {
+  return (
+    <div>
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="mt-3 h-12 w-44" />
+    </div>
+  );
+}
+
+function BestBidSkeleton() {
+  return (
+    <div>
+      <span className="font-pixel text-[9px] text-ink-mute">BEST BID</span>
+      <Skeleton className="mt-2 h-8 w-20" />
+    </div>
+  );
+}
+
+function LiveBidsSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      <Kicker>Live bids</Kicker>
+      <Skeleton className="h-9 w-full" />
+      <Skeleton className="h-9 w-full" />
+      <Skeleton className="h-9 w-3/4" />
+    </div>
+  );
+}
+
+function TrainerSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      <Kicker>Trainer</Kicker>
+      <Skeleton className="h-7 w-40" />
+      <Skeleton className="h-4 w-28" />
+    </div>
+  );
+}
+
 export default async function CardPage({ params }: { params: Promise<{ mint: string }> }) {
   const { mint } = await params;
   if (!ADDRESS.test(mint)) notFound();
-  const [card, market, offers] = await Promise.all([getCard(mint), getCardMarket(mint), getCardOffers(mint)]);
+  // Start the live reads now, alongside the catalogue read. Neither rejects:
+  // the market read resolves null on failure, offers resolve null.
+  const market: MarketData = getCardMarket(mint);
+  const offers: OffersData = getCardOffers(mint).catch(() => null);
+  // Upstream failures throw here and render error.tsx; only a real 404 is "not found".
+  const card = await loadCard(mint);
   if (!card) notFound();
 
-  const listing = market?.listing ?? null;
-  const owner = market?.owner ?? null;
   const pop = card.population;
   const insured = Number(card.insuredValue) || 0;
-  const score = listing?.currency === "USDC" ? dealScore(listing.price, card.insuredValue) : null;
-  const spread = listing?.currency === "USDC" && insured > 0 ? listing.price / insured - 1 : null;
   const grade = gradeShort(card.gradingCompany, card.grade);
   const cert = certUrl(card.gradingCompany, card.gradingID);
-  const bestBid = offers[0] ? Number(offers[0].price) : null;
   const tier = pop ? rarity(pop.gradePopulation) : null;
 
   return (
@@ -120,37 +286,22 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
           {/* price */}
           <section className="paper p-6 sm:p-7 flex flex-col gap-5">
             <div className="flex flex-wrap items-end justify-between gap-6">
-              <div>
-                <Kicker>{listing ? "Listed price" : "Not listed"}</Kicker>
-                <p className="mt-3 font-display font-bold text-5xl leading-none tabular-nums">
-                  {listing ? (listing.currency === "USDC" ? fmtUsd(listing.price) : `${listing.price} SOL`) : "·"}
-                </p>
-                {listing && (
-                  <p className="mt-2 text-sm text-ink-mute">
-                    on {venueName(listing.marketplace)} · updated{" "}
-                    {timeAgo(listing.updatedAt)} ago
-                  </p>
-                )}
-              </div>
+              <Suspense fallback={<ListingPriceSkeleton />}>
+                <ListingPrice market={market} />
+              </Suspense>
               <div className="flex gap-8">
                 <div>
                   <span className="font-pixel text-[9px] text-ink-mute">INSURED</span>
                   <p className="mt-2 font-display font-bold text-2xl">{insured ? fmtUsd(insured) : "·"}</p>
                 </div>
-                <div>
-                  <span className="font-pixel text-[9px] text-ink-mute">BEST BID</span>
-                  <p className="mt-2 font-display font-bold text-2xl text-warn">{bestBid ? fmtUsd(bestBid) : "·"}</p>
-                </div>
+                <Suspense fallback={<BestBidSkeleton />}>
+                  <BestBid offers={offers} />
+                </Suspense>
               </div>
             </div>
-            {score != null && score > 0 && <HPBar value={score} className="max-w-md" />}
-            {spread != null && (
-              <p className={`font-bold ${spread < 0 ? "text-up" : "text-down"}`}>
-                {spread < 0
-                  ? `${Math.round(-spread * 100)}% under insured value`
-                  : `${Math.round(spread * 100)}% over insured value`}
-              </p>
-            )}
+            <Suspense fallback={null}>
+              <ListingVsInsured market={market} insuredValue={card.insuredValue} />
+            </Suspense>
           </section>
 
           {/* pokédex data */}
@@ -206,44 +357,12 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
 
           {/* bids + owner */}
           <section className="grid md:grid-cols-[1.4fr_1fr] gap-10">
-            <div className="flex flex-col gap-3">
-              <Kicker>Live bids ({offers.length})</Kicker>
-              {offers.length === 0 ? (
-                <p className="text-ink-mute">No live bids. Be the first trainer to make an offer.</p>
-              ) : (
-                <ol className="dash-divide">
-                  {offers.slice(0, 8).map((o, i) => (
-                    <li key={o.id} className="flex items-center gap-3 py-2.5">
-                      <span className="font-pixel text-[9px] text-ink-mute w-5">{i + 1}</span>
-                      <span className="font-display font-bold text-xl tabular-nums text-warn">{fmtUsd(Number(o.price))}</span>
-                      {insured > 0 && (
-                        <span className="text-xs text-ink-mute">{Math.round((Number(o.price) / insured) * 100)}% of ins</span>
-                      )}
-                      <span className="ml-auto flex items-center gap-2 text-xs text-ink-mute">
-                        {ADDRESS.test(o.buyerId) && <WalletName address={o.buyerId} />}
-                        {timeAgo(o.createdAt)} ago
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-            <div className="flex flex-col gap-3">
-              <Kicker>Trainer</Kicker>
-              {owner ? (
-                <div className="flex flex-col gap-2">
-                  <span className="text-lg">
-                    <WalletName address={owner.wallet} />
-                  </span>
-                  {owner.name && <span className="text-sm text-ink-mute">Collector Crypt name: {owner.name}</span>}
-                  <Link href={`/wallet/${owner.wallet}`} className="text-sm font-extrabold text-azure-deep hover:text-poke-deep">
-                    Open trainer card →
-                  </Link>
-                </div>
-              ) : (
-                <p className="text-ink-mute">Owner unknown.</p>
-              )}
-            </div>
+            <Suspense fallback={<LiveBidsSkeleton />}>
+              <LiveBids offers={offers} insured={insured} />
+            </Suspense>
+            <Suspense fallback={<TrainerSkeleton />}>
+              <Trainer market={market} />
+            </Suspense>
           </section>
 
           {/* history */}

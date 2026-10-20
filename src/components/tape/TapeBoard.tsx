@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import type { Activity } from "@/lib/types";
+import { useTapeActivity } from "@/hooks/pages/Tape/useTapeActivity";
 import { ActivityRow } from "@/components/ActivityRow";
 import { GameBoy } from "@/components/gameboy/GameBoy";
 import { CountUp } from "@/components/motion";
@@ -31,15 +31,7 @@ export function TapeBoard() {
   const [filter, setFilter] = useState<Filter>("all");
   const [hideBots, setHideBots] = useState(true);
 
-  const { data, isLoading, isError, refetch } = useQuery<{ activity: Activity[] }>({
-    queryKey: ["tape-full"],
-    queryFn: async () => {
-      const res = await fetch("/api/activity?limit=60");
-      if (!res.ok) throw new Error("tape failed");
-      return res.json();
-    },
-    refetchInterval: 10_000,
-  });
+  const { data, isLoading, isError, refetch } = useTapeActivity();
 
   const all = useMemo(() => (data?.activity ?? []).filter((a) => a.kind !== "Unknown"), [data]);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useHighlights } from "@/components/HeroCatch";
+import { useHighlights } from "@/hooks/pages/Home/useHighlights";
 import { fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 
 const SLOGANS = [

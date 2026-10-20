@@ -7,16 +7,7 @@ import { fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { BallSearch } from "@/components/icons";
 import { GradePill } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
-
-interface Suggestion {
-  mint: string;
-  name: string;
-  grade: string | null;
-  gradingCompany: string | null;
-  category: string | null;
-  price: number | null;
-  currency: string | null;
-}
+import { useSuggest } from "@/hooks/components/WalletSearch/useSuggest";
 
 const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -40,39 +31,31 @@ export function WalletSearch({
   const boxRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
-  const [results, setResults] = useState<Suggestion[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(-1);
 
   const query = value.trim();
   const searchable = query.length >= 2 && !ADDRESS.test(query);
 
-  // Debounced typeahead; aborted on every keystroke so stale answers never land.
-  useEffect(() => {
-    if (!searchable) return;
-    const v = query;
-    const ctrl = new AbortController();
-    const id = window.setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/suggest?q=${encodeURIComponent(v)}`, { signal: ctrl.signal });
-        const data = await res.json();
-        setResults(data.results ?? []);
-        setTotal(data.total ?? 0);
-        setActive(-1);
-        setOpen(true);
-      } catch {
-        // aborted or offline
-      } finally {
-        setLoading(false);
-      }
-    }, 220);
-    return () => {
-      ctrl.abort();
-      window.clearTimeout(id);
-    };
-  }, [query, searchable]);
+  // Debounced typeahead (220ms). The last answer stays listed until the next
+  // lands; answers for an older query never replace the current one.
+  const suggest = useSuggest(searchable ? query : "");
+  // Set when a pick clears the list; the next answer brings it back.
+  const [cleared, setCleared] = useState(false);
+  const shown = cleared ? undefined : suggest.data;
+  const results = shown?.results ?? [];
+  const total = shown?.total ?? 0;
+  const loading = suggest.isFetching;
+
+  // Each new answer reopens the list with nothing highlighted.
+  const [answered, setAnswered] = useState(suggest.currentData);
+  if (answered !== suggest.currentData) {
+    setAnswered(suggest.currentData);
+    if (suggest.currentData) {
+      setCleared(false);
+      setActive(-1);
+      setOpen(true);
+    }
+  }
 
   const showList = open && searchable;
 
@@ -100,7 +83,7 @@ export function WalletSearch({
   function go(path: string) {
     setOpen(false);
     setValue("");
-    setResults([]);
+    setCleared(true);
     onDone?.();
     router.push(path);
   }

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import type { CardRow, MarketplacePage } from "@/lib/types";
+import type { CardRow } from "@/lib/types";
+import type { ScannerParams } from "@/services/Scanner/getScanner";
+import { useScanner } from "@/hooks/pages/Scanner/useScanner";
 import { dealScore, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
 import { cardImage } from "@/lib/constants";
 import { listingUsd, useMediaQuery, useSolPrice } from "@/lib/hooks";
@@ -145,31 +146,19 @@ export function ScannerTable({
     window.history.replaceState(null, "", qs ? `/scanner?${qs}` : "/scanner");
   }, [effectiveSearch, source, orderBy]);
 
-  const params = useMemo(() => {
-    const p = new URLSearchParams({ orderBy });
-    if (effectiveSearch) p.set("search", effectiveSearch);
-    if (source) p.set("source", source);
-    if (min) p.set("min", min);
-    else if (source) p.set("min", "1");
-    if (max) p.set("max", max);
-    return p;
-  }, [orderBy, effectiveSearch, source, min, max]);
+  const params = useMemo<ScannerParams>(
+    () => ({
+      orderBy,
+      search: effectiveSearch || undefined,
+      source: source || undefined,
+      min: min || (source ? "1" : undefined),
+      max: max || undefined,
+    }),
+    [orderBy, effectiveSearch, source, min, max],
+  );
 
-  const q = useInfiniteQuery({
-    queryKey: ["scanner", params.toString()],
-    initialPageParam: null as string | null,
-    queryFn: async ({ pageParam }): Promise<MarketplacePage> => {
-      const p = new URLSearchParams(params);
-      if (pageParam) p.set("cursor", pageParam);
-      const res = await fetch(`/api/scanner?${p}`);
-      if (!res.ok) throw new Error("scanner fetch failed");
-      return res.json();
-    },
-    getNextPageParam: (last) => last.nextCursor ?? null,
-    placeholderData: keepPreviousData,
-    // Only the first page live-refreshes; loaded pages stay put.
-    refetchInterval: (query) => ((query.state.data?.pages.length ?? 1) > 1 ? false : 15_000),
-  });
+  // Keeps the previous results on screen while params change; only a single page live-refreshes.
+  const q = useScanner(params);
 
   const cards = useMemo(() => {
     const seen = new Set<string>();
@@ -279,7 +268,7 @@ export function ScannerTable({
               </b>{" "}
               matching cards
               {orderBy === "deal" && (
-                <span className="text-ink-mute"> · top 60 graded-card deals from the freshest and cheapest</span>
+                <span className="text-ink-mute"> · graded-card deals from the freshest and cheapest, best first</span>
               )}
             </>
           ) : (

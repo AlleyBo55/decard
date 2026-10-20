@@ -1,20 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import type { Activity } from "@/lib/types";
 import { ActivityRow } from "@/components/ActivityRow";
 import { FeedSkeleton } from "@/components/ui";
+import { useCardActivity } from "@/hooks/pages/Card/useCardActivity";
 
 export function CardActivity({ mint }: { mint: string }) {
-  const { data, isLoading, isError } = useQuery<{ activity: Activity[] }>({
-    queryKey: ["card-activity", mint],
-    queryFn: async () => {
-      const res = await fetch(`/api/activity?mint=${mint}&limit=20`);
-      if (!res.ok) throw new Error("card activity failed");
-      return res.json();
-    },
-    refetchInterval: 20_000,
-  });
+  const { data, isLoading, isError } = useCardActivity(mint);
 
   const rows = (data?.activity ?? []).filter((a) => a.kind !== "Unknown");
 

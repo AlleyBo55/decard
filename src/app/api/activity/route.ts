@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAPIError } from "@/helpers/fetcher";
 import { getMarketplaceActivity, getWalletActivity, getCardActivity } from "@/lib/rpc";
 import { enrichActivities } from "@/lib/enrich";
+import { fillCurrentOwners } from "@/lib/owners";
 import { edgeCache } from "@/lib/cache";
 
-export const dynamic = "force-dynamic";
+// GET route handlers are dynamic by default; freshness comes from the rpc
+// layer's in-memory cache and the CDN header below.
 
 const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -25,9 +28,19 @@ export async function GET(req: NextRequest) {
       : wallet
         ? await getWalletActivity(wallet, limit, before)
         : await getMarketplaceActivity(limit > 40 ? 60 : 40);
-    const activity = await enrichActivities(raw);
-    return NextResponse.json({ activity: activity.slice(0, limit) }, { headers: edgeCache(8) });
+    // Card metadata and current holders on bids, looked up in parallel. The
+    // second owners pass is served from its cache, and only fetches assets
+    // that enrichment re-pointed to the real card.
+    const holders = fillCurrentOwners(raw);
+    const enriched = await enrichActivities(raw);
+    await holders;
+    const activity = await fillCurrentOwners(enriched);
+    return NextResponse.json({ activity: activity.slice(0, limit) }, { headers: edgeCache(6) });
   } catch (e) {
-    return NextResponse.json({ error: String(e), activity: [] }, { status: 502 });
+    console.error("[api/activity] upstream failed:", isAPIError(e) ? e.code : e);
+    return NextResponse.json(
+      { error: "Activity is temporarily unavailable.", code: "UPSTREAM_UNAVAILABLE", activity: [] },
+      { status: 502 },
+    );
   }
 }
