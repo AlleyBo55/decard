@@ -11,14 +11,12 @@ import { CardActivity } from "@/components/card/CardActivity";
 import { WalletName } from "@/components/ActivityRow";
 import { GradePill, HPBar, Kicker, Skeleton, StatBar, TypeChip } from "@/components/ui";
 
-// ISR: no card is prerendered at build; each one renders on its first visit,
-// is cached, and regenerates in the background at most every 10s. A failed
-// regeneration keeps serving the last good page.
-export const revalidate = 10;
-
-export function generateStaticParams(): { mint: string }[] {
-  return [];
-}
+// Rendered per request and streamed: the shell and loading.tsx go out at once
+// and each section below fills in as its own data arrives. Not ISR: an ISR
+// page that isn't cached yet renders completely before its first byte, so a
+// click waits on the slowest Collector Crypt call, and every <Link> in view
+// would prefetch (= render) whole card pages. The data is cached underneath
+// instead (catalogue 1h and market 10s in the Next data cache, bids 30s in memory).
 
 const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -255,7 +253,7 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
 
       <div className="grid gap-12 lg:grid-cols-[minmax(300px,420px)_1fr] items-start">
         <div className="lg:sticky lg:top-24 flex flex-col gap-6">
-          <CardFlip mint={card.nftAddress} name={card.itemName} />
+          <CardFlip mint={card.nftAddress} name={card.itemName} images={card.images} />
           <div className="flex flex-wrap justify-center gap-3">
             <a href={ccAssetUrl(card.nftAddress)} target="_blank" rel="noreferrer" className="btn btn-red">
               View on Collector Crypt ↗

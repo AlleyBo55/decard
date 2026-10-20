@@ -26,7 +26,9 @@ export function CardTile({
   const score = c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) : null;
   const type = typeFor(c.category);
   const insured = Number(c.insuredValue) || 0;
-  const src256 = cardImage(c.nftAddress, "front", 256);
+  // Pre-generated 337px WebP (cached a year, no redirect or resize wait) when the row has it.
+  const direct = c.images?.frontS ?? null;
+  const src256 = direct ?? cardImage(c.nftAddress, "front", 256);
 
   return (
     <Link
@@ -40,8 +42,19 @@ export function CardTile({
           <div className="relative aspect-[3/5] rounded-[9px] overflow-hidden bg-cream-lo">
             <img
               src={src256}
-              srcSet={`${src256} 256w, ${cardImage(c.nftAddress, "front", 384)} 384w`}
-              sizes="188px"
+              srcSet={direct ? undefined : `${src256} 256w, ${cardImage(c.nftAddress, "front", 384)} 384w`}
+              sizes={direct ? undefined : "188px"}
+              onError={
+                direct
+                  ? (e) => {
+                      // Direct URL gone: fall back to the redirect route once.
+                      const el = e.currentTarget;
+                      if (el.dataset.fallback) return;
+                      el.dataset.fallback = "1";
+                      el.src = cardImage(c.nftAddress, "front", 256);
+                    }
+                  : undefined
+              }
               alt={c.itemName}
               loading="lazy"
               decoding="async"

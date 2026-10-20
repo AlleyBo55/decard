@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       price: c.listing?.price ?? null,
       currency: c.listing?.currency ?? null,
     }));
-    return NextResponse.json({ results, total: page.findTotal }, { headers: edgeCache(60) });
+    return NextResponse.json({ results, total: page.findTotal }, { headers: edgeCache(60, 600) });
   } catch {
     return NextResponse.json({ results: [], total: 0 });
   }

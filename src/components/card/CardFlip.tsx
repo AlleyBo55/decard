@@ -8,7 +8,17 @@ import { cardImage } from "@/lib/constants";
  * Slab photos are about 3:5, so the frame uses that ratio and the image fills
  * an absolutely sized box (object-contain), which can never overflow.
  */
-export function CardFlip({ mint, name }: { mint: string; name: string }) {
+export function CardFlip({
+  mint,
+  name,
+  images,
+}: {
+  mint: string;
+  name: string;
+  /** Card detail images: direct, year-cached URLs instead of the 5-minute redirect. */
+  images?: Record<string, string> | null;
+}) {
+  const src = { images };
   const [flipped, setFlipped] = useState(false);
   const tiltRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
@@ -58,8 +68,8 @@ export function CardFlip({ mint, name }: { mint: string; name: string }) {
           >
             <span className={face} style={{ backfaceVisibility: "hidden" }}>
               <img
-                src={cardImage(mint, "front", 768)}
-                srcSet={`${cardImage(mint, "front", 512)} 512w, ${cardImage(mint, "front", 768)} 768w, ${cardImage(mint, "front", 1024)} 1024w`}
+                src={cardImage(mint, "front", 768, src)}
+                srcSet={`${cardImage(mint, "front", 512, src)} 512w, ${cardImage(mint, "front", 768, src)} 768w, ${cardImage(mint, "front", 1024, src)} 1024w`}
                 sizes="(max-width: 640px) 80vw, 340px"
                 alt={name}
                 fetchPriority="high"
@@ -69,7 +79,7 @@ export function CardFlip({ mint, name }: { mint: string; name: string }) {
             </span>
             <span className={face} style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
               <img
-                src={cardImage(mint, "back", 768)}
+                src={cardImage(mint, "back", 768, src)}
                 alt={`${name}, back of slab`}
                 loading="lazy"
                 className={img}

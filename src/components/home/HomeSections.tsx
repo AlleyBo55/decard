@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useHighlights } from "@/hooks/pages/Home/useHighlights";
+import { useHomeActivity, useHomeListings, useHotBids } from "@/hooks/pages/Home/useHighlights";
 import { CardTile } from "@/components/CardTile";
 import { ActivityRow } from "@/components/ActivityRow";
 import { GameBoy } from "@/components/gameboy/GameBoy";
@@ -28,14 +28,19 @@ function CardRail({ cards, label, ranked }: { cards: CardRow[]; label: string; r
 }
 
 export function HomeSections() {
-  const { data, isLoading, isError, refetch } = useHighlights();
+  // Three independent feeds: each section below renders as soon as its own lands.
+  const listings = useHomeListings();
+  const activity = useHomeActivity();
+  const bids = useHotBids();
+  const data = listings.data;
+  const isLoading = listings.isLoading;
 
-  if (isError && !data) {
+  if (listings.isError && !listings.data && activity.isError && !activity.data) {
     return (
       <DexMessage
         title="The DEX lost signal for a moment."
         action={
-          <button type="button" onClick={() => refetch()} className="btn btn-red">
+          <button type="button" onClick={() => window.location.reload()} className="btn btn-red">
             Try again
           </button>
         }
@@ -45,8 +50,10 @@ export function HomeSections() {
     );
   }
 
-  const live = (data?.recentActivity ?? []).filter((a) => !isBotChurn(a));
-  const feed = (live.length >= 6 ? live : data?.recentActivity ?? []).slice(0, 8);
+  const recent = activity.data?.recentActivity ?? [];
+  const live = recent.filter((a) => !isBotChurn(a));
+  const feed = (live.length >= 6 ? live : recent).slice(0, 8);
+  const hotBids = bids.data?.hotBids ?? [];
   const cats = Object.entries(data?.categories ?? {})
     .filter(([k, v]) => k && v > 0 && !MERCH.has(k))
     .sort((a, b) => b[1] - a[1])
@@ -91,14 +98,14 @@ export function HomeSections() {
             />
             <div className="grid gap-10 lg:grid-cols-[auto_1fr] xl:grid-cols-[auto_1fr_340px] items-start">
               <div className="flex justify-center lg:sticky lg:top-24">
-                <GameBoy events={data?.recentActivity ?? []} loading={isLoading} />
+                <GameBoy events={recent} loading={activity.isLoading} />
               </div>
 
               <div className="min-w-0">
                 <h3 className="font-extrabold text-lg mb-2 flex items-center gap-2">
                   <span className="live-dot" /> Latest moves
                 </h3>
-                {isLoading ? (
+                {activity.isLoading || (activity.isError && !activity.data) ? (
                   <FeedSkeleton rows={7} />
                 ) : feed.length ? (
                   <div className="dash-divide">
@@ -114,11 +121,11 @@ export function HomeSections() {
               <div className="min-w-0 lg:col-span-2 xl:col-span-1">
                 <h3 className="font-extrabold text-lg mb-1">Hot bids</h3>
                 <p className="text-sm text-ink-mute mb-3">Cards getting offers right now, with the best live bid.</p>
-                {isLoading ? (
+                {bids.isLoading || (bids.isError && !bids.data) ? (
                   <FeedSkeleton rows={5} />
-                ) : (data?.hotBids.length ?? 0) > 0 ? (
+                ) : hotBids.length > 0 ? (
                   <ol className="dash-divide">
-                    {data!.hotBids.slice(0, 6).map((b, i) => (
+                    {hotBids.slice(0, 6).map((b, i) => (
                       <li key={b.mint}>
                         <Link href={`/card/${b.mint}`} className="group flex items-center gap-3 py-3">
                           <span className="font-pixel text-[10px] text-ink-mute w-5">{i + 1}</span>

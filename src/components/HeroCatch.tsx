@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { CardRow } from "@/lib/types";
 import type { CatchPhase } from "@/components/Pokeball3D";
-import { useHighlights } from "@/hooks/pages/Home/useHighlights";
+import { useHomeListings } from "@/hooks/pages/Home/useHighlights";
 import { cardImage } from "@/lib/constants";
 import { dealScore, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { clsx } from "@/lib/clsx";
@@ -68,7 +68,7 @@ export function HeroCatch() {
   const [caught, setCaught] = useState<CardRow | null>(null);
   const [burst, setBurst] = useState(0);
   const timers = useRef<number[]>([]);
-  const { data } = useHighlights();
+  const { data } = useHomeListings();
 
   useEffect(() => {
     const t = timers.current;

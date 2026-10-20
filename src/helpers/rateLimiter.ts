@@ -23,10 +23,12 @@ export interface HostPolicy {
 
 // Published keyless limits where they exist, conservative guesses otherwise.
 const POLICIES: Record<string, HostPolicy> = {
-  // No published limit. A CC_API_KEY raises it 10x, per Collector Crypt support.
+  // No published limit; keyless bursts of 100+ parallel reads have never been
+  // throttled. Every request counts here even when Next's data cache answers
+  // it, so a low cap only slows cold pages. A CC_API_KEY raises CC's limit 10x.
   "api.collectorcrypt.com": process.env.CC_API_KEY
-    ? { rps: 40, burst: 80, concurrency: 16 }
-    : { rps: 8, burst: 24, concurrency: 8 },
+    ? { rps: 100, burst: 200, concurrency: 48 }
+    : { rps: 30, burst: 100, concurrency: 32 },
   // Keyless public RPC. Batches are charged per call inside them (see `cost`).
   "rpc.solanatracker.io": { rps: 8, burst: 40, concurrency: 4 },
   // Helius free plan: 10 RPC requests/s, and every item of a JSON-RPC batch counts as one.

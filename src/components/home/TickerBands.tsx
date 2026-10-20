@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useHighlights } from "@/hooks/pages/Home/useHighlights";
+import { useHomeListings } from "@/hooks/pages/Home/useHighlights";
 import { fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 
 const SLOGANS = [
@@ -15,7 +15,7 @@ const SLOGANS = [
 
 /** Two crossing tapes: live listings on red, slogans on yellow. */
 export function TickerBands() {
-  const { data } = useHighlights();
+  const { data } = useHomeListings();
   const items = (data?.newestListings ?? []).slice(0, 14);
 
   const listing = items.length
