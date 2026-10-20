@@ -36,7 +36,7 @@ export default function GuidePage() {
             Your graded-card <span className="text-poke">Pokédex.</span>
           </h1>
           <p className="text-lg text-ink-soft max-w-2xl">
-            {count} entries covering everything a new trainer meets on Cardex, from grading and pop reports to
+            {count} entries covering everything a new trainer meets on Decard, from grading and pop reports to
             bids, vaults and collector slang. Plain words, no jargon left unexplained.
           </p>
         </div>

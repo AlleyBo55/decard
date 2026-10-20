@@ -29,13 +29,13 @@ const press = localFont({
   preload: true,
 });
 
-const title = "Cardex · the Pokédex for graded cards on Solana";
+const title = "Decard · the Pokédex for graded cards on Solana";
 const description =
   "Gotta scan 'em all. Live listings, deal scores, an on-chain trade tape and wallet tracking for tokenized graded cards on Collector Crypt. Pokémon, One Piece, Riftbound and more. Free, keyless, open source.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: title, template: "%s · Cardex" },
+  title: { default: title, template: "%s · Decard" },
   description,
   applicationName: SITE_NAME,
   keywords: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     "trade tape",
     "wallet tracker",
   ],
-  authors: [{ name: "Cardex contributors" }],
+  authors: [{ name: "Decard contributors" }],
   category: "finance",
   alternates: { canonical: "/" },
   openGraph: {
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     title,
     description,
     url: SITE_URL,
-    images: [{ url: "/og", width: 1200, height: 630, alt: "Cardex, the Pokédex for graded cards on Solana" }],
+    images: [{ url: "/og", width: 1200, height: 630, alt: "Decard, the Pokédex for graded cards on Solana" }],
   },
   twitter: { card: "summary_large_image", title, description, images: ["/og"] },
   robots: {

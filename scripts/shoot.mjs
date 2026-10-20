@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 const [outDir, base, ...jobs] = process.argv.slice(2);
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9333;
-const profile = `/tmp/cx-cdp-${Date.now()}`;
+const profile = `/tmp/decard-cdp-${Date.now()}`;
 mkdirSync(outDir, { recursive: true });
 
 const chrome = spawn(CHROME, [

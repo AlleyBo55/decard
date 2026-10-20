@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔴 Cardex ⚪
+# 🔴 Decard ⚪
 
 ### Gotta scan &apos;em all.
 
@@ -20,7 +20,7 @@ Live listing scanner, on-chain trade tape, and wallet tracer for [Collector Cryp
 
 ## What it does
 
-The pump.fun + Collector Crypt card mania minted a new kind of trader: part degen scalper, part lifelong collector. Cardex is the terminal they didn&apos;t have. Every number on screen is read live from public endpoints — **no login, no wallet connect, no API key.**
+The pump.fun + Collector Crypt card mania minted a new kind of trader: part degen scalper, part lifelong collector. Decard is the terminal they didn&apos;t have. Every number on screen is read live from public endpoints — **no login, no wallet connect, no API key.**
 
 - 📡 **Listing Scanner** — every live graded-card listing across Collector Crypt (USDC) and Magic Eden (SOL), with a **deal score** that ranks how far below insured value each card sits. Filter by category, grade, source and price.
 - ⚡ **Live Trade Tape** — every on-chain sale, listing and offer as it lands, decoded straight from the marketplace program and enriched with card name, grade and image.
@@ -30,7 +30,7 @@ The pump.fun + Collector Crypt card mania minted a new kind of trader: part dege
 
 ## Why it&apos;s different
 
-No backend. No database. No indexer. Cardex is a pure Next.js frontend that reads:
+No backend. No database. No indexer. Decard is a pure Next.js frontend that reads:
 
 | Source | Used for | Key? |
 |---|---|---|
@@ -44,8 +44,8 @@ That means you can fork it, `npm install`, and have a working card terminal in t
 ## Quick start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cardex
-cd cardex
+git clone https://github.com/AlleyBo55/decard
+cd decard
 npm install
 npm run dev
 ```
@@ -71,7 +71,7 @@ CC_API_KEY=          # optional — 10x Collector Crypt rate limits (email suppo
 
 ## Honest limits
 
-Cardex reads a **recent window** of on-chain activity, not all-time history — a true market-wide "top buyer of all time" leaderboard needs an indexer, which this project deliberately doesn&apos;t run. Offer *bid amounts* for offer-only events aren&apos;t exposed by the public RPC, so those rows show the card and action without a dollar figure. Sales show real settled prices. We&apos;d rather show you nothing than a made-up number.
+Decard reads a **recent window** of on-chain activity, not all-time history — a true market-wide "top buyer of all time" leaderboard needs an indexer, which this project deliberately doesn&apos;t run. Offer *bid amounts* for offer-only events aren&apos;t exposed by the public RPC, so those rows show the card and action without a dollar figure. Sales show real settled prices. We&apos;d rather show you nothing than a made-up number.
 
 ## Contributing
 
@@ -79,7 +79,7 @@ PRs welcome — new data sources, more wallet labels, extra categories, a pretti
 
 ## A note on the theme
 
-Cardex is a fan-made tool styled as an homage to the handheld that raised a generation. It ships **zero** copyrighted sprites or trademarks — the Poké ball is original geometry, the fonts are system fonts, the palette is ours. Pokémon™ is a trademark of Nintendo / Creatures / GAME FREAK; Cardex is not affiliated with or endorsed by them, or by Collector Crypt.
+Decard is a fan-made tool styled as an homage to the handheld that raised a generation. It ships **zero** copyrighted sprites or trademarks — the Poké ball is original geometry, the fonts are system fonts, the palette is ours. Pokémon™ is a trademark of Nintendo / Creatures / GAME FREAK; Decard is not affiliated with or endorsed by them, or by Collector Crypt.
 
 ## License
 

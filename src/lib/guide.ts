@@ -45,7 +45,7 @@ export const GUIDE: GuideSection[] = [
       {
         term: "Cert number",
         short: "The slab's unique ID.",
-        body: "Every slab has a certification number printed on its label. You can look it up on the grader's site to confirm the card and grade are real. On a Cardex card page, PSA and CGC cert numbers link straight to the lookup.",
+        body: "Every slab has a certification number printed on its label. You can look it up on the grader's site to confirm the card and grade are real. On a Decard card page, PSA and CGC cert numbers link straight to the lookup.",
       },
       {
         term: "Raw card",
@@ -63,7 +63,7 @@ export const GUIDE: GuideSection[] = [
         term: "Population report (pop)",
         short: "How many copies exist at each grade.",
         body: "Graders publish how many of each card they've graded at every level. If only 12 copies exist as a PSA 10, that card is scarce at that grade, which supports a higher price. A low pop at the top grade is one of the strongest rarity signals.",
-        tip: "Cardex shows pop as 'base stats' bars on every card page.",
+        tip: "Decard shows pop as 'base stats' bars on every card page.",
       },
       {
         term: "Pop 1",
@@ -115,7 +115,7 @@ export const GUIDE: GuideSection[] = [
       {
         term: "Deal score",
         short: "How far below insured value a listing sits.",
-        body: "A Cardex number from 0 to 100 shown as an HP bar. It compares the asking price with the insured value, so a card listed well under its insured worth scores high. It's a quick filter for underpriced listings, not a guarantee, so always check the card.",
+        body: "A Decard number from 0 to 100 shown as an HP bar. It compares the asking price with the insured value, so a card listed well under its insured worth scores high. It's a quick filter for underpriced listings, not a guarantee, so always check the card.",
         tip: "Only shown on USDC listings that have an insured value.",
       },
       {
@@ -163,12 +163,12 @@ export const GUIDE: GuideSection[] = [
       {
         term: "Wallet",
         short: "Your on-chain account and its address.",
-        body: "A Solana address that holds your tokens. Every address is public, so anyone can look up a wallet's cards and history. On Cardex, paste an address to open its Trainer Card.",
+        body: "A Solana address that holds your tokens. Every address is public, so anyone can look up a wallet's cards and history. On Decard, paste an address to open its Trainer Card.",
       },
       {
         term: "USDC vs SOL",
         short: "The two currencies you'll see.",
-        body: "Collector Crypt prices in USDC, a dollar-pegged stablecoin, so its prices read like dollars. Magic Eden listings often settle in SOL, whose dollar value moves. Cardex converts SOL at the live rate so you can compare fairly.",
+        body: "Collector Crypt prices in USDC, a dollar-pegged stablecoin, so its prices read like dollars. Magic Eden listings often settle in SOL, whose dollar value moves. Decard converts SOL at the live rate so you can compare fairly.",
       },
       {
         term: "Escrow",
@@ -178,7 +178,7 @@ export const GUIDE: GuideSection[] = [
       {
         term: "Bulk bid bots",
         short: "Wallets that update many offers at once.",
-        body: "Some wallets adjust bids on dozens of cards in a single transaction. They add a lot of noise to the tape, so Cardex tags them as BOT and hides them by default.",
+        body: "Some wallets adjust bids on dozens of cards in a single transaction. They add a lot of noise to the tape, so Decard tags them as BOT and hides them by default.",
       },
     ],
   },

@@ -42,7 +42,7 @@ export async function GET() {
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 80px", flex: 1 }}>
           <div style={{ display: "flex", fontFamily: "Press", fontSize: 22, color: "#b8290a" }}>▶ SOLANA · GRADED CARD DEX</div>
           <div style={{ display: "flex", fontFamily: "Press", fontSize: 92, marginTop: 34, color: "#ffcb05", textShadow: `6px 6px 0 #1d5690` }}>
-            CARDEX
+            DECARD
           </div>
           <div style={{ display: "flex", fontSize: 52, marginTop: 30, lineHeight: 1.1 }}>Gotta scan &apos;em all.</div>
           <div style={{ display: "flex", fontSize: 28, marginTop: 18, color: "#4f4b68" }}>

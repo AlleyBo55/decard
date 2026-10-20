@@ -175,7 +175,7 @@ export function GameBoy({ events, loading }: { events: Activity[]; loading?: boo
       </div>
 
       <div className="gb-brand">
-        Cardex<span>POCKET · {MODE_LABEL[mode]}</span>
+        Decard<span>POCKET · {MODE_LABEL[mode]}</span>
       </div>
 
       <div className="gb-controls">

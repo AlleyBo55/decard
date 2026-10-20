@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ mint: str
   const card = ADDRESS.test(mint) ? await getCard(mint) : null;
   if (!card) return { title: "Card not found" };
   const title = `${shortCardName(card.itemName)} ${gradeShort(card.gradingCompany, card.grade)}`.trim();
-  const description = `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Cardex.`;
+  const description = `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`;
   return {
     title,
     description,

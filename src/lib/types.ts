@@ -1,4 +1,4 @@
-// Shared domain types for Cardex. Shapes mirror the live Collector Crypt
+// Shared domain types for Decard. Shapes mirror the live Collector Crypt
 // marketplace API and decoded Solana RPC transactions.
 
 // The API also returns other venues (e.g. "OPENSEA"); keep known ones typed.

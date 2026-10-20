@@ -36,9 +36,9 @@ export const CATEGORIES = [
   "Baseball",
 ] as const;
 
-export const USER_AGENT = "cardex/1.0 (+https://github.com/cardex)";
+export const USER_AGENT = "decard/1.0 (+https://github.com/AlleyBo55/decard)";
 
-export const SITE_NAME = "Cardex";
+export const SITE_NAME = "Decard";
 // Set NEXT_PUBLIC_SITE_URL in production; falls back to localhost for dev.
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";

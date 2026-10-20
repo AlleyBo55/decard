@@ -58,8 +58,8 @@ function localStore<T>(key: string, fallback: T) {
 
 const EMPTY_LABELS: Record<string, WalletLabel> = {};
 const EMPTY_WATCH: string[] = [];
-const labelStore = localStore("cardex:labels", EMPTY_LABELS);
-const watchStore = localStore("cardex:watchlist", EMPTY_WATCH);
+const labelStore = localStore("decard:labels", EMPTY_LABELS);
+const watchStore = localStore("decard:watchlist", EMPTY_WATCH);
 
 /** Private wallet labels saved in this browser. */
 export function useLocalLabels() {

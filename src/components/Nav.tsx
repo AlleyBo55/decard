@@ -17,9 +17,9 @@ const LINKS = [
 
 export function Logo() {
   return (
-    <Link href="/" className="group flex items-center gap-2.5 shrink-0" aria-label="Cardex home">
+    <Link href="/" className="group flex items-center gap-2.5 shrink-0" aria-label="Decard home">
       <span className="pokeball pokeball-spin" style={{ ["--s" as string]: "30px" }} />
-      <span className="logo-word text-[15px] sm:text-[17px] leading-none pt-0.5">CARDEX</span>
+      <span className="logo-word text-[15px] sm:text-[17px] leading-none pt-0.5">DECARD</span>
     </Link>
   );
 }
