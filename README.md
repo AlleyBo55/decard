@@ -52,14 +52,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). That&apos;s it — it works with zero configuration.
 
-### Optional env (`.env.local`)
+### Optional env (`.env`)
 
-Everything runs keyless. Two optional keys raise limits and unlock extras:
+Everything runs keyless. Two optional server-only keys raise limits (copy `.env.example` to `.env`):
 
 ```bash
-HELIUS_API_KEY=      # optional — higher-throughput RPC if the public one throttles
+HELIUS_API_KEY=      # optional — Helius becomes the primary RPC; falls back to the public RPC when throttled or down
 CC_API_KEY=          # optional — 10x Collector Crypt rate limits (email support@collectorcrypt.com)
 ```
+
+Both are read only on the server; never prefix them with `NEXT_PUBLIC_`. Locally they live in `.env` (gitignored). On Vercel, add them under **Project Settings → Environment Variables**.
 
 ## Tech
 

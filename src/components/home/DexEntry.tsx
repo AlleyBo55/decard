@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useMarket } from "@/components/home/HeroStats";
+import { useMarket } from "@/hooks/pages/Home/useMarket";
 import { CountUp } from "@/components/motion";
 import { TypeChip, TypeIcon } from "@/components/ui";
 import { TYPES, typeFor, PRIMARY_CATEGORIES } from "@/lib/poke-types";

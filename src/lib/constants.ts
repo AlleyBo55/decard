@@ -1,6 +1,8 @@
 export const CC_API = "https://api.collectorcrypt.com";
 export const CC_NFT = "https://nft.collectorcrypt.com";
 export const SOLANA_RPC = "https://rpc.solanatracker.io/public";
+// Primary RPC when a Helius key is configured. The key is server-only and appended in lib/rpc.ts, never here.
+export const HELIUS_RPC = "https://mainnet.helius-rpc.com";
 
 export const CC_MARKETPLACE_PROGRAM = "CcmRKTuZCGJBWQwMHvDYApBRvSZNHqGJXkznqpDTSQUr";
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";

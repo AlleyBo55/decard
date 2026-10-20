@@ -151,13 +151,24 @@ export interface Activity {
   blockTime: number | null;
   slot: number;
   kind: ActivityKind;
-  /** Whole-USDC sale amount when decodable from token balance deltas. */
+  /**
+   * USDC amount of the event: sale price, list price, new price on a reprice,
+   * bid amount on a bid, gross price on a taken bid. Null when the tx doesn't carry it.
+   */
   priceUsdc: number | null;
   /** SOL amount when the venue settled in SOL. */
   priceSol: number | null;
+  /** Previous list price on a reprice, when known. */
+  prevPriceUsdc?: number | null;
   assetMint: string | null;
+  /** Buyer on a sale, bidder on a bid. */
   buyer: string | null;
+  /** Seller on a sale, lister on a listing/reprice/delist, owner who accepted on a taken bid. */
   seller: string | null;
+  /** Card owner the event is against (for bids: the holder being bid on). */
+  owner?: string | null;
+  /** True when `owner` is the card's current holder looked up afterwards, not read from this tx. */
+  ownerIsCurrent?: boolean;
   /** The wallet that signed the action (platform co-signers excluded). */
   actor: string | null;
   /** Marketplace instructions in this tx. Above 2 usually means a bulk bot. */
@@ -169,6 +180,8 @@ export interface Activity {
   gradingCompany?: string | null;
   category?: string | null;
   insuredValue?: string | null;
+  /** CC image id (last path segment of images.front) for the immutable /img/{w}/cc/{id} URL. */
+  imageId?: string | null;
 }
 
 export type ActivityTone = "sale" | "list" | "bid" | "cancel" | "neutral";

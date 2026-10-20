@@ -1,19 +1,27 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { CardRow, HighlightsPayload } from "@/lib/types";
+import type { CardRow } from "@/lib/types";
 import type { CatchPhase } from "@/components/Pokeball3D";
+import { useHighlights } from "@/hooks/pages/Home/useHighlights";
 import { cardImage } from "@/lib/constants";
 import { dealScore, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { clsx } from "@/lib/clsx";
 
-const Pokeball3D = dynamic(() => import("@/components/Pokeball3D"), {
-  ssr: false,
-  loading: () => <CssBall phase="idle" />,
-});
+type Ball3D = typeof import("@/components/Pokeball3D").default;
+
+/**
+ * The three.js ball is a ~900KB chunk, so it is only fetched once the hero is
+ * on screen and the browser is idle, or on the first tap. If the chunk fails,
+ * the CSS ball simply stays.
+ */
+function loadBall3D(onLoad: (ball: Ball3D) => void) {
+  import("@/components/Pokeball3D").then(
+    (m) => onLoad(m.default),
+    () => {},
+  );
+}
 
 function CssBall({ phase, onThrow }: { phase: CatchPhase; onThrow?: () => void }) {
   return (
@@ -49,22 +57,13 @@ function canUseWebGL() {
 
 const noopSubscribe = () => () => {};
 
-export function useHighlights() {
-  return useQuery<HighlightsPayload>({
-    queryKey: ["highlights"],
-    queryFn: async () => {
-      const res = await fetch("/api/highlights");
-      if (!res.ok) throw new Error("highlights failed");
-      return res.json();
-    },
-    refetchInterval: 20_000,
-  });
-}
-
 /** Tap the ball, it shakes three times, and catches a live underpriced card. */
 export function HeroCatch() {
   // False on the server and during hydration, then the real answer.
   const webgl = useSyncExternalStore(noopSubscribe, canUseWebGL, () => false);
+  // The CSS ball shows until the three.js one has loaded.
+  const [Pokeball3D, setPokeball3D] = useState<Ball3D | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<CatchPhase>("idle");
   const [caught, setCaught] = useState<CardRow | null>(null);
   const [burst, setBurst] = useState(0);
@@ -76,7 +75,37 @@ export function HeroCatch() {
     return () => t.forEach((id) => clearTimeout(id));
   }, []);
 
+  // Fetch the 3D ball once the hero is visible and the browser is idle (2s at most).
+  useEffect(() => {
+    const el = stage.current;
+    if (!webgl || Pokeball3D || !el) return;
+    let idle: number | undefined;
+    let timer: number | undefined;
+    const mount = () => loadBall3D((ball) => setPokeball3D(() => ball));
+    const whenIdle = () => {
+      if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(mount, { timeout: 2000 });
+      else timer = window.setTimeout(mount, 1000);
+    };
+    if (typeof IntersectionObserver === "undefined") {
+      whenIdle();
+      return () => window.clearTimeout(timer);
+    }
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      whenIdle();
+    });
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
+    };
+  }, [webgl, Pokeball3D]);
+
   function throwBall() {
+    // A tap before the idle load brings the 3D ball in right away.
+    if (webgl && !Pokeball3D) loadBall3D((ball) => setPokeball3D(() => ball));
     if (phase !== "idle") return;
     const pool = [...(data?.bestDeals ?? []), ...(data?.newestListings ?? [])].filter(
       (c) => c.nftAddress !== caught?.nftAddress,
@@ -97,14 +126,18 @@ export function HeroCatch() {
 
   return (
     <div className="relative flex flex-col items-center">
-      <div className="relative aspect-square w-[clamp(230px,30vw,360px)]">
+      <div ref={stage} className="relative aspect-square w-[clamp(230px,30vw,360px)]">
         {/* soft spotlight disc */}
         <div
           aria-hidden
           className="absolute inset-[6%] rounded-full"
           style={{ background: "radial-gradient(closest-side, rgb(255 203 5 / .35), rgb(255 203 5 / .08) 60%, transparent)" }}
         />
-        {webgl ? <Pokeball3D phase={phase} onThrow={throwBall} /> : <CssBall phase={phase} onThrow={throwBall} />}
+        {webgl && Pokeball3D ? (
+          <Pokeball3D phase={phase} onThrow={throwBall} />
+        ) : (
+          <CssBall phase={phase} onThrow={throwBall} />
+        )}
         {phase === "caught" &&
           Array.from({ length: 8 }).map((_, i) => (
             <span key={`${burst}-${i}`} className="catch-star" style={{ ["--a" as string]: `${i * 45}deg` }}>

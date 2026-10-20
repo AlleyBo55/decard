@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAPIError } from "@/helpers/fetcher";
 import { getMarketplace } from "@/lib/cc";
 import { cached, edgeCache } from "@/lib/cache";
 import { isCredibleListing } from "@/lib/credible";
-
-export const dynamic = "force-dynamic";
 
 // Per-category / per-venue snapshot: listed count, floor and top of book.
 // Built from the listing API, which is always populated.
@@ -35,6 +34,7 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json(data, { headers: edgeCache(30) });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 502 });
+    console.error("[api/market] upstream failed:", isAPIError(e) ? e.code : e);
+    return NextResponse.json({ error: "Market data is temporarily unavailable.", code: "UPSTREAM_UNAVAILABLE" }, { status: 502 });
   }
 }

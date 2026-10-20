@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
+import { isAPIError } from "@/helpers/fetcher";
 import { getCardOffers, getMarketplace } from "@/lib/cc";
 import { getMarketplaceActivity } from "@/lib/rpc";
 import { enrichActivities } from "@/lib/enrich";
+import { fillCurrentOwners } from "@/lib/owners";
 import { cached, edgeCache } from "@/lib/cache";
 import { dealScore, isSale } from "@/lib/format";
 import { isCredibleListing, isGradedCard } from "@/lib/credible";
 import type { CardRow, HighlightsPayload, HotBid } from "@/lib/types";
-
-export const dynamic = "force-dynamic";
 
 /**
  * Home rails, all live:
@@ -24,7 +24,13 @@ export async function GET() {
         getMarketplace({ step: 60, orderBy: "listedPriceAsc", listPriceMin: 1, marketplaceSource: "CC" }),
         getMarketplaceActivity(40),
       ]);
-      const activity = await enrichActivities(rawActivity);
+      // Card metadata and current holders on bids, looked up in parallel. The
+      // second owners pass is served from its cache, and only fetches assets
+      // that enrichment re-pointed to the real card.
+      const holders = fillCurrentOwners(rawActivity);
+      const enriched = await enrichActivities(rawActivity);
+      await holders;
+      const activity = await fillCurrentOwners(enriched);
       const known = activity.filter((a) => a.kind !== "Unknown" && a.cardName);
 
       // Best deals across the fresh + cheap pools, ranked by discount to insured.
@@ -47,10 +53,13 @@ export async function GET() {
         if (a.kind.endsWith("Offer") && a.assetMint && !bidMints.includes(a.assetMint)) bidMints.push(a.assetMint);
         if (bidMints.length >= 10) break;
       }
-      const offers = await Promise.all(bidMints.map((m) => getCardOffers(m)));
+      // A card whose offers can't be read right now is left out, not shown as "no bids".
+      const offers = await Promise.allSettled(bidMints.map((m) => getCardOffers(m)));
       const hotBids: HotBid[] = bidMints
-        .map((mint, i) => {
-          const live = offers[i];
+        .flatMap((mint, i) => {
+          const result = offers[i];
+          if (result.status === "rejected") return [];
+          const live = result.value;
           const meta = known.find((a) => a.assetMint === mint);
           return {
             mint,
@@ -79,6 +88,7 @@ export async function GET() {
     });
     return NextResponse.json(payload, { headers: edgeCache(15) });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 502 });
+    console.error("[api/highlights] upstream failed:", isAPIError(e) ? e.code : e);
+    return NextResponse.json({ error: "Highlights are temporarily unavailable.", code: "UPSTREAM_UNAVAILABLE" }, { status: 502 });
   }
 }
