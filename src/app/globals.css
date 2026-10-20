@@ -1,26 +1,155 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--cx-sans);
+  --font-mono: var(--cx-mono);
+  --font-pixel: var(--cx-pixel);
+
+  /* ---- Pokédex palette (deeper, low-glare) ---- */
+  /* Crimson chassis instead of fire-engine red — calmer on the eye. */
+  --color-dex-red: #c0353f;
+  --color-dex-red-deep: #8e2531;
+  --color-dex-red-dark: #5e1822;
+  --color-dex-yellow: #f6c445;
+  --color-dex-gold: #d9a441;
+  --color-dex-blue: #3d5a9e;
+  --color-dex-cyan: #4bb3d4;
+  --color-dex-green: #5bbf7b;
+
+  /* Game Boy LCD greens */
+  --color-screen: #10231c;
+  --color-screen-glow: #8ad6a6;
+
+  /* Chassis / surfaces: cool dark navy-slate, not black, not red-cast */
+  --color-bg: #0c1118;
+  --color-bg-2: #111822;
+  --color-panel: #161e2a;
+  --color-panel-2: #1e2836;
+  --color-line: #2c3a4e;
+  --color-ink: #eef3fa;
+  --color-muted: #93a3bb;
+
+  /* Signal (slightly desaturated for comfort) */
+  --color-up: #4cc38a;
+  --color-down: #e5636b;
+  --color-warn: #e0a23a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: dark;
+  --cx-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --cx-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+  --cx-pixel: "Courier New", "Courier", ui-monospace, monospace;
+}
+
+html {
+  background: var(--color-bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Subtle depth: a faint crimson glow top-right, cool blue bottom-left,
+     over a dark navy base. Low opacity so nothing glares. */
+  background:
+    radial-gradient(1000px 560px at 88% -12%, rgba(192, 53, 63, 0.14), transparent 58%),
+    radial-gradient(820px 480px at -8% 108%, rgba(61, 90, 158, 0.12), transparent 58%),
+    linear-gradient(180deg, var(--color-bg-2), var(--color-bg));
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--cx-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixel {
+  font-family: var(--cx-pixel);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---- Pokédex screen: the green dot-matrix LCD look ---- */
+.screen {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(127, 227, 160, 0.06), transparent 30%),
+    var(--color-panel);
+  border: 1px solid var(--color-line);
+}
+.screen::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  border-radius: inherit;
+  opacity: 0.55;
+}
+
+/* A true LCD panel (used for the trade tape header / hero screen) */
+.lcd {
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 4px),
+    linear-gradient(160deg, #1c3b2a, var(--color-screen));
+  color: var(--color-screen-glow);
+  border: 1px solid #0a1f16;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.55), inset 0 0 2px rgba(127, 227, 160, 0.4);
+}
+
+/* Crimson chassis header bar with a subtle top sheen */
+.chassis {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, var(--color-dex-red), var(--color-dex-red-deep));
+  border-bottom: 2px solid var(--color-dex-red-dark);
+}
+
+/* Holographic sheen for the tilting card */
+.holo {
+  mix-blend-mode: screen;
+}
+
+.thin-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 999px;
+}
+
+@keyframes led {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px currentColor;
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 2px currentColor;
+  }
+}
+.led {
+  animation: led 1.6s ease-in-out infinite;
+}
+
+/* Big round Pokédex lens with a glassy highlight */
+.lens {
+  background: radial-gradient(circle at 35% 30%, #9fd8ff, #1f7fd6 45%, #0b3e73 100%);
+  box-shadow: 0 0 0 3px #e8f6ff, 0 0 0 6px #0a2a4a, 0 0 18px rgba(40, 170, 253, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .led {
+    animation: none;
+  }
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
