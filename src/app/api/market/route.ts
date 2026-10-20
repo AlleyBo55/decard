@@ -1,53 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMarketplace } from "@/lib/cc";
-import { cached } from "@/lib/cache";
-import type { Marketplace } from "@/lib/types";
+import { cached, edgeCache } from "@/lib/cache";
+import { isCredibleListing } from "@/lib/credible";
 
 export const dynamic = "force-dynamic";
 
-// Per-category / per-platform market snapshot: floor, listed count, and a
-// sampled "top of book". Built from the marketplace listing API, which is
-// always populated (unlike the sparse on-chain sales window).
+// Per-category / per-venue snapshot: listed count, floor and top of book.
+// Built from the listing API, which is always populated.
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
-  const category = sp.get("category") ?? "";
-  const source = (sp.get("source") as Marketplace | null) ?? undefined;
+  const category = (sp.get("category") ?? "").slice(0, 40);
+  const src = sp.get("source");
+  const source = src === "CC" || src === "ME" ? src : undefined;
 
-  const key = `market:${category}:${source ?? "ALL"}`;
   try {
-    const data = await cached(key, 20_000, async () => {
+    const data = await cached(`market:${category}:${source ?? "ALL"}`, 30_000, async () => {
+      const q = { search: category || undefined, marketplaceSource: source, listPriceMin: 1 };
       const [cheapest, priciest] = await Promise.all([
-        getMarketplace({
-          step: 1,
-          search: category || undefined,
-          marketplaceSource: source,
-          orderBy: "listedPriceAsc",
-          listPriceMin: 1,
-        }),
-        getMarketplace({
-          step: 1,
-          search: category || undefined,
-          marketplaceSource: source,
-          orderBy: "listedPriceDesc",
-          listPriceMin: 1,
-        }),
+        getMarketplace({ ...q, step: 1, orderBy: "listedPriceAsc" }),
+        getMarketplace({ ...q, step: 40, orderBy: "listedPriceDesc" }),
       ]);
-
-      const floorRow = cheapest.cards[0];
-      const topRow = priciest.cards[0];
-
+      // Skip troll listings at the top of the book.
+      const top = priciest.cards.find((c) => isCredibleListing(c)) ?? priciest.cards[0];
+      const pick = (c: (typeof cheapest.cards)[number] | undefined) =>
+        c?.listing
+          ? { price: c.listing.price, currency: c.listing.currency, mint: c.nftAddress, name: c.itemName }
+          : null;
       return {
         listed: cheapest.findTotal,
-        floor: floorRow?.listing
-          ? { price: floorRow.listing.price, currency: floorRow.listing.currency, mint: floorRow.nftAddress, name: floorRow.itemName }
-          : null,
-        ceiling: topRow?.listing
-          ? { price: topRow.listing.price, currency: topRow.listing.currency, mint: topRow.nftAddress, name: topRow.itemName }
-          : null,
+        floor: pick(cheapest.cards[0]),
+        ceiling: pick(top),
         categories: cheapest.cardsQtyByCategory,
       };
     });
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: edgeCache(30) });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 502 });
   }

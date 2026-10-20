@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { SolPrice } from "@/lib/types";
 import { clsx } from "@/lib/clsx";
 
-export function SolTicker() {
+export function SolTicker({ className }: { className?: string }) {
   const { data } = useQuery<SolPrice>({
     queryKey: ["sol-price"],
     queryFn: async () => {
@@ -13,17 +13,22 @@ export function SolTicker() {
       return res.json();
     },
     refetchInterval: 60_000,
+    staleTime: 60_000,
   });
 
-  if (!data) return null;
+  if (!data?.usd) return null;
   const up = data.change24h >= 0;
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-line bg-panel px-3 py-1 text-xs font-mono">
-      <span className="text-muted">SOL</span>
-      <span className="font-semibold tabular-nums">${data.usd.toFixed(2)}</span>
-      <span className={clsx("tabular-nums", up ? "text-up" : "text-down")}>
-        {up ? "+" : ""}
-        {(data.change24h * 100).toFixed(2)}%
+    <span
+      className={clsx(
+        "inline-flex items-center gap-2 rounded-full border border-sand bg-cream-hi px-3 py-1.5 text-sm",
+        className,
+      )}
+    >
+      <span className="font-pixel text-[9px] text-ink-mute">SOL</span>
+      <span className="font-extrabold tabular-nums">${data.usd.toFixed(2)}</span>
+      <span className={clsx("font-bold tabular-nums text-xs", up ? "text-up" : "text-down")}>
+        {up ? "▲" : "▼"} {Math.abs(data.change24h * 100).toFixed(2)}%
       </span>
     </span>
   );

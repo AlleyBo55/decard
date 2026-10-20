@@ -1,50 +1,119 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { WalletLabel } from "./types";
+import { useCallback, useSyncExternalStore } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { SolPrice, WalletLabel } from "./types";
+import { knownLabel } from "./labels";
 
-const LABELS_KEY = "cardex:labels";
-const WATCH_KEY = "cardex:watchlist";
+// --- localStorage-backed stores ----------------------------------------------
+// useSyncExternalStore keeps every component in sync (and other tabs, via the
+// storage event) without setState-in-effect, and renders the fallback on the
+// server so hydration never mismatches.
 
-export function useLocalLabels() {
-  const [labels, setLabels] = useState<Record<string, WalletLabel>>({});
+function localStore<T>(key: string, fallback: T) {
+  let raw: string | null | undefined;
+  let value = fallback;
+  const listeners = new Set<() => void>();
 
-  useEffect(() => {
+  const read = (): T => {
+    let next: string | null = null;
     try {
-      const raw = localStorage.getItem(LABELS_KEY);
-      if (raw) setLabels(JSON.parse(raw));
-    } catch {}
-  }, []);
+      next = localStorage.getItem(key);
+    } catch {
+      return value;
+    }
+    if (next !== raw) {
+      raw = next;
+      try {
+        value = next ? (JSON.parse(next) as T) : fallback;
+      } catch {
+        value = fallback;
+      }
+    }
+    return value;
+  };
 
-  const save = useCallback((next: Record<string, WalletLabel>) => {
-    setLabels(next);
-    try {
-      localStorage.setItem(LABELS_KEY, JSON.stringify(next));
-    } catch {}
-  }, []);
-
-  const setLabel = useCallback(
-    (wallet: string, label: string) => {
-      setLabels((prev) => {
-        const next = { ...prev };
-        if (label.trim()) next[wallet] = { wallet, label: label.trim(), kind: "custom" };
-        else delete next[wallet];
-        try {
-          localStorage.setItem(LABELS_KEY, JSON.stringify(next));
-        } catch {}
-        return next;
-      });
+  return {
+    subscribe(cb: () => void) {
+      listeners.add(cb);
+      const onStorage = (e: StorageEvent) => e.key === key && cb();
+      window.addEventListener("storage", onStorage);
+      return () => {
+        listeners.delete(cb);
+        window.removeEventListener("storage", onStorage);
+      };
     },
-    [],
-  );
-
-  return { labels, setLabel, save };
+    getSnapshot: read,
+    getServerSnapshot: () => fallback,
+    set(next: T) {
+      try {
+        localStorage.setItem(key, JSON.stringify(next));
+      } catch {
+        // storage full or blocked: the change just won't persist
+      }
+      listeners.forEach((l) => l());
+    },
+  };
 }
 
-import { useQuery } from "@tanstack/react-query";
-import type { SolPrice } from "./types";
+const EMPTY_LABELS: Record<string, WalletLabel> = {};
+const EMPTY_WATCH: string[] = [];
+const labelStore = localStore("cardex:labels", EMPTY_LABELS);
+const watchStore = localStore("cardex:watchlist", EMPTY_WATCH);
 
-/** Live SOL/USD price, shared across the app via react-query cache. */
+/** Private wallet labels saved in this browser. */
+export function useLocalLabels() {
+  const labels = useSyncExternalStore(labelStore.subscribe, labelStore.getSnapshot, labelStore.getServerSnapshot);
+  const setLabel = useCallback((wallet: string, label: string) => {
+    const next = { ...labelStore.getSnapshot() };
+    if (label.trim()) next[wallet] = { wallet, label: label.trim().slice(0, 32), kind: "custom" };
+    else delete next[wallet];
+    labelStore.set(next);
+  }, []);
+  return { labels, setLabel };
+}
+
+/** Display label for a wallet: your private label first, then the shared list. */
+export function useWalletLabel(wallet: string | null | undefined): WalletLabel | null {
+  const labels = useSyncExternalStore(labelStore.subscribe, labelStore.getSnapshot, labelStore.getServerSnapshot);
+  if (!wallet) return null;
+  return labels[wallet] ?? knownLabel(wallet);
+}
+
+export function useWatchlist() {
+  const watch = useSyncExternalStore(watchStore.subscribe, watchStore.getSnapshot, watchStore.getServerSnapshot);
+  const toggle = useCallback((wallet: string) => {
+    const cur = watchStore.getSnapshot();
+    watchStore.set(cur.includes(wallet) ? cur.filter((w) => w !== wallet) : [...cur, wallet]);
+  }, []);
+  return { watch, toggle, has: (w: string) => watch.includes(w) };
+}
+
+// --- Media queries -------------------------------------------------------------
+
+/** Live media-query match. False on the server and during hydration. */
+export function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    useCallback(
+      (cb: () => void) => {
+        const mq = window.matchMedia(query);
+        mq.addEventListener("change", cb);
+        return () => mq.removeEventListener("change", cb);
+      },
+      [query],
+    ),
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
+export function useReducedMotion() {
+  return useMediaQuery("(prefers-reduced-motion: reduce)");
+}
+
+// --- Prices ----------------------------------------------------------------------
+
+/** Live SOL/USD price, shared through the react-query cache. */
 export function useSolPrice(): number | null {
   const { data } = useQuery<SolPrice>({
     queryKey: ["sol-price"],
@@ -59,39 +128,13 @@ export function useSolPrice(): number | null {
   return data?.usd ?? null;
 }
 
-/** Convert a listing to its USD value. SOL converts via the live rate. */
+/** A listing's USD value. SOL converts at the live rate. */
 export function listingUsd(
   price: number | null | undefined,
   currency: string | null | undefined,
   solUsd: number | null,
 ): number | null {
   if (price == null) return null;
-  if (currency === "USDC") return price;
   if (currency === "SOL") return solUsd ? price * solUsd : null;
   return price;
-}
-
-export function useWatchlist() {
-  const [watch, setWatch] = useState<string[]>([]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(WATCH_KEY);
-      if (raw) setWatch(JSON.parse(raw));
-    } catch {}
-  }, []);
-
-  const toggle = useCallback((wallet: string) => {
-    setWatch((prev) => {
-      const next = prev.includes(wallet)
-        ? prev.filter((w) => w !== wallet)
-        : [...prev, wallet];
-      try {
-        localStorage.setItem(WATCH_KEY, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  }, []);
-
-  return { watch, toggle, has: (w: string) => watch.includes(w) };
 }

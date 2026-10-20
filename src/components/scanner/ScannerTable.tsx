@@ -1,54 +1,106 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import type { MarketplacePage, CardRow } from "@/lib/types";
-import { fmtUsd, timeAgo, dealScore } from "@/lib/format";
+import type { CardRow, MarketplacePage } from "@/lib/types";
+import { dealScore, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
 import { cardImage } from "@/lib/constants";
-import { useSolPrice, listingUsd } from "@/lib/hooks";
-import { Panel, PixelLabel, Badge, FeedSkeleton } from "@/components/ui";
-import { CategoryBar } from "@/components/scanner/CategoryBar";
+import { listingUsd, useMediaQuery, useSolPrice } from "@/lib/hooks";
+import { PRIMARY_CATEGORIES, TYPES, typeFor } from "@/lib/poke-types";
+import { CardTile, CardTileSkeleton } from "@/components/CardTile";
+import { CountUp } from "@/components/motion";
+import { DexMessage, FeedSkeleton, GradePill, HPBar, TypeChip, TypeIcon } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
 
-const ORDERS: { value: string; label: string }[] = [
-  { value: "deal", label: "Best Deal" },
-  { value: "listedDateDesc", label: "Newest" },
-  { value: "listedPriceAsc", label: "Price ↑" },
-  { value: "listedPriceDesc", label: "Price ↓" },
-];
+const SORTS = [
+  { id: "deal", label: "Best deal" },
+  { id: "listedDateDesc", label: "Newest" },
+  { id: "listedPriceAsc", label: "Price ↑" },
+  { id: "listedPriceDesc", label: "Price ↓" },
+] as const;
 
-function DealBar({ score }: { score: number | null }) {
-  if (score == null) return <span className="text-muted text-xs">·</span>;
-  const good = score >= 20;
+const SOURCES = [
+  { id: "", label: "All" },
+  { id: "CC", label: "Collector Crypt" },
+  { id: "ME", label: "Magic Eden" },
+] as const;
+
+type Source = "" | "CC" | "ME";
+type View = "list" | "grid";
+
+function PriceCell({ c, solUsd }: { c: CardRow; solUsd: number | null }) {
+  if (!c.listing) return <span className="text-sm text-ink-mute">Unlisted</span>;
+  const usd = listingUsd(c.listing.price, c.listing.currency, solUsd);
   return (
-    <div className="flex items-center gap-2 min-w-[72px]">
-      <div className="h-1.5 flex-1 rounded-full bg-panel-2 overflow-hidden">
-        <div
-          className={clsx("h-full rounded-full", good ? "bg-up" : "bg-muted/60")}
-          style={{ width: `${score}%` }}
-        />
-      </div>
-      <span className={clsx("text-xs tabular-nums", good ? "text-up" : "text-muted")}>{score}</span>
+    <div className="flex flex-col items-end md:items-start">
+      <span className="font-display font-bold text-lg leading-none tabular-nums">
+        {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : `${c.listing.price}◎`}
+      </span>
+      <span className="mt-1 text-[11px] text-ink-mute">
+        {venueName(c.listing.marketplace)}
+        {c.listing.currency === "SOL" && usd != null && ` · ≈${fmtUsd(usd, { compact: true })}`}
+      </span>
     </div>
   );
 }
 
-function priceCell(c: CardRow, solUsd: number | null) {
-  if (!c.listing) return <span className="text-muted text-xs">unlisted</span>;
-  const tone = c.listing.currency === "USDC" ? "cc" : "me";
-  const usd = listingUsd(c.listing.price, c.listing.currency, solUsd);
+function Row({ c, solUsd, i }: { c: CardRow; solUsd: number | null; i: number }) {
+  const score = c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) : null;
+  const type = typeFor(c.category);
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="font-semibold tabular-nums">
-        {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : `${c.listing.price}◎`}
-      </span>
-      <Badge tone={tone}>{c.listing.currency}</Badge>
-      {c.listing.currency === "SOL" && usd != null && (
-        <span className="text-[10px] text-muted tabular-nums">≈{fmtUsd(usd, { compact: true })}</span>
-      )}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: Math.min(i % 48, 16) * 0.018 }}
+    >
+      <Link
+        href={`/card/${c.nftAddress}`}
+        className="group menu-item grid grid-cols-[48px_1fr_auto] md:grid-cols-[52px_minmax(0,2.6fr)_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.3fr)_56px] items-center gap-4 py-3 px-2 rounded-xl hover:bg-cream-hi transition-colors"
+      >
+        <img
+          src={cardImage(c.nftAddress, "front", 128)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-16 w-10 rounded-md object-contain bg-cream-lo transition-transform group-hover:-rotate-3 group-hover:scale-105"
+        />
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="grid place-items-center h-4 w-4 shrink-0 rounded-full"
+              style={{ background: TYPES[type].color, color: TYPES[type].fg }}
+              title={c.category}
+            >
+              <TypeIcon type={type} className="h-2.5 w-2.5" />
+            </span>
+            <span className="font-extrabold truncate group-hover:text-poke-deep transition-colors">
+              {shortCardName(c.itemName)}
+            </span>
+            <GradePill label={gradeShort(c.gradingCompany, c.grade)} />
+          </div>
+          <p className="mt-1 text-xs text-ink-mute truncate">{c.itemName}</p>
+          <div className="md:hidden mt-2">{score != null && score > 0 && <HPBar value={score} className="max-w-[180px]" />}</div>
+        </div>
+        <div className="md:block">
+          <PriceCell c={c} solUsd={solUsd} />
+        </div>
+        <span className="hidden md:block font-bold tabular-nums text-ink-soft">
+          {Number(c.insuredValue) > 0 ? fmtUsd(Number(c.insuredValue)) : "·"}
+        </span>
+        <div className="hidden md:block">
+          {score != null && score > 0 ? (
+            <HPBar value={score} />
+          ) : (
+            <span className="text-xs text-ink-mute">{score === 0 ? "Above insured" : "·"}</span>
+          )}
+        </div>
+        <span className="hidden md:block text-sm text-ink-mute tabular-nums">
+          {c.listing ? timeAgo(c.listing.updatedAt) : "·"}
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -58,248 +110,253 @@ export function ScannerTable({
   initialOrder = "deal",
 }: {
   initialSearch?: string;
-  initialSource?: "" | "CC" | "ME";
+  initialSource?: Source;
   initialOrder?: string;
 }) {
-  const [search, setSearch] = useState(initialSearch);
-  const [debounced, setDebounced] = useState(initialSearch);
-  const [category, setCategory] = useState(initialSearch);
-  const [source, setSource] = useState<"" | "CC" | "ME">(initialSource);
-  const [orderBy, setOrderBy] = useState<string>(initialOrder);
+  const isCategory = PRIMARY_CATEGORIES.includes(initialSearch);
+  const [category, setCategory] = useState(isCategory ? initialSearch : "");
+  const [search, setSearch] = useState(isCategory ? "" : initialSearch);
+  const [debounced, setDebounced] = useState(search);
+  const [source, setSource] = useState<Source>(initialSource);
+  const [orderBy, setOrderBy] = useState<string>(SORTS.some((s) => s.id === initialOrder) ? initialOrder : "deal");
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
+  // Phones default to the visual grid, larger screens to the dense list.
+  const isPhone = useMediaQuery("(max-width: 767px)");
+  const [viewPref, setView] = useState<View | null>(null);
+  const view: View = viewPref ?? (isPhone ? "grid" : "list");
+  const solUsd = useSolPrice();
 
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(search), 400);
-    return () => clearTimeout(id);
+    const id = window.setTimeout(() => setDebounced(search.trim()), 350);
+    return () => window.clearTimeout(id);
   }, [search]);
 
-  // Category wins as the primary filter; the text box refines only when no
-  // category is picked (the API exposes a single `search` param).
+  // The API has one `search` param: a picked category wins, text refines otherwise.
   const effectiveSearch = category || debounced;
 
-  const params = new URLSearchParams({ step: "50", orderBy });
-  if (effectiveSearch) params.set("search", effectiveSearch);
-  if (source) {
-    params.set("source", source);
-    params.set("min", min || "1");
-  } else if (min) {
-    params.set("min", min);
-  }
-  if (max) params.set("max", max);
+  // Keep the URL shareable without re-rendering the server page.
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (effectiveSearch) p.set("search", effectiveSearch);
+    if (source) p.set("source", source);
+    if (orderBy !== "deal") p.set("orderBy", orderBy);
+    const qs = p.toString();
+    window.history.replaceState(null, "", qs ? `/scanner?${qs}` : "/scanner");
+  }, [effectiveSearch, source, orderBy]);
 
-  const { data, isLoading, isError } = useQuery<MarketplacePage>({
-    queryKey: ["scanner", orderBy, source, effectiveSearch, min, max],
-    queryFn: async () => {
-      const res = await fetch(`/api/scanner?${params}`);
+  const params = useMemo(() => {
+    const p = new URLSearchParams({ orderBy });
+    if (effectiveSearch) p.set("search", effectiveSearch);
+    if (source) p.set("source", source);
+    if (min) p.set("min", min);
+    else if (source) p.set("min", "1");
+    if (max) p.set("max", max);
+    return p;
+  }, [orderBy, effectiveSearch, source, min, max]);
+
+  const q = useInfiniteQuery({
+    queryKey: ["scanner", params.toString()],
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }): Promise<MarketplacePage> => {
+      const p = new URLSearchParams(params);
+      if (pageParam) p.set("cursor", pageParam);
+      const res = await fetch(`/api/scanner?${p}`);
       if (!res.ok) throw new Error("scanner fetch failed");
       return res.json();
     },
-    refetchInterval: 10_000,
+    getNextPageParam: (last) => last.nextCursor ?? null,
+    placeholderData: keepPreviousData,
+    // Only the first page live-refreshes; loaded pages stay put.
+    refetchInterval: (query) => ((query.state.data?.pages.length ?? 1) > 1 ? false : 15_000),
   });
 
-  const solUsd = useSolPrice();
-  const rawCards = data?.cards ?? [];
+  const cards = useMemo(() => {
+    const seen = new Set<string>();
+    const all = (q.data?.pages ?? []).flatMap((p) => p.cards).filter((c) => !seen.has(c.nftAddress) && seen.add(c.nftAddress));
+    // The API already orders SOL and USDC by USD value; re-rank the loaded
+    // pages at the live SOL rate so the order matches the ≈USD we display.
+    if (orderBy === "listedPriceAsc" || orderBy === "listedPriceDesc") {
+      const dir = orderBy === "listedPriceAsc" ? 1 : -1;
+      return [...all].sort((a, b) => {
+        const ua = listingUsd(a.listing?.price, a.listing?.currency, solUsd) ?? Infinity * dir;
+        const ub = listingUsd(b.listing?.price, b.listing?.currency, solUsd) ?? Infinity * dir;
+        return (ua - ub) * dir;
+      });
+    }
+    return all;
+  }, [q.data, orderBy, solUsd]);
 
-  // Price sorts from the API order by raw number, which mixes 22 SOL with
-  // 50 USDC incorrectly. Re-rank the current page by USD-equivalent so the
-  // order is fair across currencies.
-  const cards =
-    orderBy === "listedPriceAsc" || orderBy === "listedPriceDesc"
-      ? [...rawCards].sort((a, b) => {
-          const ua = listingUsd(a.listing?.price, a.listing?.currency, solUsd) ?? Infinity;
-          const ub = listingUsd(b.listing?.price, b.listing?.currency, solUsd) ?? Infinity;
-          return orderBy === "listedPriceAsc" ? ua - ub : ub - ua;
-        })
-      : rawCards;
+  const first = q.data?.pages[0];
+  const counts = first?.cardsQtyByCategory ?? {};
 
   return (
-    <div className="flex flex-col gap-4">
-      <CategoryBar
-        counts={data?.cardsQtyByCategory ?? {}}
-        active={category}
-        onPick={(c) => {
-          setCategory(c);
-          if (c) setSearch("");
-        }}
-      />
-      <Panel className="p-3 flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
-          <PixelLabel>Search</PixelLabel>
+    <div className="flex flex-col gap-6">
+      {/* sticky toolbar */}
+      <div className="sticky top-[68px] z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-cream/90 backdrop-blur-md border-b border-sand flex flex-col gap-3">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 py-1">
+          <TypeChip
+            category={null}
+            label="All types"
+            pressed={category === ""}
+            onClick={() => setCategory("")}
+          />
+          {PRIMARY_CATEGORIES.map((c) => (
+            <TypeChip
+              key={c}
+              category={c}
+              pressed={category === c}
+              onClick={() => {
+                setCategory(category === c ? "" : c);
+                setSearch("");
+              }}
+              count={counts[c] ? Intl.NumberFormat("en", { notation: "compact" }).format(counts[c]) : undefined}
+            />
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
           <input
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               if (e.target.value) setCategory("");
             }}
-            placeholder="Charizard, mint, grading id…"
-            className="bg-bg border border-line rounded-md px-3 py-2 text-sm outline-none focus:border-dex-yellow"
+            placeholder="Filter by name, set, mint or cert #"
+            aria-label="Filter listings"
+            className="h-11 flex-1 min-w-[200px] rounded-full bg-cream-hi border-2 border-sand px-4 outline-none focus:border-ink"
           />
-        </div>
-        <div className="flex flex-col gap-1">
-          <PixelLabel>Source</PixelLabel>
-          <div className="flex rounded-md overflow-hidden border border-line">
-            {([["", "All"], ["CC", "CC"], ["ME", "ME"]] as const).map(([v, l]) => (
-              <button
-                key={v}
-                onClick={() => setSource(v)}
-                className={clsx(
-                  "px-3 py-2 text-sm",
-                  source === v ? "bg-dex-yellow text-black font-semibold" : "bg-bg text-muted",
-                )}
-              >
-                {l}
+          <div className="seg" role="group" aria-label="Sort">
+            {SORTS.map((s) => (
+              <button key={s.id} type="button" aria-pressed={orderBy === s.id} onClick={() => setOrderBy(s.id)}>
+                {s.label}
               </button>
             ))}
           </div>
-        </div>
-        <div className="flex flex-col gap-1">
-          <PixelLabel>Sort</PixelLabel>
-          <select
-            value={orderBy}
-            onChange={(e) => setOrderBy(e.target.value)}
-            className="bg-bg border border-line rounded-md px-3 py-2 text-sm outline-none focus:border-dex-yellow"
-          >
-            {ORDERS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
+          <div className="seg" role="group" aria-label="Venue">
+            {SOURCES.map((s) => (
+              <button key={s.id} type="button" aria-pressed={source === s.id} onClick={() => setSource(s.id)}>
+                {s.label}
+              </button>
             ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <PixelLabel>Price $</PixelLabel>
-          <div className="flex items-center gap-1">
-            <input
-              value={min}
-              onChange={(e) => setMin(e.target.value.replace(/\D/g, ""))}
-              placeholder="min"
-              inputMode="numeric"
-              className="w-20 bg-bg border border-line rounded-md px-2 py-2 text-sm outline-none focus:border-dex-yellow"
-            />
-            <span className="text-muted">–</span>
-            <input
-              value={max}
-              onChange={(e) => setMax(e.target.value.replace(/\D/g, ""))}
-              placeholder="max"
-              inputMode="numeric"
-              className="w-20 bg-bg border border-line rounded-md px-2 py-2 text-sm outline-none focus:border-dex-yellow"
-            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            {(
+              [
+                ["min", min, setMin],
+                ["max", max, setMax],
+              ] as const
+            ).map(([label, val, set]) => (
+              <input
+                key={label}
+                value={val}
+                onChange={(e) => set(e.target.value.replace(/[^\d.]/g, ""))}
+                placeholder={`$ ${label}`}
+                inputMode="decimal"
+                aria-label={`${label} price`}
+                className="h-11 w-24 rounded-full bg-cream-hi border-2 border-sand px-4 outline-none focus:border-ink"
+              />
+            ))}
+          </div>
+          <div className="seg ml-auto" role="group" aria-label="View">
+            <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")}>
+              List
+            </button>
+            <button type="button" aria-pressed={view === "grid"} onClick={() => setView("grid")}>
+              Grid
+            </button>
           </div>
         </div>
-        {data && (
-          <div className="ml-auto text-right">
-            <PixelLabel>Matches</PixelLabel>
-            <div className="text-dex-yellow font-semibold tabular-nums">
-              {data.findTotal.toLocaleString()}
+      </div>
+
+      {/* result summary */}
+      <div className="flex flex-wrap items-center justify-between gap-3 -mt-1">
+        <p className="text-ink-soft">
+          {first ? (
+            <>
+              <b className="font-display text-2xl text-ink align-[-2px]">
+                <CountUp value={first.findTotal} />
+              </b>{" "}
+              matching cards
+              {orderBy === "deal" && (
+                <span className="text-ink-mute"> · top 60 graded-card deals from the freshest and cheapest</span>
+              )}
+            </>
+          ) : (
+            "Scanning the market"
+          )}
+        </p>
+        {q.isFetching && !q.isFetchingNextPage && (
+          <span className="inline-flex items-center gap-2 font-pixel text-[9px] text-ink-mute">
+            <span className="pokeball pokeball-wobble" style={{ ["--s" as string]: "16px" }} /> UPDATING
+          </span>
+        )}
+      </div>
+
+      {q.isError && !q.data && (
+        <DexMessage
+          title="The scanner fainted!"
+          action={
+            <button type="button" className="btn btn-red" onClick={() => q.refetch()}>
+              Revive it
+            </button>
+          }
+        >
+          Collector Crypt didn&apos;t answer. Try again in a moment.
+        </DexMessage>
+      )}
+
+      {q.isLoading &&
+        (view === "grid" ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <CardTileSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <FeedSkeleton rows={10} />
+        ))}
+
+      {!q.isLoading && !q.isError && cards.length === 0 && (
+        <DexMessage title="No cards here. Try another type or widen the price range." />
+      )}
+
+      {cards.length > 0 &&
+        (view === "grid" ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8 justify-items-center">
+            {cards.map((c) => (
+              <CardTile key={c.nftAddress} c={c} solUsd={solUsd} className="!w-full max-w-[200px]" />
+            ))}
+          </div>
+        ) : (
+          <div>
+            <div className="hidden md:grid grid-cols-[52px_minmax(0,2.6fr)_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.3fr)_56px] gap-4 px-2 pb-2 border-b-2 border-ink/80 font-pixel text-[8px] text-ink-mute">
+              <span />
+              <span>CARD</span>
+              <span>PRICE</span>
+              <span>INSURED</span>
+              <span>DEAL SCORE</span>
+              <span>LISTED</span>
+            </div>
+            <div className="dash-divide">
+              {cards.map((c, i) => (
+                <Row key={c.nftAddress} c={c} solUsd={solUsd} i={i} />
+              ))}
             </div>
           </div>
-        )}
-      </Panel>
+        ))}
 
-      {isLoading && (
-        <Panel screen className="overflow-hidden">
-          <FeedSkeleton rows={8} />
-        </Panel>
-      )}
-      {isError && <Panel className="p-6 text-center text-down">Scanner unavailable, retrying…</Panel>}
-      {!isLoading && !isError && cards.length === 0 && (
-        <Panel className="p-10 text-center text-muted">No cards match. Loosen the filters.</Panel>
-      )}
-
-      {cards.length > 0 && (
-        <Panel screen className="overflow-hidden">
-          {/* desktop table */}
-          <div className="hidden md:block overflow-x-auto thin-scroll">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left border-b border-line">
-                  {["Card", "Category", "Price", "Insured", "Deal", "Listed"].map((h) => (
-                    <th key={h} className="px-4 py-2">
-                      <PixelLabel>{h}</PixelLabel>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {cards.map((c, i) => (
-                  <motion.tr
-                    key={c.nftAddress}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: Math.min(i * 0.012, 0.3) }}
-                    className="border-b border-line/60 hover:bg-panel-2/60"
-                  >
-                    <td className="px-4 py-2">
-                      <Link href={`/card/${c.nftAddress}`} className="flex items-center gap-3 group">
-                        <img
-                          src={cardImage(c.nftAddress, "front", 128)}
-                          alt=""
-                          loading="lazy"
-                          className="h-12 w-9 object-cover rounded bg-panel-2 shrink-0"
-                        />
-                        <span>
-                          <span className="block font-medium group-hover:text-dex-yellow line-clamp-1 max-w-[320px]">
-                            {c.itemName}
-                          </span>
-                          <span className="text-xs text-muted">
-                            {c.gradingCompany} {c.grade}
-                          </span>
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2 text-muted">{c.category || "·"}</td>
-                    <td className="px-4 py-2">{priceCell(c, solUsd)}</td>
-                    <td className="px-4 py-2 tabular-nums text-muted">
-                      {fmtUsd(Number(c.insuredValue))}
-                    </td>
-                    <td className="px-4 py-2">
-                      <DealBar
-                        score={c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) : null}
-                      />
-                    </td>
-                    <td className="px-4 py-2 text-muted tabular-nums">
-                      {c.listing ? timeAgo(c.listing.updatedAt) : "·"}
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* mobile cards */}
-          <div className="md:hidden divide-y divide-line/60">
-            {cards.map((c) => (
-              <Link
-                key={c.nftAddress}
-                href={`/card/${c.nftAddress}`}
-                className="flex items-center gap-3 p-3 active:bg-panel-2"
-              >
-                <img
-                  src={cardImage(c.nftAddress, "front", 128)}
-                  alt=""
-                  loading="lazy"
-                  className="h-16 w-12 object-cover rounded bg-panel-2 shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium line-clamp-1">{c.itemName}</div>
-                  <div className="text-xs text-muted">
-                    {c.gradingCompany} {c.grade} · {c.category}
-                  </div>
-                  <div className="mt-1">{priceCell(c, solUsd)}</div>
-                </div>
-                <div className="text-right">
-                  <DealBar
-                    score={c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) : null}
-                  />
-                  <div className="text-xs text-muted mt-1">
-                    {c.listing ? timeAgo(c.listing.updatedAt) : ""}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </Panel>
+      {q.hasNextPage && (
+        <div className="flex justify-center pt-4">
+          <button
+            type="button"
+            className={clsx("btn btn-cream", q.isFetchingNextPage && "opacity-70")}
+            disabled={q.isFetchingNextPage}
+            onClick={() => q.fetchNextPage()}
+          >
+            {q.isFetchingNextPage ? "Loading..." : "Load more cards"}
+          </button>
+        </div>
       )}
     </div>
   );

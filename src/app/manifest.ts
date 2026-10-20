@@ -2,17 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Cardex — graded card scanner on Solana",
+    name: "Cardex · the Pokédex for graded cards",
     short_name: "Cardex",
-    description:
-      "Live scanner, trade tape and wallet tracer for tokenized graded cards on Collector Crypt.",
+    description: "Live listings, deal scores, real bids and wallet tracking for tokenized graded cards on Collector Crypt.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0c1118",
-    theme_color: "#0c1118",
+    background_color: "#f4efe4",
+    theme_color: "#f4efe4",
     categories: ["finance", "utilities"],
-    icons: [
-      { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
-    ],
+    icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   };
 }

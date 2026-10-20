@@ -2,78 +2,106 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { WalletSearch } from "@/components/WalletSearch";
-import { Pokedex, TownMap, Pulse, Books } from "@/components/icons";
+import { SolTicker } from "@/components/SolTicker";
+import { Pokedex, TownMap, Pulse, Books, BallSearch } from "@/components/icons";
 import { clsx } from "@/lib/clsx";
 
 const LINKS = [
   { href: "/", label: "Home", Icon: Pokedex },
   { href: "/scanner", label: "Scanner", Icon: TownMap },
-  { href: "/tape", label: "Tape", Icon: Pulse },
+  { href: "/tape", label: "Live Tape", Icon: Pulse },
   { href: "/guide", label: "Guide", Icon: Books },
 ];
 
+export function Logo() {
+  return (
+    <Link href="/" className="group flex items-center gap-2.5 shrink-0" aria-label="Cardex home">
+      <span className="pokeball pokeball-spin" style={{ ["--s" as string]: "30px" }} />
+      <span className="logo-word text-[15px] sm:text-[17px] leading-none pt-0.5">CARDEX</span>
+    </Link>
+  );
+}
+
 export function Nav() {
   const pathname = usePathname();
+  const [searchOpen, setSearchOpen] = useState(false);
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
     <>
-      {/* top bar — crimson Pokédex chassis */}
-      <header className="sticky top-0 z-40 chassis backdrop-blur">
-        <div className="mx-auto max-w-[1600px] px-3 sm:px-5 h-14 flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <span className="lens relative grid place-items-center h-7 w-7 rounded-full">
-              <span className="led h-1.5 w-1.5 rounded-full bg-white text-white" />
-            </span>
-            <span className="flex gap-1">
-              <span className="led h-2 w-2 rounded-full bg-dex-red-dark text-dex-red-dark" />
-              <span className="led h-2 w-2 rounded-full bg-dex-yellow text-dex-yellow" style={{ animationDelay: "0.3s" }} />
-              <span className="led h-2 w-2 rounded-full bg-dex-green text-dex-green" style={{ animationDelay: "0.6s" }} />
-            </span>
-            <span className="pixel text-xs sm:text-sm text-white drop-shadow ml-1">CARDEX</span>
-          </Link>
+      <header className="sticky top-0 z-40 border-b border-sand/80 bg-cream/85 backdrop-blur-md">
+        {/* Poké Ball red seam across the very top */}
+        <div className="h-1 bg-poke" aria-hidden />
+        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 h-16 flex items-center gap-6">
+          <Logo />
 
-          <nav className="hidden md:flex items-center gap-1 ml-2">
-            {LINKS.map(({ href, label, Icon }) => (
+          <nav aria-label="Main" className="hidden md:flex items-center gap-7 ml-6">
+            {LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
+                aria-current={isActive(href) ? "page" : undefined}
                 className={clsx(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
-                  isActive(href)
-                    ? "bg-black/25 text-white font-medium"
-                    : "text-white/75 hover:text-white hover:bg-black/15",
+                  "menu-item font-extrabold text-[0.95rem] transition-colors",
+                  isActive(href) ? "text-ink" : "text-ink-mute hover:text-ink",
                 )}
               >
-                <Icon className="h-4 w-4" />
                 {label}
               </Link>
             ))}
           </nav>
 
-          <div className="ml-auto hidden md:block">
-            <WalletSearch compact />
+          <div className="ml-auto flex items-center gap-3">
+            <div className="hidden xl:block">
+              <SolTicker />
+            </div>
+            <div className="hidden md:block">
+              <WalletSearch compact />
+            </div>
+            <button
+              type="button"
+              onClick={() => setSearchOpen((o) => !o)}
+              className="md:hidden grid place-items-center h-10 w-10 rounded-full bg-cream-hi border border-sand"
+              aria-label="Search"
+              aria-expanded={searchOpen}
+            >
+              <BallSearch className="h-5 w-5" />
+            </button>
           </div>
         </div>
+        {searchOpen && (
+          <div className="md:hidden px-4 pb-3 animate-pop">
+            <WalletSearch autoFocus onDone={() => setSearchOpen(false)} />
+          </div>
+        )}
       </header>
 
-      {/* mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 chassis border-t border-dex-red-dark pb-safe">
+      {/* mobile tab bar */}
+      <nav
+        aria-label="Main"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-sand bg-cream-hi/95 backdrop-blur pb-safe"
+      >
         <div className="grid grid-cols-4">
-          {LINKS.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={clsx(
-                "flex flex-col items-center gap-1 py-2.5 text-[10px]",
-                isActive(href) ? "text-dex-yellow" : "text-white/75",
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </Link>
-          ))}
+          {LINKS.map(({ href, label, Icon }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={clsx(
+                  "relative flex flex-col items-center gap-1 pt-2.5 pb-1.5 text-[11px] font-extrabold",
+                  active ? "text-poke-deep" : "text-ink-mute",
+                )}
+              >
+                {active && <span className="absolute top-0 h-1 w-8 rounded-b-full bg-poke" aria-hidden />}
+                <Icon className="h-5 w-5" />
+                {label}
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </>

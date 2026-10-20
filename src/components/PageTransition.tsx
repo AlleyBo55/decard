@@ -3,17 +3,16 @@
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 
-// Cheap, GPU-only transition (opacity + small translate) keyed on the path.
-// No layout thrash, respects reduced-motion via the browser's own handling of
-// transform animations.
+// GPU-only route transition (opacity + small rise), keyed on the path so
+// filter changes inside a page don't replay it.
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
     >
       {children}
     </motion.div>

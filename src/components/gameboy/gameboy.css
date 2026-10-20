@@ -1,0 +1,325 @@
+/* A Game Boy built in CSS. Putty body, the big rounded corner, berry A/B keys.
+   Global and gb- prefixed on purpose: the Tailwind Turbopack rule in
+   next.config.ts treats every *.css as global, so CSS Modules don't hash. */
+.gb {
+  --w: clamp(268px, 26vw, 330px);
+  position: relative;
+  width: var(--w);
+  aspect-ratio: 0.6;
+  display: flex;
+  flex-direction: column;
+  padding: 6.5% 7% 0;
+  border-radius: 16px 16px 72px 16px;
+  background: linear-gradient(160deg, #e6e2d9 0%, #d6d1c7 52%, #c8c2b6 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.75),
+    inset 0 -8px 16px rgb(0 0 0 / 0.1),
+    0 7px 0 #b3ac9e,
+    0 36px 60px -30px rgb(41 38 61 / 0.65);
+  user-select: none;
+}
+.gb:focus-visible {
+  outline: 3px solid var(--color-azure);
+  outline-offset: 6px;
+}
+
+.gb-grooves {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4.5%;
+  border-bottom: 2px solid #bdb6a8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7%;
+  font-family: var(--ff-pixel);
+  font-size: 6px;
+  color: #8f8878;
+}
+.gb-grooves::before,
+.gb-grooves::after {
+  content: "";
+  width: 6%;
+  height: 100%;
+  border-left: 2px solid #bdb6a8;
+  border-right: 2px solid #bdb6a8;
+}
+
+.gb-bezel {
+  position: relative;
+  margin-top: 4%;
+  padding: 7% 9% 6%;
+  border-radius: 10px 10px 42px 10px;
+  background: #5b5a72;
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.35);
+}
+.gb-stripe {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6%;
+  font-family: var(--ff-pixel);
+  font-size: 5.5px;
+  letter-spacing: 0.04em;
+  color: #cfcde0;
+  white-space: nowrap;
+}
+.gb-stripe i {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: #9a2257;
+  box-shadow: 0 4px 0 #2a4f9e;
+  transform: translateY(-2px);
+}
+.gb-battery {
+  position: absolute;
+  left: 3.2%;
+  top: 44%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ff-pixel);
+  font-size: 4px;
+  color: #b9b7c9;
+}
+.gb-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ff3b30;
+  box-shadow: 0 0 6px 1px rgb(255 59 48 / 0.85);
+}
+
+.gb-screen {
+  position: relative;
+  aspect-ratio: 10 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #9bbc0f;
+  color: #0f380f;
+  font-family: var(--ff-pixel);
+  box-shadow:
+    inset 0 0 0 2px #8bac0f,
+    inset 0 5px 12px rgb(15 56 15 / 0.35);
+  cursor: pointer;
+}
+.gb-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(15 56 15 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(15 56 15 / 0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+.gb-hud {
+  display: flex;
+  justify-content: space-between;
+  padding: 5% 6% 0;
+  font-size: 6.5px;
+  line-height: 1;
+}
+.gb-picture {
+  height: 47%;
+  display: grid;
+  place-items: center;
+  padding: 3% 0 2%;
+}
+.gb-picture canvas {
+  height: 100%;
+  width: auto;
+  image-rendering: pixelated;
+  filter: grayscale(1) contrast(1.35) brightness(1.05);
+  mix-blend-mode: multiply;
+}
+.gb-textbox {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 4%;
+  height: 38%;
+  padding: 5% 6%;
+  border: 2px solid #0f380f;
+  border-radius: 4px;
+  background: #9bbc0f;
+  box-shadow: inset 0 0 0 1px #9bbc0f, inset 0 0 0 2px #306230;
+  font-size: 7.5px;
+  line-height: 1.75;
+  overflow: hidden;
+}
+.gb-caret {
+  position: absolute;
+  right: 6%;
+  bottom: 6%;
+  font-size: 7px;
+  animation: gbBlink 0.9s steps(2, jump-none) infinite;
+}
+
+.gb-brand {
+  margin: 4.5% 0 0 2%;
+  font-family: var(--ff-sans);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  color: #2f2a86;
+}
+.gb-brand span {
+  font-family: var(--ff-pixel);
+  font-style: normal;
+  font-size: 7px;
+  margin-left: 6px;
+  letter-spacing: 0.06em;
+}
+
+.gb-controls {
+  position: relative;
+  flex: 1;
+}
+
+.gb-dpad {
+  position: absolute;
+  left: 2%;
+  top: 14%;
+  width: 34%;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+}
+.gb-dpad button,
+.gb-dpad .gb-hub {
+  background: #2f2d3a;
+  box-shadow: 0 3px 0 #18171f;
+}
+.gb-dpad button {
+  transition: transform 0.08s;
+}
+.gb-dpad button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #18171f;
+}
+.gb-up {
+  grid-area: 1 / 2;
+  border-radius: 4px 4px 0 0;
+}
+.gb-left {
+  grid-area: 2 / 1;
+  border-radius: 4px 0 0 4px;
+}
+.gb-right {
+  grid-area: 2 / 3;
+  border-radius: 0 4px 4px 0;
+}
+.gb-down {
+  grid-area: 3 / 2;
+  border-radius: 0 0 4px 4px;
+}
+.gb-hub {
+  grid-area: 2 / 2;
+  box-shadow: none !important;
+  background: radial-gradient(circle, #24222e 30%, #2f2d3a 32%) !important;
+}
+
+.gb-ab {
+  position: absolute;
+  right: 0;
+  top: 12%;
+  width: 46%;
+  height: 34%;
+  transform: rotate(-24deg);
+}
+.gb-key {
+  position: absolute;
+  width: 40%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, #c4447e, #9a2257 60%);
+  box-shadow:
+    0 4px 0 #6b1239,
+    inset 0 -2px 4px rgb(0 0 0 / 0.25);
+  transition: transform 0.08s;
+}
+.gb-key:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #6b1239;
+}
+.gb-keyB {
+  left: 0;
+  top: 32%;
+}
+.gb-keyA {
+  right: 0;
+  top: 2%;
+}
+.gb-keyLabel {
+  position: absolute;
+  bottom: -46%;
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: #3f2a6e;
+}
+
+.gb-pills {
+  position: absolute;
+  left: 24%;
+  bottom: 22%;
+  display: flex;
+  gap: 14%;
+  width: 46%;
+}
+.gb-pill {
+  position: relative;
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: #8f8a99;
+  transform: rotate(-24deg);
+  box-shadow:
+    0 2px 0 #6c6776,
+    inset 0 0 0 2px #a9a4b2;
+  transition: transform 0.08s;
+}
+.gb-pill:active {
+  transform: rotate(-24deg) translateY(2px);
+}
+.gb-pillLabel {
+  position: absolute;
+  top: 160%;
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #3f2a6e;
+}
+
+.gb-speaker {
+  position: absolute;
+  right: 6%;
+  bottom: 9%;
+  width: 26%;
+  height: 22%;
+  transform: rotate(-24deg);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 9%,
+    #9d9688 9% 15%,
+    transparent 15% 24%
+  );
+  border-radius: 6px;
+  opacity: 0.85;
+}
+
+@keyframes gbBlink {
+  50% {
+    opacity: 0;
+  }
+}

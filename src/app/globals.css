@@ -1,155 +1,701 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--cx-sans);
-  --font-mono: var(--cx-mono);
-  --font-pixel: var(--cx-pixel);
+/* =========================================================================
+   CARDEX design tokens
+   Warm "Game Boy putty" paper, Poké Ball red, Pikachu yellow, logo blue,
+   and the original DMG dot-matrix greens. Ink is deep indigo, never black.
+   ========================================================================= */
+@theme static {
+  --color-cream: #f4efe4;
+  --color-cream-hi: #fbf8f2;
+  --color-cream-lo: #ece5d6;
+  --color-sand: #ddd3be;
+  --color-sand-dark: #c3b79f;
 
-  /* ---- Pokédex palette (deeper, low-glare) ---- */
-  /* Crimson chassis instead of fire-engine red — calmer on the eye. */
-  --color-dex-red: #c0353f;
-  --color-dex-red-deep: #8e2531;
-  --color-dex-red-dark: #5e1822;
-  --color-dex-yellow: #f6c445;
-  --color-dex-gold: #d9a441;
-  --color-dex-blue: #3d5a9e;
-  --color-dex-cyan: #4bb3d4;
-  --color-dex-green: #5bbf7b;
+  --color-ink: #29263d;
+  --color-ink-soft: #4f4b68;
+  --color-ink-mute: #67627f;
 
-  /* Game Boy LCD greens */
-  --color-screen: #10231c;
-  --color-screen-glow: #8ad6a6;
+  --color-poke: #e3350d;
+  --color-poke-deep: #b8290a;
+  --color-poke-dark: #7e1c07;
+  --color-pika: #ffcb05;
+  --color-pika-deep: #e0a800;
+  --color-azure: #2a75bb;
+  --color-azure-deep: #1d5690;
+  --color-berry: #9a2257;
 
-  /* Chassis / surfaces: cool dark navy-slate, not black, not red-cast */
-  --color-bg: #0c1118;
-  --color-bg-2: #111822;
-  --color-panel: #161e2a;
-  --color-panel-2: #1e2836;
-  --color-line: #2c3a4e;
-  --color-ink: #eef3fa;
-  --color-muted: #93a3bb;
+  --color-gb-0: #0f380f;
+  --color-gb-1: #306230;
+  --color-gb-2: #8bac0f;
+  --color-gb-3: #9bbc0f;
 
-  /* Signal (slightly desaturated for comfort) */
-  --color-up: #4cc38a;
-  --color-down: #e5636b;
-  --color-warn: #e0a23a;
+  --color-up: #1f7a43;
+  --color-up-fill: #3dbe6e;
+  --color-down: #c0392b;
+  --color-warn: #8a5d00;
+  --color-warn-fill: #f2b51d;
+
+  --radius-card: 14px;
+  --ease-pop: cubic-bezier(0.2, 0.9, 0.25, 1.15);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Font stacks live on :root so hand-written CSS can always reference them;
+   the theme maps them onto font-sans / font-display / font-pixel utilities. */
+@theme inline {
+  --font-sans: var(--ff-sans);
+  --font-display: var(--ff-display);
+  --font-pixel: var(--ff-pixel);
+  --font-mono: var(--ff-mono);
+}
+
+/* ------------------------------------------------------------------ base */
 :root {
-  color-scheme: dark;
-  --cx-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
-  --cx-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
-  --cx-pixel: "Courier New", "Courier", ui-monospace, monospace;
+  color-scheme: light;
+  --ff-sans: var(--font-nunito), ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ff-display: var(--font-pixelify), var(--font-nunito), ui-rounded, sans-serif;
+  --ff-pixel: var(--font-press), ui-monospace, monospace;
+  --ff-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --shadow-soft: 0 1px 0 rgb(41 38 61 / 0.05), 0 12px 28px -16px rgb(41 38 61 / 0.35);
+  --shadow-lift: 0 2px 0 rgb(41 38 61 / 0.06), 0 22px 40px -18px rgb(41 38 61 / 0.45);
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%2329263D' stroke-opacity='.045' stroke-width='1.6'%3E%3Ccircle cx='24' cy='24' r='11'/%3E%3Cpath d='M13 24h7m8 0h7'/%3E%3Ccircle cx='24' cy='24' r='4'/%3E%3Ccircle cx='72' cy='72' r='11'/%3E%3Cpath d='M61 72h7m8 0h7'/%3E%3Ccircle cx='72' cy='72' r='4'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 html {
-  background: var(--color-bg);
+  background: var(--color-cream);
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 88px;
 }
 
 body {
-  /* Subtle depth: a faint crimson glow top-right, cool blue bottom-left,
-     over a dark navy base. Low opacity so nothing glares. */
   background:
-    radial-gradient(1000px 560px at 88% -12%, rgba(192, 53, 63, 0.14), transparent 58%),
-    radial-gradient(820px 480px at -8% 108%, rgba(61, 90, 158, 0.12), transparent 58%),
-    linear-gradient(180deg, var(--color-bg-2), var(--color-bg));
-  background-attachment: fixed;
+    radial-gradient(900px 520px at 92% -8%, rgb(255 203 5 / 0.16), transparent 62%),
+    radial-gradient(760px 460px at -6% 18%, rgb(227 53 13 / 0.07), transparent 60%),
+    var(--pattern),
+    var(--color-cream);
   color: var(--color-ink);
-  font-family: var(--cx-sans);
+  font-family: var(--ff-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
 }
 
-.pixel {
-  font-family: var(--cx-pixel);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+::selection {
+  background: var(--color-pika);
+  color: var(--color-ink);
 }
 
-/* ---- Pokédex screen: the green dot-matrix LCD look ---- */
-.screen {
-  position: relative;
-  background:
-    linear-gradient(180deg, rgba(127, 227, 160, 0.06), transparent 30%),
-    var(--color-panel);
-  border: 1px solid var(--color-line);
-}
-.screen::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.03) 0px,
-    rgba(255, 255, 255, 0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  border-radius: inherit;
-  opacity: 0.55;
+:focus-visible {
+  outline: 3px solid var(--color-azure);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
-/* A true LCD panel (used for the trade tape header / hero screen) */
-.lcd {
-  background:
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 4px),
-    linear-gradient(160deg, #1c3b2a, var(--color-screen));
-  color: var(--color-screen-glow);
-  border: 1px solid #0a1f16;
-  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.55), inset 0 0 2px rgba(127, 227, 160, 0.4);
+/* ------------------------------------------------------------ components */
+@layer components {
+  .font-pixel {
+    letter-spacing: 0.02em;
+    line-height: 1.6;
+  }
+
+  /* Section kicker with the Pokémon menu cursor. */
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    font-family: var(--ff-pixel);
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-poke-deep);
+  }
+  .kicker::before {
+    content: "▶";
+    font-size: 9px;
+    animation: nudge 1.6s var(--ease-out) infinite;
+  }
+
+  .h-display {
+    font-family: var(--ff-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 0.98;
+    color: var(--color-ink);
+  }
+
+  /* Raised paper surface, used sparingly. */
+  .paper {
+    background: var(--color-cream-hi);
+    border: 1px solid var(--color-sand);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Pokémon dialogue box: double ink border and a blinking advance arrow. */
+  .dialog {
+    position: relative;
+    background: var(--color-cream-hi);
+    border: 3px solid var(--color-ink);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 0 3px var(--color-cream-hi),
+      inset 0 0 0 5px var(--color-ink),
+      0 6px 0 rgb(41 38 61 / 0.12);
+    padding: 1.1rem 1.25rem;
+  }
+  .dialog-text {
+    font-family: var(--ff-pixel);
+    font-size: 11px;
+    line-height: 2;
+    color: var(--color-ink);
+  }
+  .dialog-arrow::after {
+    content: "▼";
+    position: absolute;
+    right: 16px;
+    bottom: 10px;
+    font-size: 10px;
+    color: var(--color-poke);
+    animation: bob 0.9s steps(2, jump-none) infinite;
+  }
+
+  /* Tactile buttons with a pressed state, like Game Boy keys. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1;
+    transition:
+      transform 0.12s var(--ease-out),
+      box-shadow 0.12s var(--ease-out),
+      background-color 0.2s;
+    user-select: none;
+  }
+  .btn:active {
+    transform: translateY(3px);
+  }
+  .btn-red {
+    background: var(--color-poke-deep);
+    color: #fff;
+    box-shadow: 0 4px 0 var(--color-poke-dark);
+  }
+  .btn-red:hover {
+    background: #c92e0b;
+  }
+  .btn-red:active {
+    box-shadow: 0 1px 0 var(--color-poke-dark);
+  }
+  .btn-yellow {
+    background: var(--color-pika);
+    color: var(--color-ink);
+    box-shadow: 0 4px 0 var(--color-pika-deep);
+  }
+  .btn-yellow:active {
+    box-shadow: 0 1px 0 var(--color-pika-deep);
+  }
+  .btn-cream {
+    background: var(--color-cream-hi);
+    color: var(--color-ink);
+    border: 2px solid var(--color-ink);
+    box-shadow: 0 4px 0 var(--color-ink);
+  }
+  .btn-cream:active {
+    box-shadow: 0 1px 0 var(--color-ink);
+  }
+
+  /* Segmented control styled like START / SELECT pills. */
+  .seg {
+    display: inline-flex;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 999px;
+    background: var(--color-cream-lo);
+    border: 1px solid var(--color-sand);
+  }
+  .seg > button {
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      box-shadow 0.2s;
+  }
+  .seg > button:hover {
+    color: var(--color-ink);
+  }
+  .seg > button[aria-pressed="true"],
+  .seg > button[aria-selected="true"] {
+    background: var(--color-ink);
+    color: var(--color-cream-hi);
+    box-shadow: 0 2px 0 rgb(41 38 61 / 0.25);
+  }
+
+  /* Pokémon type chip. Set --t (type colour) and --tf (text on solid). */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem 0.3rem 0.35rem;
+    font-weight: 800;
+    font-size: 0.8rem;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--t) 20%, var(--color-cream-hi));
+    border: 1.5px solid color-mix(in srgb, var(--t) 75%, var(--color-ink));
+    transition:
+      transform 0.18s var(--ease-pop),
+      background-color 0.2s,
+      color 0.2s;
+  }
+  .chip-icon {
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    background: var(--t);
+    color: var(--tf);
+  }
+  a.chip:hover,
+  button.chip:hover {
+    transform: translateY(-2px) rotate(-1.5deg);
+  }
+  .chip[aria-pressed="true"],
+  .chip-solid {
+    background: var(--t);
+    color: var(--tf);
+    border-color: color-mix(in srgb, var(--t) 70%, var(--color-ink));
+  }
+  .chip[aria-pressed="true"] .chip-icon,
+  .chip-solid .chip-icon {
+    background: color-mix(in srgb, var(--tf) 18%, transparent);
+  }
+
+  /* Battle HP bar. Colour shifts green, yellow, red like the games. */
+  .hp {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .hp-label {
+    font-family: var(--ff-pixel);
+    font-size: 8px;
+    line-height: 1;
+    color: var(--color-warn);
+    background: var(--color-ink);
+    color: var(--color-pika);
+    padding: 3px 4px 2px;
+    border-radius: 4px;
+  }
+  .hp-track {
+    position: relative;
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-cream-lo);
+    border: 1.5px solid var(--color-ink);
+    overflow: hidden;
+  }
+  .hp-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 999px;
+    background: var(--hp-color, var(--color-up-fill));
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12);
+    transform-origin: left;
+    animation: hp-in 0.9s var(--ease-out) both;
+  }
+
+  /* Holographic card tile. Pointer position arrives as CSS variables. */
+  .holo-card {
+    position: relative;
+    border-radius: var(--radius-card);
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0));
+    transition: transform 0.45s var(--ease-out), box-shadow 0.3s;
+    transform-style: preserve-3d;
+  }
+  .holo-card[data-active="true"] {
+    --lift: -6px;
+    transition: transform 0.08s linear, box-shadow 0.3s;
+  }
+  .holo-glare {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s;
+    background:
+      radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.65), transparent 42%),
+      linear-gradient(
+        115deg,
+        transparent 18%,
+        rgb(255 203 5 / 0.32) 34%,
+        rgb(99 144 240 / 0.3) 48%,
+        rgb(249 85 135 / 0.26) 62%,
+        transparent 78%
+      );
+    background-size:
+      100% 100%,
+      240% 240%;
+    background-position:
+      center,
+      var(--mx, 50%) var(--my, 50%);
+    mix-blend-mode: soft-light;
+  }
+  .holo-card[data-active="true"] .holo-glare {
+    opacity: 1;
+  }
+
+  /* Pure-CSS Poké Ball, sized by --s. */
+  .pokeball {
+    --s: 28px;
+    --edge: max(2px, calc(var(--s) * 0.075));
+    position: relative;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    border: var(--edge) solid var(--color-ink);
+    background:
+      radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.55) 0 12%, transparent 13%),
+      linear-gradient(
+        to bottom,
+        var(--color-poke) 0 calc(50% - var(--edge) / 2),
+        var(--color-ink) calc(50% - var(--edge) / 2) calc(50% + var(--edge) / 2),
+        #fbf8f2 calc(50% + var(--edge) / 2)
+      );
+    flex: none;
+  }
+  .pokeball::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 34%;
+    height: 34%;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: #fbf8f2;
+    border: var(--edge) solid var(--color-ink);
+    box-shadow: inset 0 0 0 calc(var(--edge) * 0.6) #fff;
+  }
+  .pokeball-spin:hover {
+    animation: spin 0.6s var(--ease-out);
+  }
+  .pokeball-wobble {
+    animation: wobble 1.4s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+
+  /* Infinite ticker band. Track holds two copies of the content. */
+  .marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee var(--marquee-duration, 60s) linear infinite;
+  }
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  .skeleton {
+    border-radius: 10px;
+    background: linear-gradient(
+      90deg,
+      var(--color-cream-lo) 0%,
+      var(--color-cream-hi) 50%,
+      var(--color-cream-lo) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.3s linear infinite;
+  }
+
+  /* Pokédex data row with a dotted leader between label and value. */
+  .leader-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+  .leader-row > .leader {
+    flex: 1;
+    min-width: 1rem;
+    border-bottom: 2px dotted var(--color-sand-dark);
+    transform: translateY(-0.3em);
+  }
+
+  /* Menu list item: the ▶ cursor slides in on hover, like the START menu. */
+  .menu-item {
+    position: relative;
+  }
+  .menu-item::before {
+    content: "▶";
+    position: absolute;
+    left: -0.95rem;
+    top: 50%;
+    translate: -4px -50%;
+    font-size: 0.6rem;
+    color: var(--color-poke);
+    opacity: 0;
+    transition:
+      opacity 0.18s,
+      translate 0.18s var(--ease-out);
+  }
+  .menu-item:hover::before,
+  .menu-item[aria-current="page"]::before {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+
+  .full-bleed {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+  }
+
+  .dash-divide > * + * {
+    border-top: 1.5px dashed var(--color-sand);
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-up-fill);
+    box-shadow: 0 0 0 0 rgb(61 190 110 / 0.6);
+    animation: ping 1.8s var(--ease-out) infinite;
+  }
+
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-sand-dark) transparent;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
 }
 
-/* Crimson chassis header bar with a subtle top sheen */
-.chassis {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 30%),
-    linear-gradient(180deg, var(--color-dex-red), var(--color-dex-red-deep));
-  border-bottom: 2px solid var(--color-dex-red-dark);
-}
-
-/* Holographic sheen for the tilting card */
-.holo {
-  mix-blend-mode: screen;
-}
-
-.thin-scroll::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
-}
-.thin-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-line);
-  border-radius: 999px;
-}
-
-@keyframes led {
+/* --------------------------------------------------------------- motion */
+@keyframes nudge {
   0%,
   100% {
-    opacity: 1;
-    box-shadow: 0 0 8px currentColor;
+    translate: 0 0;
   }
   50% {
-    opacity: 0.4;
-    box-shadow: 0 0 2px currentColor;
+    translate: 3px 0;
   }
 }
-.led {
-  animation: led 1.6s ease-in-out infinite;
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 3px;
+  }
+}
+@keyframes hp-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes wobble {
+  0%,
+  55%,
+  100% {
+    rotate: 0deg;
+  }
+  10% {
+    rotate: -18deg;
+  }
+  22% {
+    rotate: 14deg;
+  }
+  34% {
+    rotate: -8deg;
+  }
+  45% {
+    rotate: 4deg;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes ping {
+  70% {
+    box-shadow: 0 0 0 7px rgb(61 190 110 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(61 190 110 / 0);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+@keyframes star {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(0deg) translateY(0) scale(0.4);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-88px) scale(1);
+  }
 }
 
-/* Big round Pokédex lens with a glassy highlight */
-.lens {
-  background: radial-gradient(circle at 35% 30%, #9fd8ff, #1f7fd6 45%, #0b3e73 100%);
-  box-shadow: 0 0 0 3px #e8f6ff, 0 0 0 6px #0a2a4a, 0 0 18px rgba(40, 170, 253, 0.5);
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+.animate-pop {
+  animation: pop-in 0.45s var(--ease-pop) both;
+}
+
+@media (hover: none) {
+  .holo-card {
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .led {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .marquee {
+    overflow-x: auto;
+  }
+  .holo-card {
+    transform: none !important;
   }
 }
 
-.pb-safe {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+/* ------------------------------------------------- DMG mode (easter egg) */
+[data-theme="dmg"] {
+  --color-cream: #9bbc0f;
+  --color-cream-hi: #a9c823;
+  --color-cream-lo: #8bac0f;
+  --color-sand: #6f8f0f;
+  --color-sand-dark: #4f6f10;
+  --color-ink: #0f380f;
+  --color-ink-soft: #1d4a1d;
+  --color-ink-mute: #306230;
+  --color-poke: #306230;
+  --color-poke-deep: #0f380f;
+  --color-poke-dark: #0f380f;
+  --color-pika: #c4dd4a;
+  --color-pika-deep: #306230;
+  --color-azure: #306230;
+  --color-azure-deep: #0f380f;
+}
+[data-theme="dmg"] body {
+  background: var(--color-cream);
+}
+[data-theme="dmg"] img {
+  filter: grayscale(1) sepia(1) hue-rotate(38deg) saturate(2.4) contrast(1.05) brightness(0.92);
+}
+
+/* ------------------------------------------------------------ wordmark */
+/* Pixel wordmark: Pikachu yellow fill with a stepped blue outline. */
+.logo-word {
+  font-family: var(--ff-pixel);
+  color: var(--color-pika);
+  letter-spacing: 0.04em;
+  /* 1.5px outline plus a straight-down drop, so open letters like C stay open. */
+  text-shadow:
+    1.5px 0 0 var(--color-azure-deep),
+    -1.5px 0 0 var(--color-azure-deep),
+    0 1.5px 0 var(--color-azure-deep),
+    0 -1.5px 0 var(--color-azure-deep),
+    0 3.5px 0 var(--color-azure-deep);
+}
+
+/* Hand-drawn marker swash under a headline word. */
+.swash {
+  position: relative;
+  white-space: nowrap;
+  z-index: 0;
+}
+.swash::after {
+  content: "";
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  bottom: 0.02em;
+  height: 0.34em;
+  z-index: -1;
+  border-radius: 0.2em;
+  background: var(--color-pika);
+  transform: rotate(-1.2deg) scaleX(0);
+  transform-origin: left;
+  animation: swash 0.8s var(--ease-out) 0.35s forwards;
+}
+@keyframes swash {
+  to {
+    transform: rotate(-1.2deg) scaleX(1);
+  }
+}
+
+/* Catch burst: small stars fly out from the ball. */
+.catch-star {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  color: var(--color-pika);
+  font-size: 18px;
+  text-shadow: 0 0 0 var(--color-ink), 1px 1px 0 var(--color-ink);
+  animation: star 0.9s var(--ease-out) forwards;
+  pointer-events: none;
 }

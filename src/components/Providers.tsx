@@ -10,8 +10,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 10_000,
+            gcTime: 2 * 60_000,
             refetchOnWindowFocus: false,
-            // Stop polling when the tab is hidden — saves requests and memory.
+            // Hidden tabs stop polling: fewer requests, less memory churn.
             refetchIntervalInBackground: false,
             retry: 1,
           },

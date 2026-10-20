@@ -1,78 +1,69 @@
 import Link from "next/link";
-import { TradeTape } from "@/components/TradeTape";
-import { SolTicker } from "@/components/SolTicker";
 import { WalletSearch } from "@/components/WalletSearch";
-import { HeroBall } from "@/components/HeroBall";
-import { Highlights } from "@/components/Highlights";
-import { MarketStats } from "@/components/MarketStats";
-import { PixelLabel } from "@/components/ui";
-import { Pulse } from "@/components/icons";
-import { CATEGORIES } from "@/lib/constants";
+import { HeroCatch } from "@/components/HeroCatch";
+import { HeroStats } from "@/components/home/HeroStats";
+import { TickerBands } from "@/components/home/TickerBands";
+import { HomeSections } from "@/components/home/HomeSections";
+import { DialogBox, TypeChip } from "@/components/ui";
+import { Reveal } from "@/components/motion";
+import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-10 py-6">
-      {/* hero — Pokédex faceplate */}
-      <section className="relative overflow-hidden rounded-2xl border-2 border-dex-red-dark chassis p-5 sm:p-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          <div className="flex flex-col gap-5">
-            <div className="flex items-center gap-3 flex-wrap">
-              <PixelLabel className="text-white/90">SOLANA · GRADED CARDS</PixelLabel>
-              <SolTicker />
-            </div>
-            <h1 className="pixel text-3xl sm:text-5xl leading-tight text-white drop-shadow">
-              CARD<span className="text-dex-yellow">EX</span>
-            </h1>
-            <p className="text-base sm:text-lg text-white/85 max-w-lg">
-              Gotta scan &apos;em all. The live dashboard for tokenized graded cards. Track
-              listings, deal scores, and every wallet&apos;s moves across Collector Crypt and Magic
-              Eden. On-chain, no login.
-            </p>
-            <div id="track" className="scroll-mt-20">
-              <WalletSearch />
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {CATEGORIES.slice(0, 6).map((c) => (
-                <Link
-                  key={c}
-                  href={`/scanner?search=${encodeURIComponent(c)}`}
-                  className="rounded-full border border-white/25 bg-black/15 px-3 py-1 text-xs text-white/85 hover:bg-dex-yellow hover:text-black hover:border-dex-yellow transition-colors"
-                >
-                  {c}
-                </Link>
-              ))}
-            </div>
-            <Link href="/guide" className="text-xs text-white/70 hover:text-dex-yellow w-fit">
-              New to graded cards? Read the Trainer&apos;s Guide →
+    <>
+      {/* hero */}
+      <section className="relative grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center pt-10 sm:pt-16">
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="kicker">Solana · graded card dex</span>
+            <span className="inline-flex items-center gap-2 font-pixel text-[9px] text-up">
+              <span className="live-dot" /> LIVE
+            </span>
+          </div>
+          <h1 className="h-display mt-6 text-[clamp(3rem,7.4vw,5.8rem)]">
+            Gotta <span className="text-poke">scan</span>
+            <br />
+            <span className="swash">&apos;em all.</span>
+          </h1>
+          <p className="mt-7 text-lg sm:text-xl text-ink-soft max-w-xl leading-relaxed">
+            Live listings, deal scores, real bids and every wallet&apos;s moves for tokenized graded cards on
+            Collector Crypt and Magic Eden. No login, no keys.
+          </p>
+          <div className="mt-8 max-w-xl">
+            <WalletSearch />
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {PRIMARY_CATEGORIES.slice(0, 6).map((c) => (
+              <TypeChip key={c} category={c} href={`/scanner?search=${encodeURIComponent(c)}`} />
+            ))}
+          </div>
+          <HeroStats />
+        </div>
+        <HeroCatch />
+      </section>
+
+      <TickerBands />
+
+      <HomeSections />
+
+      {/* professor's tip */}
+      <Reveal className="mt-24">
+        <DialogBox className="max-w-3xl mx-auto !p-6 sm:!p-8">
+          <p className="dialog-text !text-[12px]">PROFESSOR&apos;S TIP</p>
+          <p className="mt-3 text-lg text-ink-soft leading-relaxed">
+            A PSA 10 with a population of 12 is a different beast from a PSA 10 everyone owns. Before you buy,
+            check the pop report, the gem rate and how far the price sits from insured value.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/guide" className="btn btn-red">
+              Read the Trainer&apos;s Guide
+            </Link>
+            <Link href="/scanner?orderBy=deal" className="btn btn-cream">
+              Find a deal
             </Link>
           </div>
-          <div className="flex justify-center">
-            <div className="lcd rounded-full p-3 sm:p-5">
-              <HeroBall size={280} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* market snapshot — per category / platform */}
-      <MarketStats />
-
-      {/* highlight rails */}
-      <Highlights />
-
-      {/* live tape */}
-      <section id="tape" className="scroll-mt-20 flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Pulse className="h-4 w-4 text-dex-yellow" />
-            <PixelLabel className="text-dex-yellow">LIVE TRADE TAPE</PixelLabel>
-          </div>
-          <Link href="/tape" className="text-xs text-muted hover:text-dex-yellow">
-            full tape →
-          </Link>
-        </div>
-        <TradeTape />
-      </section>
-    </div>
+        </DialogBox>
+      </Reveal>
+    </>
   );
 }

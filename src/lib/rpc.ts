@@ -1,22 +1,58 @@
 import "server-only";
-import {
-  SOLANA_RPC,
-  CC_MARKETPLACE_PROGRAM,
-  USDC_MINT,
-  MPL_CORE,
-  USER_AGENT,
-} from "./constants";
+import { SOLANA_RPC, CC_MARKETPLACE_PROGRAM, USDC_MINT, MPL_CORE, USER_AGENT } from "./constants";
+import { cached } from "./cache";
 import type { Activity, ActivityKind } from "./types";
 
 // Keyless public RPC. Confirmed by probing: getSignaturesForAddress,
-// getTransaction (jsonParsed), and JSON-RPC batching all work; DAS and
+// getTransaction (jsonParsed) and JSON-RPC batching work; DAS and
 // getTokenAccountsByOwner are blocked and intentionally unused.
+
+/** Platform wallets that co-sign user transactions. Never shown as the actor. */
+const PLATFORM_SIGNERS = new Set(["cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi"]);
 
 interface RpcRequest {
   jsonrpc: "2.0";
   id: number;
   method: string;
   params: unknown[];
+}
+
+interface SigInfo {
+  signature: string;
+  slot: number;
+  blockTime: number | null;
+  err: unknown | null;
+}
+
+interface AccountKey {
+  pubkey: string;
+  signer?: boolean;
+}
+
+interface TokenBalance {
+  accountIndex: number;
+  mint: string;
+  owner?: string;
+  uiTokenAmount: { uiAmountString: string | null; decimals: number };
+}
+
+interface ParsedIx {
+  programId?: string;
+  accounts?: string[];
+}
+
+interface ParsedTx {
+  meta: {
+    logMessages?: string[];
+    preTokenBalances?: TokenBalance[];
+    postTokenBalances?: TokenBalance[];
+    preBalances?: number[];
+    postBalances?: number[];
+    innerInstructions?: { instructions: ParsedIx[] }[];
+  } | null;
+  transaction: {
+    message: { accountKeys: (AccountKey | string)[]; instructions: ParsedIx[] };
+  } | null;
 }
 
 async function rpc<T>(method: string, params: unknown[]): Promise<T> {
@@ -32,7 +68,7 @@ async function rpc<T>(method: string, params: unknown[]): Promise<T> {
   return json.result as T;
 }
 
-async function rpcBatch(reqs: RpcRequest[]): Promise<any[]> {
+async function rpcBatch(reqs: RpcRequest[]): Promise<({ id: number; result?: ParsedTx } | undefined)[]> {
   if (reqs.length === 0) return [];
   const res = await fetch(SOLANA_RPC, {
     method: "POST",
@@ -41,16 +77,9 @@ async function rpcBatch(reqs: RpcRequest[]): Promise<any[]> {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`RPC batch ${res.status}`);
-  const arr = await res.json();
-  const byId = new Map<number, any>(arr.map((r: any) => [r.id, r]));
+  const arr = (await res.json()) as { id: number; result?: ParsedTx }[];
+  const byId = new Map(arr.map((r) => [r.id, r]));
   return reqs.map((r) => byId.get(r.id));
-}
-
-interface SigInfo {
-  signature: string;
-  slot: number;
-  blockTime: number | null;
-  err: unknown | null;
 }
 
 export function getSignatures(address: string, limit = 25, before?: string) {
@@ -68,30 +97,26 @@ function classify(logs: string[]): ActivityKind {
     const name = m[1];
     if (/^Buy/.test(name)) return name as ActivityKind;
     if (/^AcceptOffer/.test(name)) return "AcceptOffer";
-    if (name === "MakeOffer") return "MakeOffer";
+    if (name === "MakeOffer" || name === "MakeOfferNDeposit") return "MakeOffer";
     if (name === "UpdateOffer") return "UpdateOffer";
     if (name === "CancelOffer") return "CancelOffer";
     if (name === "UpdateListing") return "UpdateListing";
+    if (/^Cancel.*Listing$/.test(name)) return "CancelListing";
     if (/^List/.test(name)) return name as ActivityKind;
   }
   return "Unknown";
 }
 
-interface TokenBalance {
-  accountIndex: number;
-  mint: string;
-  owner?: string;
-  uiTokenAmount: { uiAmountString: string | null; decimals: number };
-}
+const pubkeyOf = (k: AccountKey | string | undefined) => (typeof k === "string" ? k : k?.pubkey);
 
 /**
  * Decode one parsed transaction into an Activity row.
- * Sale price is the largest USDC credit to a non-fee-payer owner; buyer is the
- * fee payer on a Buy, seller is the USDC recipient. Validated against a real
- * BuyCore: feePayer paid 36 USDC, seller received 35.28 (2% fee split).
+ * The actor is the first signer that isn't a platform co-signer. On a buy the
+ * actor is the buyer and the seller is the largest USDC credit. Validated on a
+ * real BuyCore: buyer paid 36 USDC, seller received 35.28 (2% fee split).
  */
-export function decodeActivity(sig: SigInfo, tx: any): Activity {
-  const base: Activity = {
+export function decodeActivity(sig: SigInfo, tx: ParsedTx | undefined): Activity & { _mintCandidates?: string[] } {
+  const base: Activity & { _mintCandidates?: string[] } = {
     signature: sig.signature,
     blockTime: sig.blockTime,
     slot: sig.slot,
@@ -101,120 +126,99 @@ export function decodeActivity(sig: SigInfo, tx: any): Activity {
     assetMint: null,
     buyer: null,
     seller: null,
+    actor: null,
+    ixCount: 0,
     err: sig.err != null,
   };
-  if (!tx?.meta || !tx?.transaction) return base;
+  if (!tx?.meta || !tx.transaction) return base;
 
-  const logs: string[] = tx.meta.logMessages ?? [];
-  base.kind = classify(logs);
+  base.kind = classify(tx.meta.logMessages ?? []);
 
   const keys = tx.transaction.message.accountKeys;
-  const feePayer = typeof keys[0] === "string" ? keys[0] : keys[0]?.pubkey;
+  const signers = keys
+    .filter((k): k is AccountKey => typeof k !== "string" && Boolean(k.signer))
+    .map((k) => k.pubkey);
+  const actor = signers.find((s) => !PLATFORM_SIGNERS.has(s)) ?? signers[0] ?? pubkeyOf(keys[0]) ?? null;
+  base.actor = actor;
 
-  // Resolve the asset mint from the marketplace instruction's own accounts.
-  // Probing showed the card mint sits within the first ~6 accounts for every
-  // instruction type (UpdateOffer/UpdateListing/CancelOffer at idx 2, Core
-  // cancel at 4, MakeOffer at 5). We capture the candidates and let the
-  // enrichment step confirm which one is a real card.
+  // Mint candidates from the marketplace instruction's own accounts. Probing
+  // showed the card mint sits in the first ~6 accounts for every instruction
+  // type; enrichment confirms which candidate is a real card.
   const mintCandidates: string[] = [];
   for (const ix of tx.transaction.message.instructions ?? []) {
     if (ix.programId !== CC_MARKETPLACE_PROGRAM) continue;
-    const accs: string[] = Array.isArray(ix.accounts) ? ix.accounts : [];
-    for (const a of accs.slice(0, 7)) {
-      if (typeof a === "string" && a.length >= 32 && a.length <= 44) mintCandidates.push(a);
+    base.ixCount += 1;
+    if (base.ixCount > 1) continue; // first instruction is enough to name the card
+    for (const a of (ix.accounts ?? []).slice(0, 7)) {
+      if (a.length >= 32 && a.length <= 44 && !signers.includes(a)) mintCandidates.push(a);
     }
   }
-  base.assetMint = mintCandidates[0] ?? null;
 
-  const pre: TokenBalance[] = tx.meta.preTokenBalances ?? [];
-  const post: TokenBalance[] = tx.meta.postTokenBalances ?? [];
-  const deltaByOwner = new Map<string, number>();
+  // USDC deltas per owner.
+  const pre = tx.meta.preTokenBalances ?? [];
+  const post = tx.meta.postTokenBalances ?? [];
   const amount = (b: TokenBalance) => Number(b.uiTokenAmount.uiAmountString ?? 0);
   const preByIdx = new Map(pre.map((b) => [b.accountIndex, b]));
-
+  const deltaByOwner = new Map<string, number>();
   for (const b of post) {
     if (b.mint !== USDC_MINT || !b.owner) continue;
     const before = preByIdx.get(b.accountIndex);
-    const d = amount(b) - (before ? amount(before) : 0);
-    deltaByOwner.set(b.owner, (deltaByOwner.get(b.owner) ?? 0) + d);
+    deltaByOwner.set(b.owner, (deltaByOwner.get(b.owner) ?? 0) + amount(b) - (before ? amount(before) : 0));
   }
 
-  let maxCredit = 0;
-  let seller: string | null = null;
-  for (const [owner, d] of deltaByOwner) {
-    if (owner !== feePayer && d > maxCredit) {
-      maxCredit = d;
-      seller = owner;
-    }
-  }
-  const buyerDebit = feePayer ? deltaByOwner.get(feePayer) ?? 0 : 0;
-
-  if (base.kind.startsWith("Buy") || base.kind === "AcceptOffer") {
-    base.buyer = feePayer ?? null;
-    base.seller = seller;
-    // Round to whole USDC: CC listings are whole-dollar, fee is 2%.
-    const gross = buyerDebit < 0 ? -buyerDebit : maxCredit;
-    base.priceUsdc = gross > 0 ? Math.round(gross) : null;
-
-    // Net SOL moved to the seller (ME-routed sales settle in SOL). Lamport
-    // deltas on the account keys; take the largest positive non-fee-payer gain.
-    const preBal: number[] = tx.meta.preBalances ?? [];
-    const postBal: number[] = tx.meta.postBalances ?? [];
-    let maxSolGain = 0;
-    for (let i = 0; i < keys.length; i++) {
-      const pk = typeof keys[i] === "string" ? keys[i] : keys[i]?.pubkey;
-      if (pk === feePayer) continue;
-      const gain = (postBal[i] ?? 0) - (preBal[i] ?? 0);
-      if (gain > maxSolGain) maxSolGain = gain;
-    }
-    if (!base.priceUsdc && maxSolGain > 0) {
-      base.priceSol = Number((maxSolGain / 1e9).toFixed(3));
-    }
-  }
-
-  // MPL Core transfer is authoritative for the moved asset mint.
-  for (const inner of tx.meta.innerInstructions ?? []) {
-    for (const ix of inner.instructions) {
-      if (ix.programId === MPL_CORE && Array.isArray(ix.accounts) && ix.accounts[0]) {
-        base.assetMint = ix.accounts[0];
+  const k = base.kind;
+  if (k.startsWith("Buy")) {
+    let maxCredit = 0;
+    let seller: string | null = null;
+    for (const [owner, d] of deltaByOwner) {
+      if (owner !== actor && d > maxCredit) {
+        maxCredit = d;
+        seller = owner;
       }
     }
+    const debit = actor ? deltaByOwner.get(actor) ?? 0 : 0;
+    base.buyer = actor;
+    base.seller = seller;
+    const gross = debit < 0 ? -debit : maxCredit;
+    base.priceUsdc = gross > 0 ? Math.round(gross * 100) / 100 : null;
+
+    if (!base.priceUsdc) {
+      // SOL-settled: largest lamport gain that isn't the actor.
+      const preBal = tx.meta.preBalances ?? [];
+      const postBal = tx.meta.postBalances ?? [];
+      let maxGain = 0;
+      keys.forEach((key, i) => {
+        if (pubkeyOf(key) === actor) return;
+        const gain = (postBal[i] ?? 0) - (preBal[i] ?? 0);
+        if (gain > maxGain) maxGain = gain;
+      });
+      if (maxGain > 0) base.priceSol = Number((maxGain / 1e9).toFixed(3));
+    }
+  } else if (k === "AcceptOffer") {
+    // The owner accepts; payment comes from the bidder's escrow PDA.
+    base.seller = actor;
+    let maxCredit = 0;
+    for (const [owner, d] of deltaByOwner) if (owner === actor && d > maxCredit) maxCredit = d;
+    base.priceUsdc = maxCredit > 0 ? Math.round((maxCredit / 0.98) * 100) / 100 : null;
+  } else if (k.endsWith("Offer")) {
+    base.buyer = actor; // the bidder
+  } else if (k.startsWith("List") || k === "UpdateListing" || k === "CancelListing") {
+    base.seller = actor; // the lister
   }
-  // Stash the remaining candidates so enrichment can resolve the mint for
-  // offer/listing events (which don't transfer an asset).
-  if (mintCandidates.length) {
-    (base as Activity & { _mintCandidates?: string[] })._mintCandidates = Array.from(
-      new Set([base.assetMint, ...mintCandidates].filter(Boolean) as string[]),
-    );
+
+  // MPL Core transfer is authoritative for a moved asset.
+  for (const inner of tx.meta.innerInstructions ?? []) {
+    for (const ix of inner.instructions) {
+      if (ix.programId === MPL_CORE && ix.accounts?.[0]) base.assetMint = ix.accounts[0];
+    }
   }
+  const cands = Array.from(new Set([base.assetMint, ...mintCandidates].filter(Boolean) as string[]));
+  base.assetMint = cands[0] ?? null;
+  if (cands.length) base._mintCandidates = cands;
   return base;
 }
 
-/** Recent marketplace-program activity: the live trade tape. */
-export async function getMarketplaceActivity(limit = 25): Promise<Activity[]> {
-  const sigs = await getSignatures(CC_MARKETPLACE_PROGRAM, limit);
-  return hydrate(sigs);
-}
-
-/** Per-wallet activity feed. */
-export async function getWalletActivity(
-  wallet: string,
-  limit = 25,
-  before?: string,
-): Promise<Activity[]> {
-  const sigs = await getSignatures(wallet, limit, before);
-  return hydrate(sigs);
-}
-
-/** Per-card transaction history: every tx that touched this asset mint. */
-export async function getCardActivity(mint: string, limit = 20): Promise<Activity[]> {
-  const sigs = await getSignatures(mint, limit);
-  const rows = await hydrate(sigs);
-  // Every row is this card; stamp the mint so enrichment resolves it directly.
-  return rows.map((r) => ({ ...r, assetMint: r.assetMint ?? mint }));
-}
-
-async function hydrate(sigs: SigInfo[]): Promise<Activity[]> {
+async function hydrate(sigs: SigInfo[]) {
   if (sigs.length === 0) return [];
   const reqs: RpcRequest[] = sigs.map((s, i) => ({
     jsonrpc: "2.0",
@@ -224,4 +228,26 @@ async function hydrate(sigs: SigInfo[]): Promise<Activity[]> {
   }));
   const results = await rpcBatch(reqs);
   return sigs.map((s, i) => decodeActivity(s, results[i]?.result));
+}
+
+/** Recent marketplace-program activity (the live tape). Shared 8s cache. */
+export function getMarketplaceActivity(limit = 40) {
+  return cached(`rpc:program:${limit}`, 8_000, async () =>
+    hydrate(await getSignatures(CC_MARKETPLACE_PROGRAM, limit)),
+  );
+}
+
+/** Per-wallet activity feed. */
+export function getWalletActivity(wallet: string, limit = 25, before?: string) {
+  return cached(`rpc:wallet:${wallet}:${limit}:${before ?? ""}`, 15_000, async () =>
+    hydrate(await getSignatures(wallet, limit, before)),
+  );
+}
+
+/** Per-card history: every tx that touched this asset mint. */
+export function getCardActivity(mint: string, limit = 20) {
+  return cached(`rpc:card:${mint}:${limit}`, 15_000, async () => {
+    const rows = await hydrate(await getSignatures(mint, limit));
+    return rows.map((r) => ({ ...r, assetMint: mint, _mintCandidates: [mint] }));
+  });
 }

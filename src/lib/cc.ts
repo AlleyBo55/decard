@@ -1,33 +1,17 @@
 import "server-only";
 import { CC_API, USER_AGENT } from "./constants";
-import type {
-  CardDetail,
-  CardMarket,
-  CardOffer,
-  CardRow,
-  MarketplacePage,
-  MarketplaceQuery,
-} from "./types";
+import { cached } from "./cache";
+import type { CardDetail, CardMarket, CardOffer, CardRow, MarketplacePage, MarketplaceQuery } from "./types";
 
 // Collector Crypt refuses requests without a User-Agent at the edge, so every
-// fetch here sets one. All reads are public and keyless.
+// fetch sets one. All reads are public and keyless.
 
-const headers: Record<string, string> = {
-  "User-Agent": USER_AGENT,
-  Accept: "application/json",
-};
-if (process.env.CC_API_KEY) {
-  headers.Authorization = `Bearer ${process.env.CC_API_KEY}`;
-}
+const headers: Record<string, string> = { "User-Agent": USER_AGENT, Accept: "application/json" };
+if (process.env.CC_API_KEY) headers.Authorization = `Bearer ${process.env.CC_API_KEY}`;
 
 async function ccFetch<T>(path: string, revalidate = 15): Promise<T> {
-  const res = await fetch(`${CC_API}${path}`, {
-    headers,
-    next: { revalidate },
-  });
-  if (!res.ok) {
-    throw new Error(`CC ${res.status} on ${path}`);
-  }
+  const res = await fetch(`${CC_API}${path}`, { headers, next: { revalidate } });
+  if (!res.ok) throw new Error(`CC ${res.status} on ${path}`);
   return res.json() as Promise<T>;
 }
 
@@ -78,18 +62,25 @@ export async function getCardMarket(id: string): Promise<CardMarket | null> {
   }
 }
 
-export async function getCardOffers(nftAddress: string): Promise<CardOffer[]> {
-  try {
-    const res = await fetch(`${CC_API}/`, {
-      method: "POST",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ method: "getCardOffers", params: { nftAddress } }),
-      next: { revalidate: 10 },
-    });
-    if (!res.ok) return [];
-    const data = (await res.json()) as CardOffer[];
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+/** Live offers on a card, price normalised to a number, best first. */
+export function getCardOffers(nftAddress: string): Promise<CardOffer[]> {
+  return cached(`cc:offers:${nftAddress}`, 30_000, async () => {
+    try {
+      const res = await fetch(`${CC_API}/`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ method: "getCardOffers", params: { nftAddress } }),
+        cache: "no-store",
+      });
+      if (!res.ok) return [];
+      const data = (await res.json()) as CardOffer[];
+      if (!Array.isArray(data)) return [];
+      return data
+        .map((o) => ({ ...o, price: Number(o.price) }))
+        .filter((o) => Number.isFinite(o.price))
+        .sort((a, b) => Number(b.price) - Number(a.price));
+    } catch {
+      return [];
+    }
+  });
 }

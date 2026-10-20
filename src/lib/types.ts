@@ -1,8 +1,8 @@
-// Shared domain types for Cardex. Every page and route handler imports from here.
-// Shapes mirror the live Collector Crypt marketplace API and Solana RPC responses
-// confirmed by probing the endpoints directly.
+// Shared domain types for Cardex. Shapes mirror the live Collector Crypt
+// marketplace API and decoded Solana RPC transactions.
 
-export type Marketplace = "CC" | "ME";
+// The API also returns other venues (e.g. "OPENSEA"); keep known ones typed.
+export type Marketplace = "CC" | "ME" | "OPENSEA" | (string & {});
 export type Currency = "USDC" | "SOL";
 
 /** A listing as returned on a marketplace row (`/marketplace`). */
@@ -85,11 +85,11 @@ export interface CardMarket {
   burnedForBridge: boolean;
 }
 
-/** An offer from the `getCardOffers` dispatch method. */
+/** An offer from the `getCardOffers` dispatch method. Price arrives as a string. */
 export interface CardOffer {
   id: string;
   buyerId: string;
-  price: number;
+  price: number | string;
   currency: string;
   status: string;
   createdAt: string;
@@ -140,6 +140,7 @@ export type ActivityKind =
   | "UpdateOffer"
   | "CancelOffer"
   | "UpdateListing"
+  | "CancelListing"
   | "ListCore"
   | "ListPnft"
   | "Transfer"
@@ -150,45 +151,64 @@ export interface Activity {
   blockTime: number | null;
   slot: number;
   kind: ActivityKind;
-  /** Whole-USDC sale/offer amount when decodable from token balance deltas. */
+  /** Whole-USDC sale amount when decodable from token balance deltas. */
   priceUsdc: number | null;
-  /** SOL amount when the venue settled in SOL (Magic Eden routed). */
+  /** SOL amount when the venue settled in SOL. */
   priceSol: number | null;
   assetMint: string | null;
   buyer: string | null;
   seller: string | null;
+  /** The wallet that signed the action (platform co-signers excluded). */
+  actor: string | null;
+  /** Marketplace instructions in this tx. Above 2 usually means a bulk bot. */
+  ixCount: number;
   err: boolean;
-  // --- enrichment, filled from the CC catalogue by mint (see enrich.ts) ---
+  // Enrichment, filled from the CC catalogue by mint (see enrich.ts).
   cardName?: string | null;
   grade?: string | null;
   gradingCompany?: string | null;
   category?: string | null;
   insuredValue?: string | null;
-  image?: string | null;
 }
 
-/** A human-readable verb + direction for an Activity, derived from kind. */
+export type ActivityTone = "sale" | "list" | "bid" | "cancel" | "neutral";
+
 export interface ActivityDisplay {
   verb: string;
-  tone: "up" | "down" | "warn" | "default";
-}
-
-export interface WalletHoldings {
-  wallet: string;
-  cards: CardRow[];
-  total: number;
-  insuredTotalUsd: number;
-  displayName: string | null;
+  tone: ActivityTone;
 }
 
 export interface WalletLabel {
   wallet: string;
   label: string;
-  kind: "treasury" | "strategy" | "whale" | "custom";
+  kind: "platform" | "treasury" | "strategy" | "whale" | "bot" | "custom";
   note?: string;
 }
 
 export interface SolPrice {
   usd: number;
   change24h: number;
+}
+
+/** A card currently attracting offers, with its best live bid. */
+export interface HotBid {
+  mint: string;
+  cardName: string;
+  grade: string | null;
+  gradingCompany: string | null;
+  category: string | null;
+  insuredValue: string | null;
+  topBid: number;
+  bidCount: number;
+}
+
+export interface HighlightsPayload {
+  newestListings: CardRow[];
+  topListings: CardRow[];
+  bestDeals: CardRow[];
+  recentSales: Activity[];
+  recentActivity: Activity[];
+  hotBids: HotBid[];
+  categories: Record<string, number>;
+  findTotal: number;
 }

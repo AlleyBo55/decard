@@ -1,44 +1,80 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMarketplace } from "@/lib/cc";
-import { cached } from "@/lib/cache";
+import { cached, edgeCache } from "@/lib/cache";
 import { dealScore } from "@/lib/format";
-import type { MarketplaceQuery, OrderBy } from "@/lib/types";
+import { isGradedCard } from "@/lib/credible";
+import type { MarketplacePage, MarketplaceQuery, OrderBy } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+const ORDERS = new Set<string>([
+  "listedDateDesc",
+  "listedDateAsc",
+  "listedPriceAsc",
+  "listedPriceDesc",
+  "priceAsc",
+  "priceDesc",
+  "yearAsc",
+  "yearDesc",
+  "nameAsc",
+  "nameDesc",
+]);
+
+function num(v: string | null) {
+  const n = v == null ? NaN : Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
-  const orderByParam = sp.get("orderBy") ?? "listedDateDesc";
-  // "deal" isn't a native API sort. We fetch a wider cheapest-first page and
-  // re-rank by discount-to-insured value server-side.
-  const isDeal = orderByParam === "deal";
+  const order = sp.get("orderBy") ?? "listedDateDesc";
+  const isDeal = order === "deal";
 
-  const q: MarketplaceQuery = {
-    step: isDeal ? 100 : sp.get("step") ? Number(sp.get("step")) : 50,
-    orderBy: isDeal ? "listedPriceAsc" : (orderByParam as OrderBy),
-  };
-  if (sp.get("cursor")) q.cursor = sp.get("cursor")!;
-  else if (sp.get("page")) q.page = Number(sp.get("page"));
-  if (sp.get("search")) q.search = sp.get("search")!;
-  if (sp.get("ownerAddress")) q.ownerAddress = sp.get("ownerAddress")!;
-  if (sp.get("source")) q.marketplaceSource = sp.get("source") as "CC" | "ME";
-  if (sp.get("min")) q.listPriceMin = Number(sp.get("min"));
-  if (sp.get("max")) q.listPriceMax = Number(sp.get("max"));
-  // Deal ranking only makes sense on USDC listings with an insured value.
-  if (isDeal && !q.listPriceMin) q.listPriceMin = 1;
+  const base: MarketplaceQuery = {};
+  const search = sp.get("search")?.slice(0, 80);
+  if (search) base.search = search;
+  const owner = sp.get("ownerAddress");
+  if (owner && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) base.ownerAddress = owner;
+  const source = sp.get("source");
+  if (source === "CC" || source === "ME") base.marketplaceSource = source;
+  base.listPriceMin = num(sp.get("min"));
+  base.listPriceMax = num(sp.get("max"));
 
-  const key = `scanner:${JSON.stringify(q)}:${isDeal}`;
   try {
-    const page = await cached(key, 8_000, () => getMarketplace(q));
     if (isDeal) {
-      const ranked = [...page.cards].sort((a, b) => {
-        const da = a.listing?.currency === "USDC" ? dealScore(a.listing.price, a.insuredValue) ?? -1 : -1;
-        const db = b.listing?.currency === "USDC" ? dealScore(b.listing.price, b.insuredValue) ?? -1 : -1;
-        return db - da;
+      // "Best deal" isn't a native sort: rank fresh + cheap USDC listings by
+      // discount to insured value.
+      const q = { ...base, listPriceMin: base.listPriceMin ?? 1 };
+      const page = await cached(`scanner:deal:${JSON.stringify(q)}`, 10_000, async (): Promise<MarketplacePage> => {
+        const [fresh, cheap] = await Promise.all([
+          getMarketplace({ ...q, step: 200, orderBy: "listedDateDesc" }),
+          getMarketplace({ ...q, step: 200, orderBy: "listedPriceAsc" }),
+        ]);
+        const seen = new Set<string>();
+        const ranked = [...fresh.cards, ...cheap.cards]
+          .filter((c) => isGradedCard(c) && !seen.has(c.nftAddress) && seen.add(c.nftAddress))
+          .map((c) => ({
+            c,
+            s: c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) ?? -1 : -1,
+          }))
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 60)
+          .map((x) => x.c);
+        return { ...fresh, cards: ranked, nextCursor: null };
       });
-      return NextResponse.json({ ...page, cards: ranked.slice(0, 50) });
+      return NextResponse.json(page, { headers: edgeCache(10) });
     }
-    return NextResponse.json(page);
+
+    const step = Math.min(100, num(sp.get("step")) ?? 48);
+    const q: MarketplaceQuery = {
+      ...base,
+      step,
+      orderBy: (ORDERS.has(order) ? order : "listedDateDesc") as OrderBy,
+    };
+    const cursor = sp.get("cursor");
+    if (cursor) q.cursor = cursor.slice(0, 400);
+    const page = await cached(`scanner:${JSON.stringify(q)}`, 8_000, () => getMarketplace(q));
+    return NextResponse.json(page, { headers: edgeCache(8) });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 502 });
   }

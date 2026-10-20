@@ -1,7 +1,27 @@
 {
-  "CCryptUf1WCwEPpXW4CnpXFdB5RDzpViLyNsh5zqSXpr": {
-    "label": "Collector Crypt",
+  "CCryptUfeFSZ3Fgc9FLeKrhLVAP67FSqi1GuVoj9CRac": {
+    "label": "CC Card Collection",
+    "kind": "platform",
+    "note": "MPL Core collection that Collector Crypt cards belong to"
+  },
+  "cc3novbXuNSe292qKH2gGhxToaWjuBvJbA7zQf8NVxi": {
+    "label": "CC Co-signer",
+    "kind": "platform",
+    "note": "Co-signs listings and fee-sponsored transactions"
+  },
+  "8373hLiAEXxaJ3oV7SRzx4KHwurEg9rEG98tUPj1sdtX": {
+    "label": "CC Treasury",
     "kind": "treasury",
-    "note": "Platform program authority"
+    "note": "Receives the 2% marketplace fee on sales"
+  },
+  "FrY8u2MhPoV3xjSxeZf74ftPMdvthAo9or6fLGwLAXr8": {
+    "label": "Bulk Bidder A",
+    "kind": "bot",
+    "note": "Updates around 10 bids per transaction"
+  },
+  "3L5hCjiEz1zXPvLER4CfrLFDAh8X7p16qbJdJoZqTCqH": {
+    "label": "Bulk Bidder B",
+    "kind": "bot",
+    "note": "Updates around 10 bids per transaction"
   }
 }
