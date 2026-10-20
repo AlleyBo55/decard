@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
         cards: pool.ranked.slice(offset, next),
         nextCursor: next < pool.ranked.length ? String(next) : null,
       };
-      return NextResponse.json(page, { headers: edgeCache(10) });
+      return NextResponse.json(page, { headers: edgeCache(10, 120) });
     }
 
     const step = Math.min(100, num(sp.get("step")) ?? 48);
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
     const cursor = sp.get("cursor");
     if (cursor) q.cursor = cursor.slice(0, 400);
     const page = await cached(`scanner:${JSON.stringify(q)}`, 8_000, () => getMarketplace(q));
-    return NextResponse.json(page, { headers: edgeCache(8) });
+    return NextResponse.json(page, { headers: edgeCache(8, 120) });
   } catch (e) {
     console.error("[api/scanner] upstream failed:", isAPIError(e) ? e.code : e);
     return NextResponse.json({ error: "Listings are temporarily unavailable.", code: "UPSTREAM_UNAVAILABLE" }, { status: 502 });

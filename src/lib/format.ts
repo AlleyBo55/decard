@@ -105,8 +105,12 @@ export function isBotChurn(a: Activity) {
   return a.kind.endsWith("Offer") && a.kind !== "AcceptOffer" && a.ixCount >= 5;
 }
 
+/** Event amount: sale or taken-bid gross, list price, bid amount; a reprice as "old → new" when the old price is known. */
 export function priceText(a: Activity): string | null {
-  if (a.priceUsdc != null) return fmtUsd(a.priceUsdc);
+  if (a.priceUsdc != null) {
+    const prev = a.kind === "UpdateListing" ? a.prevPriceUsdc : null;
+    return prev != null && prev !== a.priceUsdc ? `${fmtUsd(prev)} → ${fmtUsd(a.priceUsdc)}` : fmtUsd(a.priceUsdc);
+  }
   if (a.priceSol != null) return `${a.priceSol}◎`;
   return null;
 }

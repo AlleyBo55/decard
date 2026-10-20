@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     const enriched = await enrichActivities(raw);
     await holders;
     const activity = await fillCurrentOwners(enriched);
-    return NextResponse.json({ activity: activity.slice(0, limit) }, { headers: edgeCache(6) });
+    return NextResponse.json({ activity: activity.slice(0, limit) }, { headers: edgeCache(6, 30) });
   } catch (e) {
     console.error("[api/activity] upstream failed:", isAPIError(e) ? e.code : e);
     return NextResponse.json(

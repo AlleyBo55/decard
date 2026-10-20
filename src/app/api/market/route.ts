@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
         categories: cheapest.cardsQtyByCategory,
       };
     });
-    return NextResponse.json(data, { headers: edgeCache(30) });
+    return NextResponse.json(data, { headers: edgeCache(30, 300) });
   } catch (e) {
     console.error("[api/market] upstream failed:", isAPIError(e) ? e.code : e);
     return NextResponse.json({ error: "Market data is temporarily unavailable.", code: "UPSTREAM_UNAVAILABLE" }, { status: 502 });

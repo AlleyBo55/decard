@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import StoreProvider from "@/components/commons/StoreProvider";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { PageTransition } from "@/components/PageTransition";
+import { RouteProgress } from "@/components/RouteProgress";
 import { Konami } from "@/components/Konami";
 import { SITE_URL, SITE_NAME } from "@/lib/constants";
 
@@ -102,6 +104,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        {/* Reads useSearchParams, so it needs its own boundary to keep static pages prerendered. */}
+        <Suspense fallback={null}>
+          <RouteProgress />
+        </Suspense>
         <StoreProvider>
           <Nav />
           <main id="main" className="flex-1 w-full mx-auto max-w-[1360px] px-4 sm:px-6 pb-28 md:pb-16">

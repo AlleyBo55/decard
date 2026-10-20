@@ -10,13 +10,13 @@ import { GradePill, Tag } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
 
 /** A wallet shown by label when we know it (yours or the shared list). */
-export function WalletName({ address }: { address: string }) {
+export function WalletName({ address, title }: { address: string; title?: string }) {
   const label = useWalletLabel(address);
   return (
     <Link
       href={`/wallet/${address}`}
       onClick={(e) => e.stopPropagation()}
-      title={address}
+      title={title ?? address}
       className={clsx(
         "font-bold hover:text-poke-deep transition-colors",
         label ? "text-azure-deep" : "font-mono text-[13px] text-ink-soft",
@@ -32,17 +32,36 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
   const d = activityDisplay(a.kind);
   const price = priceText(a);
   const hasCard = Boolean(a.cardName && a.assetMint);
-  const from = d.tone === "sale" ? a.seller : a.actor ?? a.seller ?? a.buyer;
-  const to = d.tone === "sale" ? a.buyer : null;
+  // Sale: seller → buyer. Taken bid: owner → bidder. Bid: bidder → owner.
+  // Listing, reprice, delist: the lister only.
+  const isBid = a.kind.endsWith("Offer") && a.kind !== "AcceptOffer";
+  const isListing = a.kind.startsWith("List") || a.kind === "UpdateListing" || a.kind === "CancelListing";
+  const from =
+    d.tone === "sale"
+      ? a.seller ?? a.owner ?? null
+      : isBid
+        ? a.buyer ?? a.actor
+        : isListing
+          ? a.seller ?? a.actor
+          : a.actor ?? a.seller ?? a.buyer;
+  const to = d.tone === "sale" ? a.buyer : isBid ? a.owner ?? null : null;
+  const toTitle = isBid && to && a.ownerIsCurrent ? `current holder · ${to}` : undefined;
 
   const navigate = () => {
     if (hasCard && showCard) router.push(`/card/${a.assetMint}`);
     else window.open(solscanTx(a.signature), "_blank", "noopener");
   };
+  // Rows aren't <Link>s, so nothing prefetches them: warm the card route on
+  // hover/focus so the click shows its loading state at once.
+  const warm = () => {
+    if (hasCard && showCard) router.prefetch(`/card/${a.assetMint}`);
+  };
 
   return (
     <div
       onClick={navigate}
+      onPointerEnter={warm}
+      onFocus={warm}
       role="link"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && navigate()}
@@ -51,10 +70,17 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
       {showCard &&
         (hasCard ? (
           <img
-            src={cardImage(a.assetMint!, "front", 128)}
+            src={cardImage(a.assetMint!, "front", 128, { imageId: a.imageId })}
             alt=""
             loading="lazy"
             decoding="async"
+            onError={(e) => {
+              // Direct image URL gone: fall back to the redirect route once.
+              const el = e.currentTarget;
+              if (!a.imageId || el.dataset.fallback) return;
+              el.dataset.fallback = "1";
+              el.src = cardImage(a.assetMint!, "front", 128);
+            }}
             className="h-12 w-9 rounded-md object-contain bg-cream-lo shrink-0 transition-transform group-hover:-rotate-3 group-hover:scale-105"
           />
         ) : (
@@ -86,7 +112,7 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
           {to && to !== from && (
             <>
               <span className="text-poke">→</span>
-              <WalletName address={to} />
+              <WalletName address={to} title={toTitle} />
             </>
           )}
         </div>

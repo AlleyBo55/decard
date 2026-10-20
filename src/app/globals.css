@@ -401,6 +401,49 @@ body {
     transform-origin: 50% 90%;
   }
 
+  /* Route change bar (components/RouteProgress.tsx): a Pikachu-yellow charge
+     runs along the red top seam with a Poké Ball rolling at its head. */
+  .route-progress {
+    --ball: 14px;
+    position: fixed;
+    inset: 0 0 auto;
+    height: calc(var(--ball) + 4px);
+    z-index: 55;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .route-progress[data-state="loading"],
+  .route-progress[data-state="done"] {
+    visibility: visible;
+  }
+  .route-progress-bar {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    transform-origin: 0 50%;
+    background:
+      linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.75) 50%, transparent 70%) 0 0 / 160px 100% repeat-x,
+      var(--color-pika);
+    box-shadow: inset 0 -1px 0 var(--color-pika-deep);
+  }
+  .route-progress[data-state="loading"] .route-progress-bar {
+    animation: zap 0.7s linear infinite;
+  }
+  /* One ball wider than the bar, so at 100% the ball has rolled off-screen. */
+  .route-progress-head {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(100% + var(--ball));
+  }
+  .route-progress .pokeball {
+    --s: var(--ball);
+    position: absolute;
+    top: 0;
+    left: calc(var(--ball) / -2);
+    box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color-pika) 85%, transparent);
+  }
+
   /* Infinite ticker band. Track holds two copies of the content. */
   .marquee {
     overflow: hidden;
@@ -525,6 +568,13 @@ body {
 @keyframes spin {
   to {
     rotate: 360deg;
+  }
+}
+@keyframes zap {
+  to {
+    background-position:
+      160px 0,
+      0 0;
   }
 }
 @keyframes wobble {

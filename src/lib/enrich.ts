@@ -28,7 +28,8 @@ const MAX = 20_000;
 const HIT_TTL_MS = 6 * 60 * 60_000;
 const NOT_CARD_TTL_MS = 30 * 60_000;
 const MISS_TTL_MS = 60_000;
-const CONCURRENCY = 6;
+/** Catalogue lookups in flight at once. CC answers 30 parallel reads in ~0.6s vs ~2.4s six at a time. */
+const CONCURRENCY = 24;
 
 const memo = new Map<string, Memo>();
 const inflight = new Map<string, Promise<Resolved | null>>();

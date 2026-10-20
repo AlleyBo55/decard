@@ -159,7 +159,9 @@ export function TypeChip({
   const cls = clsx("chip", solid && "chip-solid", className);
   if (href)
     return (
-      <Link href={href} className={cls} style={typeStyle(category)}>
+      // Not prefetched: a page shows many type chips and each distinct
+      // /scanner?search= link would cost a server render just for being visible.
+      <Link href={href} prefetch={false} className={cls} style={typeStyle(category)}>
         {content}
       </Link>
     );

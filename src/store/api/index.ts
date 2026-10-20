@@ -1,6 +1,12 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createAPIError, isAPIError, type APIError } from "@/helpers/fetcher";
-import type { HighlightsPayload, MarketplacePage, SolPrice } from "@/lib/types";
+import type {
+  HomeActivityPayload,
+  HomeListingsPayload,
+  HotBidsPayload,
+  MarketplacePage,
+  SolPrice,
+} from "@/lib/types";
 import getActivity, { type ActivityParams, type ActivityPayload } from "@/services/Activity/getActivity";
 import getHighlights from "@/services/Highlights/getHighlights";
 import getMarket, { type Market, type MarketParams } from "@/services/Market/getMarket";
@@ -39,8 +45,15 @@ const api = createApi({
     solPrice: build.query<SolPrice, void>({
       queryFn: (_arg, { signal }) => run(getSolPrice(signal)),
     }),
-    highlights: build.query<HighlightsPayload, void>({
-      queryFn: (_arg, { signal }) => run(getHighlights(signal)),
+    // The home feed in three parts, so each section renders when its own data lands.
+    homeListings: build.query<HomeListingsPayload, void>({
+      queryFn: (_arg, { signal }) => run(getHighlights("listings", signal)),
+    }),
+    homeActivity: build.query<HomeActivityPayload, void>({
+      queryFn: (_arg, { signal }) => run(getHighlights("activity", signal)),
+    }),
+    hotBids: build.query<HotBidsPayload, void>({
+      queryFn: (_arg, { signal }) => run(getHighlights("bids", signal)),
     }),
     market: build.query<Market, MarketParams>({
       queryFn: (params, { signal }) => run(getMarket(params, signal)),
@@ -81,7 +94,9 @@ export function selectView<T>(result: { data?: T; isLoading: boolean; isError: b
 
 export const {
   useSolPriceQuery,
-  useHighlightsQuery,
+  useHomeListingsQuery,
+  useHomeActivityQuery,
+  useHotBidsQuery,
   useMarketQuery,
   useScannerInfiniteQuery,
   useActivityQuery,

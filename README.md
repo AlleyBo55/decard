@@ -73,7 +73,7 @@ Both are read only on the server; never prefix them with `NEXT_PUBLIC_`. Locally
 
 ## Honest limits
 
-Decard reads a **recent window** of on-chain activity, not all-time history — a true market-wide "top buyer of all time" leaderboard needs an indexer, which this project deliberately doesn&apos;t run. Offer *bid amounts* for offer-only events aren&apos;t exposed by the public RPC, so those rows show the card and action without a dollar figure. Sales show real settled prices. We&apos;d rather show you nothing than a made-up number.
+Decard reads a **recent window** of on-chain activity, not all-time history — a true market-wide "top buyer of all time" leaderboard needs an indexer, which this project deliberately doesn&apos;t run. Amounts and wallets come from the Collector Crypt program&apos;s own instruction data: list and reprice prices, bid amounts with the bidder and the owner being bid on, and gross prices on sales and taken bids. A pulled bid carries no amount, a reprice shows its old price only when the earlier listing is in the same window, and when a bid doesn&apos;t name the owner we show the card&apos;s current holder instead (marked as such). Instruction layouts we haven&apos;t verified stay blank. We&apos;d rather show you nothing than a made-up number.
 
 ## Contributing
 

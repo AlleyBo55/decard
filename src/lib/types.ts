@@ -52,6 +52,8 @@ export interface CardRow {
   insuredValue: string;
   frontImage: string | null;
   backImage: string | null;
+  /** Pre-generated WebP variants on Collector Crypt's CDN (frontS, frontM, backS...), cached a year. */
+  images?: Record<string, string> | null;
   nftStandard: string;
   vault: string | null;
   listing: Listing | null;
@@ -72,6 +74,7 @@ export interface CardDetail extends Omit<CardRow, "listing" | "owner" | "offers"
   authenticated: boolean;
   images: Record<string, string>;
 }
+
 
 /** Live market state from `GET /cards/publicNft/:id/market`. */
 export interface CardMarket {
@@ -225,3 +228,16 @@ export interface HighlightsPayload {
   categories: Record<string, number>;
   findTotal: number;
 }
+
+/**
+ * The home feed is served in three independent parts so each section renders
+ * as soon as its own data lands: listings are a few fast marketplace reads,
+ * activity needs the chain, hot bids need activity plus live offers.
+ */
+export type HomePart = "listings" | "activity" | "bids";
+export type HomeListingsPayload = Pick<
+  HighlightsPayload,
+  "newestListings" | "topListings" | "bestDeals" | "categories" | "findTotal"
+>;
+export type HomeActivityPayload = Pick<HighlightsPayload, "recentSales" | "recentActivity">;
+export type HotBidsPayload = Pick<HighlightsPayload, "hotBids">;
