@@ -1,13 +1,71 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
+import { isAPIError } from "@/helpers/fetcher";
+import { getMarketplace } from "@/lib/cc";
 import { SITE_URL } from "@/lib/constants";
+import { isGradedCard } from "@/lib/credible";
+import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
+import { categoryPath } from "@/lib/seo";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Rendered per request (connection() below), so a deploy never serves a
+// build-time copy without cards and the build makes no Collector Crypt calls.
+// The marketplace pages behind it stay in the Next data cache for 6 hours, so
+// a crawl normally costs no upstream calls.
+const CARD_LIST_TTL = 21600;
+
+// A cold render makes ~70 Collector Crypt calls (8.7s in testing). Older Vercel
+// plans default to a 10s function limit, so leave headroom.
+export const maxDuration = 60;
+
+const STEP = 200; // the largest page Collector Crypt serves
+const MAX_PAGES = 100; // 20k cards, well under the 50k-URL limit of one sitemap
+
+/** Every listed graded card, plus per-category counts. Card pages are the long tail people search by name. */
+async function listedCards() {
+  const query = { step: STEP, orderBy: "listedDateDesc", listPriceMin: 1 } as const;
+  const cache = { revalidate: CARD_LIST_TTL };
+  const first = await getMarketplace({ ...query, page: 1 }, cache);
+  const more = await Promise.allSettled(
+    Array.from({ length: Math.max(0, Math.min(first.totalPages, MAX_PAGES) - 1) }, (_, i) =>
+      getMarketplace({ ...query, page: i + 2 }, cache),
+    ),
+  );
+  const seen = new Set<string>();
+  const cards = [first, ...more.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []))]
+    .flatMap((p) => p.cards)
+    .filter((c) => isGradedCard(c) && !seen.has(c.nftAddress) && seen.add(c.nftAddress));
+  return { cards, counts: first.cardsQtyByCategory, failed: more.filter((r) => r.status === "rejected").length };
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
   const now = new Date();
-  const routes = ["", "/scanner", "/tape", "/guide"];
-  return routes.map((path) => ({
+  const pages: MetadataRoute.Sitemap = ["", "/scanner", "/tape", "/guide"].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
     changeFrequency: path === "" ? "hourly" : "always",
     priority: path === "" ? 1 : 0.8,
   }));
+
+  let listed: Awaited<ReturnType<typeof listedCards>> | null = null;
+  try {
+    listed = await listedCards();
+    if (listed.failed) console.warn(`[sitemap] ${listed.failed} marketplace page(s) failed; those cards wait for the next rebuild`);
+  } catch (e) {
+    console.error("[sitemap] marketplace unavailable, listing site pages only:", isAPIError(e) ? e.code : e);
+  }
+
+  // Categories with live listings (all of them when the counts are unknown).
+  const categories: MetadataRoute.Sitemap = PRIMARY_CATEGORIES.filter((c) => !listed || (listed.counts[c] ?? 0) > 0).map(
+    (c) => ({ url: `${SITE_URL}${categoryPath(c)}`, lastModified: now, changeFrequency: "hourly", priority: 0.7 }),
+  );
+
+  // URL and lastmod only: Google ignores changefreq/priority, and at ~14k cards
+  // the bytes matter (a Vercel Function response is capped at 4.5 MB).
+  const cards: MetadataRoute.Sitemap = (listed?.cards ?? []).map((c) => ({
+    url: `${SITE_URL}/card/${c.nftAddress}`,
+    lastModified: c.listing?.updatedAt,
+  }));
+
+  return [...pages, ...categories, ...cards];
 }

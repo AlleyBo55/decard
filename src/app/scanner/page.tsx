@@ -1,19 +1,31 @@
 import type { Metadata } from "next";
 import { ScannerTable } from "@/components/scanner/ScannerTable";
 import { Kicker } from "@/components/ui";
+import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
+import { categoryName, categoryPath, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Listing Scanner",
-  description:
-    "Every live graded-card listing on Collector Crypt and Magic Eden, ranked by deal score, price or freshness. Filter by Pokémon, One Piece, Riftbound and more.",
-  alternates: { canonical: "/scanner" },
-};
+type ScannerSearch = Promise<{ search?: string; source?: string; orderBy?: string }>;
 
-export default async function ScannerPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ search?: string; source?: string; orderBy?: string }>;
-}) {
+// One indexable URL per category; every other filter or sort canonicalizes to /scanner.
+export async function generateMetadata({ searchParams }: { searchParams: ScannerSearch }): Promise<Metadata> {
+  const { search } = await searchParams;
+  if (!search || !PRIMARY_CATEGORIES.includes(search)) {
+    return pageMetadata({
+      title: "Collector Crypt listings ranked by deal score",
+      description:
+        "Every live graded-card listing on Collector Crypt and Magic Eden, ranked by deal score, price or freshness. Filter by Pokémon, One Piece, Riftbound and more.",
+      path: "/scanner",
+    });
+  }
+  const name = categoryName(search);
+  return pageMetadata({
+    title: `${name} graded cards for sale on Collector Crypt`,
+    description: `Live ${name} graded card listings on Collector Crypt and Magic Eden, ranked by deal score: how far each slab sits under its insured value.`,
+    path: categoryPath(search),
+  });
+}
+
+export default async function ScannerPage({ searchParams }: { searchParams: ScannerSearch }) {
   const sp = await searchParams;
   const source = sp.source === "CC" || sp.source === "ME" ? sp.source : "";
 

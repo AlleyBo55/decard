@@ -3,15 +3,16 @@ import Link from "next/link";
 import { GUIDE } from "@/lib/guide";
 import { GuideBook } from "@/components/guide/GuideBook";
 import { DialogBox, Kicker } from "@/components/ui";
+import { pageMetadata } from "@/lib/seo";
 
 const count = GUIDE.reduce((n, s) => n + s.terms.length, 0);
 
-export const metadata: Metadata = {
-  title: "Trainer's Guide",
+export const metadata: Metadata = pageMetadata({
+  title: "Graded card guide: PSA vs CGC, pop reports, gem rate",
   description:
     "New to tokenized graded cards? Plain-language guide to grading, PSA vs CGC vs BGS, population reports, gem rate, insured value, floor, bids, deal score, vaults, redeeming and collector slang.",
-  alternates: { canonical: "/guide" },
-};
+  path: "/guide",
+});
 
 const faqLd = {
   "@context": "https://schema.org",

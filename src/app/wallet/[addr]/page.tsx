@@ -3,15 +3,18 @@ import { notFound } from "next/navigation";
 import { WalletView } from "@/components/wallet/WalletView";
 import { Kicker } from "@/components/ui";
 import { shortAddr } from "@/lib/format";
+import { pageMetadata } from "@/lib/seo";
 
 const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 export async function generateMetadata({ params }: { params: Promise<{ addr: string }> }): Promise<Metadata> {
   const { addr } = await params;
   return {
-    title: `Trainer ${shortAddr(addr)}`,
-    description: `Graded card collection, insured value and on-chain marketplace activity for wallet ${addr}.`,
-    alternates: { canonical: `/wallet/${addr}` },
+    ...pageMetadata({
+      title: `Trainer ${shortAddr(addr)}`,
+      description: `Graded card collection, insured value and on-chain marketplace activity for wallet ${addr}.`,
+      path: `/wallet/${addr}`,
+    }),
     robots: { index: false, follow: true },
   };
 }

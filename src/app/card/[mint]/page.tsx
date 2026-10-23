@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { Suspense, cache } from "react";
 import { getCard, getCardMarket, getCardOffers } from "@/lib/cc";
 import { dealScore, fmtNum, fmtPct, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
-import { cardImage, ccAssetUrl, solscanAddr } from "@/lib/constants";
-import type { CardMarket, CardOffer } from "@/lib/types";
+import { SITE_URL, cardImage, ccAssetUrl, solscanAddr } from "@/lib/constants";
+import { categoryPath, jsonLd, pageMetadata } from "@/lib/seo";
+import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
+import type { CardDetail, CardMarket, CardOffer } from "@/lib/types";
 import { CardFlip } from "@/components/card/CardFlip";
 import { CardActivity } from "@/components/card/CardActivity";
 import { WalletName } from "@/components/ActivityRow";
@@ -23,19 +25,23 @@ const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 /** One catalogue read per request, shared by generateMetadata and the page. */
 const loadCard = cache((mint: string) => getCard(mint));
 
+/** Search snippet and Product description for one card. */
+function cardDescription(card: CardDetail) {
+  return `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ mint: string }> }): Promise<Metadata> {
   const { mint } = await params;
   const card = ADDRESS.test(mint) ? await loadCard(mint) : null;
   if (!card) return { title: "Card not found" };
-  const title = `${shortCardName(card.itemName)} ${gradeShort(card.gradingCompany, card.grade)}`.trim();
-  const description = `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`;
-  return {
-    title,
-    description,
-    alternates: { canonical: `/card/${mint}` },
-    openGraph: { title, description, images: [{ url: cardImage(mint, "front", 1024), alt: card.itemName }] },
-    twitter: { card: "summary_large_image", title, description, images: [cardImage(mint, "front", 1024)] },
-  };
+  // Lead with what people search for: card, grade, then set.
+  const name = `${shortCardName(card.itemName)} ${gradeShort(card.gradingCompany, card.grade)}`.trim();
+  return pageMetadata({
+    title: card.set ? `${name} price · ${card.set}` : `${name} price`,
+    description: cardDescription(card),
+    path: `/card/${mint}`,
+    image: { url: cardImage(mint, "front", 1024), alt: card.itemName },
+  });
 }
 
 function rarity(pop: number) {
@@ -85,6 +91,35 @@ async function ListingPrice({ market }: { market: MarketData }) {
       )}
     </div>
   );
+}
+
+/**
+ * schema.org Product with the live offer, so Google can show the price in
+ * results. Only for USDC listings: Product markup needs an offer, the page
+ * shows USDC prices in dollars, and SOL has no ISO currency code.
+ */
+async function ProductJsonLd({ market, card }: { market: MarketData; card: CardDetail }) {
+  const listing = (await market)?.listing;
+  // The market endpoint sends the price as a string despite the type.
+  const price = Number(listing?.price);
+  if (listing?.currency !== "USDC" || !(price > 0)) return null;
+  const product = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: card.itemName,
+    image: cardImage(card.nftAddress, "front", 1024, { images: card.images }),
+    description: cardDescription(card),
+    category: card.category,
+    url: `${SITE_URL}/card/${card.nftAddress}`,
+    offers: {
+      "@type": "Offer",
+      price,
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      seller: { "@type": "Organization", name: venueName(listing.marketplace) },
+    },
+  };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(product) }} />;
 }
 
 async function BestBid({ offers }: { offers: OffersData }) {
@@ -233,8 +268,26 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
   const cert = certUrl(card.gradingCompany, card.gradingID);
   const tier = pop ? rarity(pop.gradePopulation) : null;
 
+  // Mirrors the visible breadcrumb, so Google can show it instead of the long mint URL.
+  const crumbs = [
+    { name: "Scanner", path: "/scanner" },
+    ...(card.category && PRIMARY_CATEGORIES.includes(card.category)
+      ? [{ name: card.category, path: categoryPath(card.category) }]
+      : []),
+    { name: shortCardName(card.itemName), path: `/card/${mint}` },
+  ];
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: `${SITE_URL}${c.path}` })),
+  };
+
   return (
     <article className="pt-8 flex flex-col gap-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbLd) }} />
+      <Suspense fallback={null}>
+        <ProductJsonLd market={market} card={card} />
+      </Suspense>
       <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-bold text-ink-mute">
         <Link href="/scanner" className="hover:text-poke-deep">
           Scanner

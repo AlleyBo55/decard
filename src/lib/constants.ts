@@ -63,9 +63,21 @@ export const CATEGORIES = [
   "Baseball",
 ] as const;
 
-export const USER_AGENT = "decard/1.0 (+https://github.com/AlleyBo55/decard)";
+export const REPO_URL = "https://github.com/AlleyBo55/decard";
+export const USER_AGENT = `decard/1.0 (+${REPO_URL})`;
 
 export const SITE_NAME = "Decard";
-// Set NEXT_PUBLIC_SITE_URL in production; falls back to localhost for dev.
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// Origin for canonical tags, robots.txt and the sitemap. NEXT_PUBLIC_SITE_URL
+// pins the exact host (e.g. https://www.decard.fun). On Vercel it otherwise
+// falls back to the production domain Vercel reports, so a deploy can never
+// advertise localhost to search engines. Localhost only for local dev.
+const siteEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+const vercelProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+export const SITE_URL = (
+  // "www.decard.fun" without a scheme would make new URL() fail the build.
+  siteEnv
+    ? /^https?:\/\//i.test(siteEnv) ? siteEnv : `https://${siteEnv}`
+    : vercelProd
+      ? `https://${vercelProd}`
+      : "http://localhost:3000"
+).replace(/\/+$/, "");
