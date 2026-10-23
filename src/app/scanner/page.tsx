@@ -41,11 +41,14 @@ export default async function ScannerPage({ searchParams }: { searchParams: Scan
           Live graded cards across Collector Crypt and Magic Eden. The deal score shows how far each USDC
           listing sits under its insured value, so the best buys float to the top.
         </p>
-        <p>
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          <Link href="/pokemon-card-value-checker" className="font-extrabold text-azure-deep underline decoration-sand-dark underline-offset-4 hover:text-poke-deep">
+            Check Pokémon card prices and PSA values →
+          </Link>
           <Link href="/cards" className="font-extrabold text-azure-deep underline decoration-sand-dark underline-offset-4 hover:text-poke-deep">
             Browse the graded card directory by exact name, grade, set and year →
           </Link>
-        </p>
+        </div>
       </header>
       <ScannerTable initialSearch={sp.search ?? ""} initialSource={source} initialOrder={sp.orderBy ?? "deal"} />
     </section>
