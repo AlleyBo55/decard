@@ -6,6 +6,7 @@ const COLUMNS = [
     title: "Explore",
     links: [
       { href: "/scanner", label: "Listing scanner" },
+      { href: "/cards", label: "Card directory" },
       { href: "/scanner?orderBy=deal", label: "Best deals" },
       { href: "/tape", label: "Live tape" },
     ],

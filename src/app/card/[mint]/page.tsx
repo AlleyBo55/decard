@@ -102,7 +102,27 @@ async function ProductJsonLd({ market, card }: { market: MarketData; card: CardD
   const listing = (await market)?.listing;
   // The market endpoint sends the price as a string despite the type.
   const price = Number(listing?.price);
-  if (listing?.currency !== "USDC" || !(price > 0)) return null;
+  const usdOffer = listing?.currency === "USDC" && price > 0
+    ? {
+        "@type": "Offer",
+        price,
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        seller: { "@type": "Organization", name: venueName(listing.marketplace) },
+      }
+    : null;
+  const facts = [
+    ["Grading company", card.gradingCompany],
+    ["Grade", card.grade],
+    ["Set", card.set],
+    ["Year", card.year],
+    ["Card number", card.serial],
+    ["Parallel", card.parallel],
+    ["Certification number", card.gradingID],
+    ["Grade population", card.population?.gradePopulation],
+    ["Population higher", card.population?.populationHigher],
+    ["Total graded population", card.population?.totalPopulation],
+  ].filter((fact): fact is [string, string | number] => fact[1] !== null && fact[1] !== undefined && fact[1] !== "");
   const product = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -111,13 +131,9 @@ async function ProductJsonLd({ market, card }: { market: MarketData; card: CardD
     description: cardDescription(card),
     category: card.category,
     url: `${SITE_URL}/card/${card.nftAddress}`,
-    offers: {
-      "@type": "Offer",
-      price,
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-      seller: { "@type": "Organization", name: venueName(listing.marketplace) },
-    },
+    ...(card.gradingID ? { identifier: `${card.gradingCompany ?? "Grading"} certification ${card.gradingID}` } : {}),
+    additionalProperty: facts.map(([name, value]) => ({ "@type": "PropertyValue", name, value })),
+    ...(usdOffer ? { offers: usdOffer } : {}),
   };
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(product) }} />;
 }

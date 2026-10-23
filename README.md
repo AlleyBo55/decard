@@ -51,7 +51,7 @@ Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on 
 ## Features
 
 - **Deal score.** `(1 − price ÷ insured value) × 100`, clamped to 0–100, on every USDC listing with an insured value. Higher means further under insured value. It's a filter, not a guarantee.
-- **Scanner.** Category chips with live counts, venue and price filters, list or grid view, and Load more on every sort.
+- **Scanner.** Category chips with live counts, venue and price filters, list or grid view, and Load more on every sort. The server-rendered [graded card directory](https://www.decard.fun/cards) exposes exact names, grades, sets and years to search engines and AI crawlers.
 - **Trade tape.** Hides bulk bid bots by default, shows who bid on whom, and refreshes every 10 seconds.
 - **Card pages.** Rarity tier from the pop report, gem rate, PSA and CGC cert lookups, and each live bid as a share of insured value.
 - **Wallets.** Holdings sorted by insured value, list price or name, plus decoded activity. Labels and the watchlist stay in your browser (localStorage).
