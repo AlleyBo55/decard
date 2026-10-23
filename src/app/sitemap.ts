@@ -22,7 +22,10 @@ const MAX_PAGES = 100; // 20k cards, well under the 50k-URL limit of one sitemap
 
 /** Every listed graded card, plus per-category counts. Card pages are the long tail people search by name. */
 async function listedCards() {
-  const query = { step: STEP, orderBy: "listedDateDesc", listPriceMin: 1 } as const;
+  // Keep this query identical to CardDirectory so the sitemap and directory
+  // share one set of cached marketplace pages. Name order changes less often
+  // than newest-first order, reducing duplicates between numbered pages.
+  const query = { step: STEP, orderBy: "nameAsc", listPriceMin: 1 } as const;
   const cache = { revalidate: CARD_LIST_TTL };
   const first = await getMarketplace({ ...query, page: 1 }, cache);
   const more = await Promise.allSettled(
@@ -34,7 +37,12 @@ async function listedCards() {
   const cards = [first, ...more.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []))]
     .flatMap((p) => p.cards)
     .filter((c) => isGradedCard(c) && !seen.has(c.nftAddress) && seen.add(c.nftAddress));
-  return { cards, counts: first.cardsQtyByCategory, failed: more.filter((r) => r.status === "rejected").length };
+  return {
+    cards,
+    counts: first.cardsQtyByCategory,
+    directoryPages: Math.min(first.totalPages, MAX_PAGES),
+    failed: more.filter((r) => r.status === "rejected").length,
+  };
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -43,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: MetadataRoute.Sitemap = [
     { path: "", lastModified: now, changeFrequency: "hourly" as const, priority: 1 },
     { path: "/scanner", lastModified: now, changeFrequency: "hourly" as const, priority: 0.9 },
+    { path: "/cards", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
     { path: "/tape", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
     { path: "/guide", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/tokenized-trading-cards", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.9 },
@@ -56,6 +65,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] marketplace unavailable, listing site pages only:", isAPIError(e) ? e.code : e);
   }
 
+  const directoryPages: MetadataRoute.Sitemap = Array.from(
+    { length: Math.max(0, (listed?.directoryPages ?? 1) - 1) },
+    (_, index) => ({
+      url: `${SITE_URL}/cards/page/${index + 2}`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.5,
+    }),
+  );
+
   // Categories with live listings (all of them when the counts are unknown).
   const categories: MetadataRoute.Sitemap = PRIMARY_CATEGORIES.filter((c) => !listed || (listed.counts[c] ?? 0) > 0).map(
     (c) => ({ url: `${SITE_URL}${categoryPath(c)}`, lastModified: now, changeFrequency: "hourly", priority: 0.7 }),
@@ -68,5 +87,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: c.listing?.updatedAt,
   }));
 
-  return [...pages, ...categories, ...cards];
+  return [...pages, ...directoryPages, ...categories, ...cards];
 }
