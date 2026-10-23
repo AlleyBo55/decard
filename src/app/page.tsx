@@ -4,9 +4,45 @@ import { HeroCatch } from "@/components/HeroCatch";
 import { HeroStats } from "@/components/home/HeroStats";
 import { TickerBands } from "@/components/home/TickerBands";
 import { HomeSections } from "@/components/home/HomeSections";
-import { DialogBox, TypeChip } from "@/components/ui";
+import { DialogBox, MoreLink, SectionHead, TypeChip } from "@/components/ui";
 import { Reveal } from "@/components/motion";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
+import { jsonLd } from "@/lib/seo";
+
+// Plain text rendered on the server: search engines and AI assistants read it
+// without running the page's JavaScript. The same list feeds the FAQPage data.
+const FAQ = [
+  {
+    q: "What is Decard?",
+    a: "A free, open-source scanner and tracker for Collector Crypt graded cards on Solana. It ranks live Collector Crypt and Magic Eden listings by deal score, decodes every on-chain sale, listing and bid, and shows population reports and any wallet's cards.",
+  },
+  {
+    q: "What is a deal score?",
+    a: "How far a USDC listing sits under the card's insured value, from 0 to 100. A card insured at $100 and listed at $80 scores 20. Sorting the scanner by best deal puts the deepest discounts first.",
+  },
+  {
+    q: "Is Decard part of Collector Crypt?",
+    a: "No. Decard is independent and fan-made. It reads Collector Crypt's public marketplace API and the Solana blockchain, and links out to Collector Crypt and Magic Eden when you want to buy.",
+  },
+  {
+    q: "Do I need to sign up or connect a wallet?",
+    a: "No. Decard is read-only: no account, no wallet connection and no API key. Paste any Solana address to see that wallet's graded cards and marketplace activity.",
+  },
+  {
+    q: "Which cards does Decard cover?",
+    a: "Every graded card listed on Collector Crypt: Pokémon, One Piece, Riftbound, Dragon Ball, Lorcana, Magic: The Gathering, Yu-Gi-Oh!, Gundam and sports cards, graded by PSA, CGC, Beckett (BGS) and others.",
+  },
+  {
+    q: "Where does the data come from?",
+    a: "Listings, insured values, bids and population reports come from Collector Crypt's public API. The trade tape is decoded from the Collector Crypt marketplace program on Solana. There is no database: every number is read live.",
+  },
+];
+
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+};
 
 export default function Home() {
   return (
@@ -64,6 +100,26 @@ export default function Home() {
           </div>
         </DialogBox>
       </Reveal>
+
+      {/* FAQ: native <details>, so it works and is readable without JavaScript. */}
+      <section className="mt-24 max-w-3xl mx-auto flex flex-col gap-6">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqLd) }} />
+        <SectionHead kicker="Trainer FAQ" title="Questions, answered." />
+        <div className="dash-divide">
+          {FAQ.map((f) => (
+            <details key={f.q} className="group py-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-extrabold [&::-webkit-details-marker]:hidden">
+                {f.q}
+                <span aria-hidden className="shrink-0 text-xs text-poke transition-transform group-open:rotate-90">
+                  ▶
+                </span>
+              </summary>
+              <p className="mt-3 text-ink-soft leading-relaxed">{f.a}</p>
+            </details>
+          ))}
+        </div>
+        <MoreLink href="/guide">Every term in the Trainer&apos;s Guide</MoreLink>
+      </section>
     </>
   );
 }

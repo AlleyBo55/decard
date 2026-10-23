@@ -39,22 +39,25 @@ export async function GET() {
         }}
       >
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 14, background: "#e3350d", display: "flex" }} />
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 80px", flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 72px", flex: 1 }}>
           <div style={{ display: "flex", fontFamily: "Press", fontSize: 22, color: "#b8290a" }}>▶ SOLANA · GRADED CARD DEX</div>
           <div style={{ display: "flex", fontFamily: "Press", fontSize: 92, marginTop: 34, color: "#ffcb05", textShadow: `6px 6px 0 #1d5690` }}>
             DECARD
           </div>
           <div style={{ display: "flex", fontSize: 52, marginTop: 30, lineHeight: 1.1 }}>Gotta scan &apos;em all.</div>
+          {/* One line: the text column is ~630px wide, and the old longer line wrapped. */}
           <div style={{ display: "flex", fontSize: 28, marginTop: 18, color: "#4f4b68" }}>
-            Live listings · deal scores · real bids · wallet tracking
+            Listings · deal scores · bids · wallets
           </div>
-          <div style={{ display: "flex", gap: 12, marginTop: 34 }}>
+          {/* Chips keep their size and wrap; shrinking them squeezed the labels out of the pills. */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 34 }}>
             {TYPES.map(([label, color]) => (
               <div
                 key={label}
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  flexShrink: 0,
                   padding: "8px 18px",
                   borderRadius: 999,
                   border: `3px solid ${INK}`,

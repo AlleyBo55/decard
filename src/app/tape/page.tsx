@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { TapeBoard } from "@/components/tape/TapeBoard";
 import { Kicker } from "@/components/ui";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Live Trade Tape",
+export const metadata: Metadata = pageMetadata({
+  title: "Collector Crypt live sales and trade tape",
   description:
     "Every graded-card sale, listing and bid on the Collector Crypt marketplace program, decoded live with card, grade, price and wallets. Filter out bulk bid bots.",
-  alternates: { canonical: "/tape" },
-};
+  path: "/tape",
+});
 
 export default function TapePage() {
   return (

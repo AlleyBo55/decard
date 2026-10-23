@@ -14,7 +14,8 @@ function ccFetch<T>(path: string, revalidate = 15): Promise<T> {
   return fetcher<T>({ url: `${CC_API}${path}`, method: "GET", ...auth, next: { revalidate } });
 }
 
-export async function getMarketplace(q: MarketplaceQuery): Promise<MarketplacePage> {
+/** `opts.revalidate` overrides the 15s data-cache lifetime (the sitemap keeps pages for hours). */
+export async function getMarketplace(q: MarketplaceQuery, opts: { revalidate?: number } = {}): Promise<MarketplacePage> {
   const params = new URLSearchParams();
   params.set("step", String(q.step ?? 50));
   if (q.cursor) params.set("cursor", q.cursor);
@@ -33,7 +34,7 @@ export async function getMarketplace(q: MarketplaceQuery): Promise<MarketplacePa
     total: number;
     totalPages: number;
     cardsQtyByCategory: Record<string, number>;
-  }>(`/marketplace?${params}`);
+  }>(`/marketplace?${params}`, opts.revalidate);
 
   return {
     cards: raw.filterNFtCard ?? [],

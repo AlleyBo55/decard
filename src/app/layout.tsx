@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import localFont from "next/font/local";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import StoreProvider from "@/components/commons/StoreProvider";
 import { Nav } from "@/components/Nav";
@@ -8,7 +9,12 @@ import { Footer } from "@/components/Footer";
 import { PageTransition } from "@/components/PageTransition";
 import { RouteProgress } from "@/components/RouteProgress";
 import { Konami } from "@/components/Konami";
-import { SITE_URL, SITE_NAME } from "@/lib/constants";
+import { REPO_URL, SITE_URL, SITE_NAME } from "@/lib/constants";
+import { OG_IMAGE, jsonLd } from "@/lib/seo";
+
+const gaId = process.env.NEXT_PUBLIC_GA_ID?.trim();
+/** GA4 measurement ID. Public by design (it ships in every page). Unset or malformed loads no analytics. */
+const GA_ID = gaId && /^G-[A-Z0-9]+$/i.test(gaId) ? gaId : undefined;
 
 // Self-hosted OFL fonts (no network fetch at build time).
 const nunito = localFont({
@@ -31,9 +37,10 @@ const press = localFont({
   preload: true,
 });
 
-const title = "Decard · the Pokédex for graded cards on Solana";
+// Lead with what people type into Google; the brand shows as the site name.
+const title = "Collector Crypt scanner and tracker for graded cards · Decard";
 const description =
-  "Gotta scan 'em all. Live listings, deal scores, an on-chain trade tape and wallet tracking for tokenized graded cards on Collector Crypt. Pokémon, One Piece, Riftbound and more. Free, keyless, open source.";
+  "Collector Crypt and Magic Eden listings ranked by deal score, an on-chain trade tape, pop reports and a wallet tracker for tokenized Pokémon cards on Solana.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -61,9 +68,9 @@ export const metadata: Metadata = {
     title,
     description,
     url: SITE_URL,
-    images: [{ url: "/og", width: 1200, height: 630, alt: "Decard, the Pokédex for graded cards on Solana" }],
+    images: [OG_IMAGE],
   },
-  twitter: { card: "summary_large_image", title, description, images: ["/og"] },
+  twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE.url] },
   robots: {
     index: true,
     follow: true,
@@ -79,15 +86,34 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const jsonLd = {
+// WebSite gives Google the site name to show in results. WebApplication and
+// SoftwareSourceCode tie decard.fun to its GitHub repo for search engines and AI assistants.
+const appId = `${SITE_URL}/#app`;
+const siteLd = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: SITE_NAME,
-  url: SITE_URL,
-  applicationCategory: "FinanceApplication",
-  operatingSystem: "Web",
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  description,
+  "@graph": [
+    { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: SITE_NAME, alternateName: "decard.fun", url: `${SITE_URL}/` },
+    {
+      "@type": "WebApplication",
+      "@id": appId,
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      isAccessibleForFree: true,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      description,
+      sameAs: [REPO_URL],
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      name: `${SITE_NAME} source code`,
+      codeRepository: REPO_URL,
+      programmingLanguage: "TypeScript",
+      license: "https://opensource.org/licenses/MIT",
+      targetProduct: { "@id": appId },
+    },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -97,7 +123,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="preconnect" href="https://nft.collectorcrypt.com" crossOrigin="" />
       </head>
       <body className="min-h-dvh flex flex-col">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(siteLd) }} />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] btn btn-yellow"
@@ -117,6 +143,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Konami />
         </StoreProvider>
       </body>
+      {/* Loads gtag after hydration; GA4 counts client-side navigations from history changes. */}
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
     </html>
   );
 }
