@@ -55,7 +55,7 @@ Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on 
 - **Trade tape.** Hides bulk bid bots by default, shows who bid on whom, and refreshes every 10 seconds.
 - **Card pages.** Rarity tier from the pop report, gem rate, PSA and CGC cert lookups, and each live bid as a share of insured value.
 - **Wallets.** Holdings sorted by insured value, list price or name, plus decoded activity. Labels and the watchlist stay in your browser (localStorage).
-- **Trainer's guide.** A plain-language glossary of grading, pop reports, gem rate, insured value, bids and vaults.
+- **Trainer's guide.** A plain-language glossary of grading, pop reports, gem rate, insured value, bids and vaults, plus a sourced [guide to tokenized trading cards on Solana](https://www.decard.fun/tokenized-trading-cards).
 - **Easter eggs.** Tap the 3D Poké Ball to catch a deal, and try ↑ ↑ ↓ ↓ ← → ← → B A.
 
 ## How it works
