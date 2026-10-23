@@ -40,12 +40,13 @@ async function listedCards() {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
   const now = new Date();
-  const pages: MetadataRoute.Sitemap = ["", "/scanner", "/tape", "/guide"].map((path) => ({
-    url: `${SITE_URL}${path}`,
-    lastModified: now,
-    changeFrequency: path === "" ? "hourly" : "always",
-    priority: path === "" ? 1 : 0.8,
-  }));
+  const pages: MetadataRoute.Sitemap = [
+    { path: "", lastModified: now, changeFrequency: "hourly" as const, priority: 1 },
+    { path: "/scanner", lastModified: now, changeFrequency: "hourly" as const, priority: 0.9 },
+    { path: "/tape", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
+    { path: "/guide", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.8 },
+    { path: "/tokenized-trading-cards", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.9 },
+  ].map(({ path, ...entry }) => ({ url: `${SITE_URL}${path}`, ...entry }));
 
   let listed: Awaited<ReturnType<typeof listedCards>> | null = null;
   try {

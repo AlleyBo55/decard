@@ -118,7 +118,10 @@ export default function Home() {
             </details>
           ))}
         </div>
-        <MoreLink href="/guide">Every term in the Trainer&apos;s Guide</MoreLink>
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          <MoreLink href="/tokenized-trading-cards">How tokenized trading cards work</MoreLink>
+          <MoreLink href="/guide">Every term in the Trainer&apos;s Guide</MoreLink>
+        </div>
       </section>
     </>
   );

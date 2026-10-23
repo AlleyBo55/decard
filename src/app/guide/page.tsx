@@ -46,6 +46,14 @@ export default function GuidePage() {
         </DialogBox>
       </header>
 
+      <div className="paper p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p className="font-display font-bold text-xl">New to on-chain cards?</p>
+          <p className="mt-1 text-ink-soft">Start with vault custody, tokenized ownership, redemption, deal scores and risks.</p>
+        </div>
+        <Link href="/tokenized-trading-cards" className="btn btn-yellow shrink-0">Read the 10-minute guide</Link>
+      </div>
+
       <GuideBook sections={GUIDE} />
 
       <DialogBox className="max-w-2xl mx-auto !p-7 text-center" arrow={false}>

@@ -23,6 +23,7 @@ const body = `# Decard
 - [Home](${SITE_URL}/): newest, most expensive and best-deal listings, recent sales and hot bids.
 - [Listing scanner](${SITE_URL}/scanner): every live listing, sorted by best deal, newest or price, filtered by category, venue and price.
 - [Live trade tape](${SITE_URL}/tape): decoded marketplace sales, listings and bids as they land.
+- [Tokenized trading cards on Solana](${SITE_URL}/tokenized-trading-cards): sourced guide to vault custody, Collector Crypt, on-chain ownership, USDC trading, insured value, deal scores, population reports, redemption and risks.
 - [Trainer's guide](${SITE_URL}/guide): plain-language glossary of grading, PSA vs CGC vs BGS, pop reports, gem rate, insured value, bids and vaults.
 - Card pages (${SITE_URL}/card/{mint}): listing price, insured value, best bid, population report and on-chain history for one card. Every listed card is in the [sitemap](${SITE_URL}/sitemap.xml).
 - Wallet pages (${SITE_URL}/wallet/{address}): any Solana wallet's graded cards, insured total and marketplace activity.

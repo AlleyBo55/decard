@@ -13,6 +13,7 @@ const COLUMNS = [
   {
     title: "Learn",
     links: [
+      { href: "/tokenized-trading-cards", label: "Tokenized cards explained" },
       { href: "/guide", label: "Trainer's Guide" },
       { href: "/guide#grading", label: "What is grading?" },
       { href: "/guide#buying-and-selling", label: "Deal score" },
