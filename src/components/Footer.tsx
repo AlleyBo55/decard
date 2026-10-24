@@ -9,6 +9,8 @@ const COLUMNS = [
       { href: "/cards", label: "Card directory" },
       { href: "/scanner?orderBy=deal", label: "Best deals" },
       { href: "/tape", label: "Live tape" },
+      { href: "/sales", label: "Recent sales" },
+      { href: "/pokemon", label: "Pokémon prices" },
     ],
   },
   {

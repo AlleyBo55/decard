@@ -10,6 +10,7 @@ import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import type { CardDetail, CardMarket, CardOffer } from "@/lib/types";
 import { CardFlip } from "@/components/card/CardFlip";
 import { CardActivity } from "@/components/card/CardActivity";
+import { RelatedCards } from "@/components/card/RelatedCards";
 import { WalletName } from "@/components/ActivityRow";
 import { GradePill, HPBar, Kicker, Skeleton, StatBar, TypeChip } from "@/components/ui";
 
@@ -439,6 +440,7 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
           </section>
         </div>
       </div>
+      <RelatedCards card={card} />
     </article>
   );
 }

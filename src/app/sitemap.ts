@@ -5,6 +5,7 @@ import { getMarketplace } from "@/lib/cc";
 import { SITE_URL } from "@/lib/constants";
 import { isGradedCard } from "@/lib/credible";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
+import { POKEMON_HUBS } from "@/lib/pokemon-hubs";
 import { categoryPath } from "@/lib/seo";
 
 // Rendered per request (connection() below), so a deploy never serves a
@@ -55,6 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/tape", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
     { path: "/guide", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/pokemon-card-value-checker", lastModified: "2026-10-23", changeFrequency: "daily" as const, priority: 0.9 },
+    { path: "/pokemon", lastModified: now, changeFrequency: "daily" as const, priority: 0.8 },
+    { path: "/sales", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
     { path: "/tokenized-trading-cards", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.9 },
   ].map(({ path, ...entry }) => ({ url: `${SITE_URL}${path}`, ...entry }));
 
@@ -88,5 +91,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: c.listing?.updatedAt,
   }));
 
-  return [...pages, ...directoryPages, ...categories, ...cards];
+  const guides: MetadataRoute.Sitemap = POKEMON_HUBS.map((hub) => ({
+    url: `${SITE_URL}/pokemon/${hub.slug}`,
+    lastModified: now,
+    changeFrequency: "daily",
+    priority: 0.7,
+  }));
+
+  return [...pages, ...guides, ...directoryPages, ...categories, ...cards];
 }

@@ -5,6 +5,7 @@ import { getMarketplace } from "@/lib/cc";
 import { cardImage, SITE_NAME, SITE_URL } from "@/lib/constants";
 import { isCredibleListing, isGradedCard } from "@/lib/credible";
 import { dealScore, fmtUsd, gradeShort } from "@/lib/format";
+import { POKEMON_HUBS } from "@/lib/pokemon-hubs";
 import { jsonLd, pageMetadata } from "@/lib/seo";
 import type { CardRow, Listing } from "@/lib/types";
 
@@ -259,6 +260,23 @@ export default function PokemonCardValueCheckerPage() {
         </div>
         <CurrentPrices />
         <MoreLink href="/scanner?search=Pokemon">Browse every live Pokémon listing</MoreLink>
+        <div className="flex flex-col gap-3">
+          <h3 className="font-display text-xl font-bold text-ink">Price guides by Pokémon</h3>
+          <ul className="flex flex-wrap gap-2">
+            {POKEMON_HUBS.slice(0, 16).map((hub) => (
+              <li key={hub.slug}>
+                <Link
+                  href={`/pokemon/${hub.slug}`}
+                  prefetch={false}
+                  className="inline-block rounded-full border-2 border-sand bg-cream-hi px-3 py-1.5 text-sm font-bold text-ink-soft hover:border-poke hover:text-poke-deep"
+                >
+                  {hub.name} prices
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <MoreLink href="/pokemon">All Pokémon price guides</MoreLink>
+        </div>
       </section>
 
       <div className="mt-16 grid items-start gap-14 lg:grid-cols-[minmax(0,1fr)_300px]">

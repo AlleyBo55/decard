@@ -1,5 +1,5 @@
 import "server-only";
-import fetcher, { createAPIError, isAPIError } from "@/helpers/fetcher";
+import fetcher, { createAPIError, isAPIError, type IFetchConfig } from "@/helpers/fetcher";
 import { CC_API } from "./constants";
 import { cached } from "./cache";
 import type { CardDetail, CardMarket, CardOffer, CardRow, MarketplacePage, MarketplaceQuery } from "./types";
@@ -10,12 +10,20 @@ import type { CardDetail, CardMarket, CardOffer, CardRow, MarketplacePage, Marke
 const CC_KEY = process.env.CC_API_KEY || undefined;
 const auth = { isPublic: !CC_KEY, userToken: CC_KEY };
 
-function ccFetch<T>(path: string, revalidate = 15): Promise<T> {
-  return fetcher<T>({ url: `${CC_API}${path}`, method: "GET", ...auth, next: { revalidate } });
+type ReadOptions = Pick<IFetchConfig, "timeoutMs" | "retries">;
+
+function ccFetch<T>(path: string, revalidate = 15, read: ReadOptions = {}): Promise<T> {
+  return fetcher<T>({ url: `${CC_API}${path}`, method: "GET", ...auth, next: { revalidate }, ...read });
 }
 
-/** `opts.revalidate` overrides the 15s data-cache lifetime (the sitemap keeps pages for hours). */
-export async function getMarketplace(q: MarketplaceQuery, opts: { revalidate?: number } = {}): Promise<MarketplacePage> {
+/**
+ * `opts.revalidate` overrides the 15s data-cache lifetime (the sitemap keeps pages for hours).
+ * `timeoutMs` and `retries` let an optional section give up fast instead of queueing.
+ */
+export async function getMarketplace(
+  q: MarketplaceQuery,
+  opts: { revalidate?: number } & ReadOptions = {},
+): Promise<MarketplacePage> {
   const params = new URLSearchParams();
   params.set("step", String(q.step ?? 50));
   if (q.cursor) params.set("cursor", q.cursor);
@@ -34,7 +42,7 @@ export async function getMarketplace(q: MarketplaceQuery, opts: { revalidate?: n
     total: number;
     totalPages: number;
     cardsQtyByCategory: Record<string, number>;
-  }>(`/marketplace?${params}`, opts.revalidate);
+  }>(`/marketplace?${params}`, opts.revalidate, { timeoutMs: opts.timeoutMs, retries: opts.retries });
 
   return {
     cards: raw.filterNFtCard ?? [],
