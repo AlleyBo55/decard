@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { CardRow } from "@/lib/types";
 import { cardImage } from "@/lib/constants";
-import { dealScore, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { dealScore, fmtUsd, gradeShort, shortCardName, venueName } from "@/lib/format";
 import { listingUsd } from "@/lib/hooks";
 import { HoloCard } from "@/components/motion";
 import { GradePill, HPBar, TypeIcon } from "@/components/ui";
@@ -98,9 +98,15 @@ export function CardTile({
             <span className="text-xs text-ink-mute">Unlisted</span>
           )}
         </div>
-        <div className="flex items-center justify-between text-[11px] text-ink-mute">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 text-[11px] text-ink-mute">
           <span>ins {insured ? fmtUsd(insured, { compact: true }) : "·"}</span>
-          {c.listing?.currency === "SOL" && usd != null && <span>≈ {fmtUsd(usd, { compact: true })}</span>}
+          {/* Where this listing lives: the same card can be listed on Collector Crypt or Magic Eden. */}
+          {c.listing && (
+            <span>
+              {venueName(c.listing.marketplace)}
+              {c.listing.currency === "SOL" && usd != null && ` · ≈${fmtUsd(usd, { compact: true })}`}
+            </span>
+          )}
         </div>
         {score != null && score > 0 && <HPBar value={score} />}
       </div>

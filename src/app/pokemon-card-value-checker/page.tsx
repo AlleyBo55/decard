@@ -4,7 +4,7 @@ import { GradePill, Kicker, MoreLink } from "@/components/ui";
 import { getMarketplace } from "@/lib/cc";
 import { cardImage, SITE_NAME, SITE_URL } from "@/lib/constants";
 import { isCredibleListing, isGradedCard } from "@/lib/credible";
-import { dealScore, fmtUsd, gradeShort } from "@/lib/format";
+import { dealScore, fmtUsd, gradeShort, venueName } from "@/lib/format";
 import { POKEMON_HUBS } from "@/lib/pokemon-hubs";
 import { jsonLd, pageMetadata } from "@/lib/seo";
 import type { CardRow, Listing } from "@/lib/types";
@@ -164,11 +164,15 @@ async function CurrentPrices() {
                 {score != null && score > 0 && (
                   <p className="mt-3 text-xs font-bold text-up">Asking {score}% under insured value</p>
                 )}
-                {updated && (
-                  <p className="mt-2 text-xs text-ink-mute">
-                    Listing updated <time dateTime={card.listing.updatedAt}>{updated}</time>
-                  </p>
-                )}
+                <p className="mt-2 text-xs text-ink-mute">
+                  On {venueName(card.listing.marketplace)}
+                  {updated && (
+                    <>
+                      {" "}
+                      · updated <time dateTime={card.listing.updatedAt}>{updated}</time>
+                    </>
+                  )}
+                </p>
               </div>
             </article>
           );
@@ -254,7 +258,8 @@ export default function PokemonCardValueCheckerPage() {
             Current Pokémon card asking prices
           </h2>
           <p className="mt-3 max-w-3xl text-ink-soft">
-            Recent credible USDC listings from Collector Crypt. This snapshot is cached for up to five minutes.
+            Recent credible USDC listings of Collector Crypt cards, on Collector Crypt or Magic Eden as labelled.
+            This snapshot is cached for up to five minutes.
             Asking prices and insured references are comparison inputs, not guaranteed sale values.
           </p>
         </div>

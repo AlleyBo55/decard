@@ -65,7 +65,7 @@ export default function PokemonPriceGuidesPage() {
           Pokémon card prices, <span className="text-poke">one Pokémon at a time.</span>
         </h1>
         <p className="max-w-3xl text-xl leading-relaxed text-ink-soft">
-          Pick a Pokémon to see every graded slab of it listed on Collector Crypt, the lowest and median asking price for
+          Pick a Pokémon to see every graded slab of it listed on Collector Crypt or Magic Eden, the lowest and median asking price for
           each grade, and the cheapest and most valuable cards on the market right now.
         </p>
       </header>
@@ -88,7 +88,8 @@ export default function PokemonPriceGuidesPage() {
       <section className="mt-16 flex max-w-3xl flex-col gap-4 text-[1.05rem] leading-8 text-ink-soft">
         <h2 className="h-display text-[clamp(1.6rem,3.5vw,2.3rem)]">What each guide shows</h2>
         <p>
-          Each guide reads every graded listing of that Pokémon on Collector Crypt and refreshes about every 15 minutes. It
+          Each guide reads every graded listing of that Pokémon on Collector Crypt and Magic Eden, labels each listing&apos;s
+          venue, lets you switch between them, and refreshes about every 15 minutes. It
           groups USDC asking prices by grade, links the lowest-priced card for each grade, and lists the cheapest and most
           valuable slabs. Prices are asking prices, not completed sales.
         </p>
