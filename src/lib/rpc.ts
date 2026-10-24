@@ -1,6 +1,6 @@
 import "server-only";
 import fetcher, { createAPIError, isAPIError } from "@/helpers/fetcher";
-import { SOLANA_RPC, HELIUS_RPC, CC_MARKETPLACE_PROGRAM } from "./constants";
+import { SOLANA_RPC, HELIUS_RPC, CC_MARKETPLACE_PROGRAM, CC_TREASURY } from "./constants";
 import { cached } from "./cache";
 import { decodeActivity, linkReprices, type SigInfo } from "./decode";
 
@@ -274,6 +274,18 @@ export async function getMarketplaceActivity(limit = 40) {
   const size = Math.max(limit, TAPE_WINDOW);
   const rows = await cached(`rpc:program:${size}`, 6_000, () => loadLinkedHistory(CC_MARKETPLACE_PROGRAM, size));
   return rows.length > limit ? rows.slice(0, limit) : rows;
+}
+
+/** Treasury transactions per sales refresh: roughly the last two to three hours of sales. */
+const SALES_WINDOW = 60;
+
+/**
+ * Recent treasury history, newest first. Marketplace sales pay the treasury, so
+ * this is nearly all sales; callers keep only `isSale` rows because the treasury
+ * also moves funds. Shared 60s cache.
+ */
+export function getTreasuryActivity() {
+  return cached(`rpc:treasury:${SALES_WINDOW}`, 60_000, () => loadLinkedHistory(CC_TREASURY, SALES_WINDOW));
 }
 
 /** Per-wallet activity feed. */

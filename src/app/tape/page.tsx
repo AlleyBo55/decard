@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { TapeBoard } from "@/components/tape/TapeBoard";
 import { Kicker } from "@/components/ui";
 import { pageMetadata } from "@/lib/seo";
@@ -21,6 +22,11 @@ export default function TapePage() {
         <p className="text-lg text-ink-soft max-w-2xl">
           Every move on the Collector Crypt marketplace program, decoded in real time: who bought what, at what
           grade, for how much, and from whom.
+        </p>
+        <p>
+          <Link href="/sales" className="font-extrabold text-azure-deep underline decoration-sand-dark underline-offset-4 hover:text-poke-deep">
+            Recent sales with prices and Solana transaction links →
+          </Link>
         </p>
       </header>
       <TapeBoard />

@@ -7,6 +7,8 @@ export const HELIUS_RPC = "https://mainnet.helius-rpc.com";
 export const CC_MARKETPLACE_PROGRAM = "CcmRKTuZCGJBWQwMHvDYApBRvSZNHqGJXkznqpDTSQUr";
 export const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const MPL_CORE = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d";
+/** Collector Crypt's fee wallet. Marketplace sales pay it, so its history is a sales feed. */
+export const CC_TREASURY = "8373hLiAEXxaJ3oV7SRzx4KHwurEg9rEG98tUPj1sdtX";
 
 // Collector Crypt card art.
 // - /{front|back}/{mint}?width=N: a redirect (cached only 5 minutes) to a WebP

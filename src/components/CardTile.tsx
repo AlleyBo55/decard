@@ -87,7 +87,8 @@ export function CardTile({
             {shortCardName(c.itemName)}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-2">
+        {/* Wraps instead of overflowing when a grid cell is narrower than the rail tile. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <GradePill label={gradeShort(c.gradingCompany, c.grade)} />
           {c.listing ? (
             <span className="font-display font-bold text-lg leading-none tabular-nums">
