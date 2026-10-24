@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CardTile } from "@/components/CardTile";
-import { GradePill, Kicker, MoreLink } from "@/components/ui";
+import { HubMarket, type HubGrade, type HubView, type Priced, type Venue } from "@/components/pokemon/HubMarket";
+import { Kicker, MoreLink } from "@/components/ui";
 import { getMarketplace } from "@/lib/cc";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { isCredibleListing, isGradedCard } from "@/lib/credible";
-import { fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { gradeShort, shortCardName } from "@/lib/format";
 import { hubBySlug, matchesHub, POKEMON_HUBS, type PokemonHub } from "@/lib/pokemon-hubs";
 import { jsonLd, pageMetadata } from "@/lib/seo";
-import type { CardRow, Listing, MarketplacePage } from "@/lib/types";
+import type { CardRow, MarketplacePage } from "@/lib/types";
 
 // Each guide renders on its first visit, then is served from the ISR cache and rebuilt
 // at most every 15 minutes. None is prerendered, so deploys make no Collector Crypt calls.
@@ -22,7 +22,6 @@ export function generateStaticParams(): { name: string }[] {
 }
 
 type Props = { params: Promise<{ name: string }> };
-type Priced = CardRow & { listing: Listing };
 
 const PAGE_SIZE = 200;
 /** The largest guides (Charizard, Pikachu) had about 650 listings in October 2026. */
@@ -73,15 +72,8 @@ function median(sorted: number[]): number {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-interface GradeRow {
-  label: string;
-  count: number;
-  lowest: Priced;
-  median: number;
-}
-
 /** Listings per grade label ("PSA 10", "CGC 9.5"), highest grade first. Input is sorted by price. */
-function byGrade(priced: Priced[]): GradeRow[] {
+function byGrade(priced: Priced[]): HubGrade[] {
   const groups = new Map<string, Priced[]>();
   for (const card of priced) {
     const label = gradeShort(card.gradingCompany, card.grade);
@@ -97,7 +89,7 @@ function byGrade(priced: Priced[]): GradeRow[] {
 }
 
 const description = (hub: PokemonHub) =>
-  `Live ${hub.name} Pokémon card prices by grade: lowest and median asking prices for PSA 10, PSA 9, CGC and BGS slabs listed on Collector Crypt, with insured values.`;
+  `Live ${hub.name} Pokémon card prices by grade: lowest and median asking prices for PSA 10, PSA 9, CGC and BGS slabs listed on Collector Crypt and Magic Eden, with insured values.`;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const hub = hubBySlug((await params).name);
@@ -109,59 +101,63 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="paper p-4">
-      <dt className="font-pixel text-[9px] text-ink-mute">{label}</dt>
-      <dd className="mt-2 font-display text-2xl font-bold tabular-nums text-ink">{value}</dd>
-    </div>
-  );
+/**
+ * Copies of rows holding only what CardTile reads (upstream rows carry many more
+ * fields), one copy per card: the three venue views share the same objects, so
+ * the page payload carries each card once.
+ */
+function slimmer() {
+  const done = new Map<string, Priced>();
+  return (c: Priced): Priced => {
+    const known = done.get(c.nftAddress);
+    if (known) return known;
+    const { price, currency, marketplace, createdAt, updatedAt } = c.listing;
+    const row: Priced = {
+      nftAddress: c.nftAddress,
+      id: c.id,
+      itemName: c.itemName,
+      category: c.category,
+      year: c.year,
+      set: c.set,
+      serial: c.serial,
+      grade: c.grade,
+      gradeNum: c.gradeNum,
+      gradingCompany: c.gradingCompany,
+      gradingID: c.gradingID,
+      insuredValue: c.insuredValue,
+      frontImage: null,
+      backImage: null,
+      images: c.images?.frontS ? { frontS: c.images.frontS } : null,
+      nftStandard: c.nftStandard,
+      vault: c.vault,
+      listing: { price, currency, marketplace, sellerId: null, receiptId: null, createdAt, updatedAt },
+      owner: null,
+      offers: [],
+    };
+    done.set(c.nftAddress, row);
+    return row;
+  };
 }
 
-function TileGrid({ cards }: { cards: CardRow[] }) {
-  return (
-    <div role="list" className="grid grid-cols-2 justify-items-center gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-      {cards.map((c) => (
-        <CardTile key={c.nftAddress} c={c} solUsd={null} className="!w-full max-w-[200px]" />
-      ))}
-    </div>
-  );
-}
-
-function GradeTable({ grades }: { grades: GradeRow[] }) {
-  const th = "p-4 font-normal";
-  return (
-    <div className="paper overflow-x-auto">
-      <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="border-b-2 border-sand font-pixel text-[9px] text-ink-mute">
-          <tr>
-            <th scope="col" className={th}>GRADE</th>
-            <th scope="col" className={th}>LISTED</th>
-            <th scope="col" className={th}>LOWEST ASK</th>
-            <th scope="col" className={th}>MEDIAN ASK</th>
-            <th scope="col" className={th}>LOWEST-PRICED CARD</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-sand">
-          {grades.map((g) => (
-            <tr key={g.label}>
-              <td className="p-4">
-                <GradePill label={g.label} />
-              </td>
-              <td className="p-4 tabular-nums">{g.count}</td>
-              <td className="p-4 font-display text-lg font-bold tabular-nums text-ink">{fmtUsd(g.lowest.listing.price)}</td>
-              <td className="p-4 tabular-nums">{fmtUsd(g.median)}</td>
-              <td className="p-4">
-                <Link href={`/card/${g.lowest.nftAddress}`} prefetch={false} className="font-bold text-azure-deep hover:text-poke-deep">
-                  {g.lowest.itemName}
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+/**
+ * One venue's numbers. Credible USDC listings only: SOL prices can't be ranked
+ * against dollars, and troll asks would wreck the medians.
+ */
+function viewFor(cards: CardRow[], venue: Venue, slim: (c: Priced) => Priced): HubView {
+  const listed = venue === "all" ? cards : cards.filter((c) => c.listing?.marketplace === venue);
+  const priced = listed.filter((c): c is Priced => isCredibleListing(c)).sort((a, b) => a.listing.price - b.listing.price);
+  const prices = priced.map((c) => c.listing.price);
+  const grades = byGrade(priced).slice(0, 10);
+  return {
+    listed: listed.length,
+    priced: priced.length,
+    lowest: prices[0] ?? null,
+    median: prices.length ? median(prices) : null,
+    lowestPsa10: grades.find((g) => g.label === "PSA 10")?.lowest.listing.price ?? null,
+    grades: grades.map((g) => ({ ...g, lowest: slim(g.lowest) })),
+    cheapest: priced.slice(0, GRID).map(slim),
+    highest: priced.length > GRID ? priced.slice(-6).reverse().map(slim) : [],
+  };
 }
 
 export default async function PokemonHubPage({ params }: Props) {
@@ -169,12 +165,13 @@ export default async function PokemonHubPage({ params }: Props) {
   if (!hub) notFound();
   const data = await loadHub(hub);
   const cards = data?.cards ?? [];
-  // Credible USDC listings only: SOL prices can't be ranked against dollars, and troll asks would wreck the medians.
-  const priced = cards.filter((c): c is Priced => isCredibleListing(c)).sort((a, b) => a.listing.price - b.listing.price);
-  const prices = priced.map((c) => c.listing.price);
-  const grades = byGrade(priced).slice(0, 10);
-  const grid = priced.slice(0, GRID);
-  const top = priced.length > GRID ? priced.slice(-6).reverse() : [];
+  const slim = slimmer();
+  const views: Record<Venue, HubView> = {
+    all: viewFor(cards, "all", slim),
+    CC: viewFor(cards, "CC", slim),
+    ME: viewFor(cards, "ME", slim),
+  };
+  const grid = views.all.cheapest;
   const url = `${SITE_URL}/pokemon/${hub.slug}`;
   const structured = {
     "@context": "https://schema.org",
@@ -238,8 +235,9 @@ export default async function PokemonHubPage({ params }: Props) {
           {hub.name} card prices <span className="text-poke">by grade.</span>
         </h1>
         <p className="max-w-3xl text-xl leading-relaxed text-ink-soft">
-          Every graded {hub.name} slab listed on Collector Crypt right now, with the lowest and median asking price for each
-          grade. Prices are live USDC asking prices, not completed sales.
+          Every graded {hub.name} slab tokenized by Collector Crypt and listed right now, on Collector Crypt or Magic Eden,
+          with the lowest and median asking price for each grade. Switch venues to compare them. Prices are live USDC
+          asking prices, not completed sales.
         </p>
         {data && (
           <p className="text-sm text-ink-mute">
@@ -255,60 +253,10 @@ export default async function PokemonHubPage({ params }: Props) {
           listing.
         </p>
       )}
-      {data && !priced.length && (
-        <p className="paper mt-10 p-6 text-ink-soft">No graded {hub.name} slabs are listed in USDC right now.</p>
+      {data && !cards.length && (
+        <p className="paper mt-10 p-6 text-ink-soft">No graded {hub.name} slabs are listed right now.</p>
       )}
-
-      {priced.length > 0 && (
-        <>
-          <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            <Stat label="GRADED SLABS" value={String(cards.length)} />
-            <Stat label="PRICED IN USDC" value={String(priced.length)} />
-            <Stat label="LOWEST ASK" value={fmtUsd(prices[0])} />
-            <Stat label="MEDIAN ASK" value={fmtUsd(median(prices))} />
-            <Stat label="LOWEST PSA 10" value={fmtUsd(grades.find((g) => g.label === "PSA 10")?.lowest.listing.price)} />
-          </dl>
-
-          <section className="mt-14 flex flex-col gap-5" aria-labelledby="by-grade">
-            <div>
-              <Kicker>Prices by grade</Kicker>
-              <h2 id="by-grade" className="h-display mt-3 text-[clamp(1.8rem,4vw,2.6rem)]">
-                What each {hub.name} grade is listed for
-              </h2>
-              <p className="mt-3 max-w-3xl text-ink-soft">
-                Each grade groups every printing of {hub.name}, so one grade can span very different cards. Open the
-                lowest-priced card to see exactly which one it is.
-              </p>
-            </div>
-            <GradeTable grades={grades} />
-          </section>
-
-          <section className="mt-14 flex flex-col gap-6" aria-labelledby="lowest">
-            <div>
-              <Kicker>Cheapest first</Kicker>
-              <h2 id="lowest" className="h-display mt-3 text-[clamp(1.8rem,4vw,2.6rem)]">
-                Lowest-priced graded {hub.name} cards
-              </h2>
-            </div>
-            <TileGrid cards={grid} />
-            <MoreLink href={`/scanner?search=${encodeURIComponent(hub.name)}`}>
-              Sort and filter every {hub.name} listing in the scanner
-            </MoreLink>
-          </section>
-
-          {top.length > 0 && (
-            <section className="mt-14 flex flex-col gap-6" aria-labelledby="top">
-              <div>
-                <Kicker>Top of the market</Kicker>
-                <h2 id="top" className="h-display mt-3 text-[clamp(1.8rem,4vw,2.6rem)]">
-                  Highest asking prices for {hub.name}
-                </h2>
-              </div>
-              <TileGrid cards={top} />
-            </section>
-          )}
-        </>
-      )}
+      {cards.length > 0 && <HubMarket name={hub.name} search={hub.name} views={views} />}
 
       <section className="mt-16 flex max-w-3xl flex-col gap-4 text-[1.05rem] leading-8 text-ink-soft">
         <h2 className="h-display text-[clamp(1.6rem,3.5vw,2.3rem)]">How to read {hub.name} prices</h2>

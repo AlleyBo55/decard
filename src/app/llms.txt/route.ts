@@ -24,7 +24,7 @@ const body = `# Decard
 - [Listing scanner](${SITE_URL}/scanner): every live listing, sorted by best deal, newest or price, filtered by category, venue and price.
 - [Graded card directory](${SITE_URL}/cards): crawlable, paginated index of currently listed cards with exact names, grades, sets, years, card numbers and canonical card links.
 - [Pokémon card value checker](${SITE_URL}/pokemon-card-value-checker): search current graded Pokémon asking prices, insured references and PSA, CGC or BGS grades; explains how to compare identity, bids, sales and population without treating a listing as an appraisal.
-- [Pokémon card prices by Pokémon](${SITE_URL}/pokemon): one guide per popular Pokémon (Charizard, Pikachu, Umbreon, Gengar and more) with every graded listing, lowest and median USDC asking price per grade, and the cheapest and most valuable slabs, refreshed about every 15 minutes.
+- [Pokémon card prices by Pokémon](${SITE_URL}/pokemon): one guide per popular Pokémon (Charizard, Pikachu, Umbreon, Gengar and more) with every graded listing on Collector Crypt and Magic Eden (filterable by venue), lowest and median USDC asking price per grade, and the cheapest and most valuable slabs, refreshed about every 15 minutes.
 - [Recent sales](${SITE_URL}/sales): the latest settled Collector Crypt sales decoded from Solana, with card, grade, price, seller, buyer and transaction link, plus count, USDC volume and median for the window.
 - [Live trade tape](${SITE_URL}/tape): decoded marketplace sales, listings and bids as they land.
 - [Tokenized trading cards on Solana](${SITE_URL}/tokenized-trading-cards): sourced guide to vault custody, Collector Crypt, on-chain ownership, USDC trading, insured value, deal scores, population reports, redemption and risks.

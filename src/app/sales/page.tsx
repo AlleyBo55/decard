@@ -244,6 +244,10 @@ export default async function SalesPage() {
             seller&apos;s USDC credit grossed up by the 2% marketplace fee. Sales settled in SOL show their SOL amount and
             stay out of the dollar totals.
           </p>
+          <p>
+            Only sales on the Collector Crypt marketplace are listed. Collector Crypt cards also sell on Magic Eden, and
+            those sales are not included here.
+          </p>
         </section>
         <section className="flex flex-col gap-4 text-[1.05rem] leading-8 text-ink-soft">
           <h2 className="h-display text-[clamp(1.6rem,3.5vw,2.3rem)]">What this list does not cover</h2>
