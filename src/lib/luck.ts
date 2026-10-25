@@ -101,7 +101,8 @@ function bandsAreOrdered(bands: TierRecord<TierBand>) {
   });
 }
 
-function availableLeaves(snapshot: PullPoolSnapshot) {
+/** The tier's candidates minus cards an earlier pack won and nobody returned. */
+export function availableLeaves(snapshot: Pick<PullPoolSnapshot, "leaves" | "takenEvents">) {
   const latest = new Map<string, PoolEvent["direction"]>();
   const events = [...snapshot.takenEvents].sort((a, b) => {
     const left = BigInt(a.ownershipSeq);

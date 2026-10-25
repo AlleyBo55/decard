@@ -12,7 +12,7 @@ const LINKS = [
   { href: "/", label: "Home", Icon: Pokedex },
   { href: "/scanner", label: "Scanner", Icon: TownMap },
   { href: "/tape", label: "Live Tape", Icon: Pulse },
-  { href: "/luck", label: "Pull Luck", Icon: Sparkle },
+  { href: "/luck", label: "Gacha", Icon: Sparkle },
   { href: "/guide", label: "Guide", Icon: Books },
 ];
 

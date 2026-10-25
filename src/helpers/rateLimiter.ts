@@ -33,6 +33,8 @@ const POLICIES: Record<string, HostPolicy> = {
   "rpc.solanatracker.io": { rps: 8, burst: 40, concurrency: 4 },
   // Solana Foundation keyless RPC, used only for wallet pack history: 40 calls per 10s per method per IP.
   "api.mainnet-beta.solana.com": { rps: 3, burst: 10, concurrency: 4 },
+  // Collector Crypt's gacha site (VRF witness, live feed, pools). No published limit: stay polite.
+  "gacha.collectorcrypt.com": { rps: 6, burst: 24, concurrency: 6 },
   // Helius free plan: 10 RPC requests/s, and every item of a JSON-RPC batch counts as one.
   "mainnet.helius-rpc.com": { rps: 8, burst: 10, concurrency: 4 },
   // Jupiter keyless: 0.5 req/s (30 per minute, 60s sliding window).

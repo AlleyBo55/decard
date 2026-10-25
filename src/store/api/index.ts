@@ -1,15 +1,23 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createAPIError, isAPIError, type APIError } from "@/helpers/fetcher";
 import type {
+  BigHitsPayload,
+  GachaMachinesPayload,
+  GachaOddsPayload,
   HomeActivityPayload,
   HomeListingsPayload,
   HotBidsPayload,
+  LivePullsPayload,
   MarketplacePage,
   PullLuckPayload,
   SolPrice,
   WalletPullsPayload,
 } from "@/lib/types";
 import getActivity, { type ActivityParams, type ActivityPayload } from "@/services/Activity/getActivity";
+import getBigHits from "@/services/Gacha/getBigHits";
+import getGachaMachines from "@/services/Gacha/getGachaMachines";
+import getGachaOdds from "@/services/Gacha/getGachaOdds";
+import getLivePulls from "@/services/Gacha/getLivePulls";
 import getHighlights from "@/services/Highlights/getHighlights";
 import getLuck from "@/services/Luck/getLuck";
 import getWalletPulls from "@/services/Luck/getWalletPulls";
@@ -85,6 +93,21 @@ const api = createApi({
       queryFn: (q, { signal }) => run(getSuggest(q, signal)),
       keepUnusedDataFor: 60,
     }),
+    // Live gacha: Collector Crypt's public pack feeds.
+    gachaLive: build.query<LivePullsPayload, void>({
+      queryFn: (_arg, { signal }) => run(getLivePulls(signal)),
+    }),
+    gachaHits: build.query<BigHitsPayload, void>({
+      queryFn: (_arg, { signal }) => run(getBigHits(signal)),
+    }),
+    gachaMachines: build.query<GachaMachinesPayload, void>({
+      queryFn: (_arg, { signal }) => run(getGachaMachines(signal)),
+    }),
+    // The server caches each machine's odds for 5 minutes; keep switched-away machines as long.
+    gachaOdds: build.query<GachaOddsPayload, string>({
+      queryFn: (code, { signal }) => run(getGachaOdds(code, signal)),
+      keepUnusedDataFor: 300,
+    }),
   }),
 });
 
@@ -114,6 +137,10 @@ export const {
   useWalletPullsQuery,
   useHoldingsQuery,
   useSuggestQuery,
+  useGachaLiveQuery,
+  useGachaHitsQuery,
+  useGachaMachinesQuery,
+  useGachaOddsQuery,
 } = api;
 
 export default api;

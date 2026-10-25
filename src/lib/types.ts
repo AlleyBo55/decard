@@ -317,3 +317,124 @@ export interface WalletLuckSummary {
   /** valueInsured / expectedTotal. */
   valueRatio: number | null;
 }
+
+// --- Live gacha (Collector Crypt's public gacha feeds) ---
+
+/** One pack opening from Collector Crypt's live feed. */
+export interface LivePull {
+  /** Feed id; increases with every pull. */
+  id: number;
+  memo: string;
+  /** ISO time the pack was bought. */
+  at: string;
+  wallet: string;
+  packType: string;
+  packName: string | null;
+  category: string | null;
+  /** Pack price, USD. 0 for a free spin. */
+  price: number;
+  /** Null until the card is awarded. */
+  tier: GachaTier | null;
+  insuredValue: number | null;
+  /** insuredValue / price; null for free spins or before the award. */
+  multiple: number | null;
+  mint: string | null;
+  turbo: boolean;
+  free: boolean;
+}
+
+export interface LivePullsPayload {
+  /** Newest first, at most 50 (about the last two minutes). */
+  pulls: LivePull[];
+  updatedAt: string;
+}
+
+/** An epic pull from Collector Crypt's recent winners. */
+export interface BigHit {
+  at: string;
+  wallet: string;
+  packType: string;
+  packName: string | null;
+  category: string | null;
+  price: number | null;
+  insuredValue: number;
+  /** insuredValue / price. */
+  multiple: number | null;
+  mint: string;
+  cardName: string;
+  imageUrl: string | null;
+  /** Where the pack was opened, e.g. "cc" or "jupiter". */
+  platform: string | null;
+}
+
+export interface BigHitsPayload {
+  /** Newest first, up to 100 (roughly the last 12 hours). */
+  hits: BigHit[];
+  /** Time of the oldest hit: the start of the window. */
+  since: string | null;
+  updatedAt: string;
+}
+
+export interface TierBandUsd {
+  start: number;
+  end: number;
+}
+
+/** A public gacha machine, with the odds that need no pool data. */
+export interface GachaMachine {
+  code: string;
+  name: string;
+  category: string;
+  price: number;
+  imageUrl: string | null;
+  /** Instant buyback as a fraction of insured value, 0..1. */
+  buybackRate: number;
+  odds: Record<GachaTier, number>;
+  bands: Record<GachaTier, TierBandUsd>;
+  stock: Record<GachaTier, number>;
+  /** Collector Crypt's expected insured value per pack, USD. */
+  ev: number;
+  /** ev / price. */
+  evPerDollar: number;
+  /** ev * buybackRate / price: average cash back per $1 if every card is sold back. */
+  cashOutPerDollar: number;
+  /** P(card worth >= price) when the price sits on a tier edge (exact from odds alone); null when it needs pool data. */
+  cardBeatsPriceEdge: number | null;
+}
+
+export interface GachaMachinesPayload {
+  machines: GachaMachine[];
+  updatedAt: string;
+}
+
+/** A top card in a machine's epic tier right now. */
+export interface ChaseCard {
+  mint: string;
+  name: string;
+  imageUrl: string | null;
+  value: number;
+  /** Chance this exact card is the next pull, 0..1. */
+  chance: number;
+}
+
+/** "If you pull now" for one machine: published tier odds plus the newest pool snapshots. */
+export interface GachaOdds {
+  machine: GachaMachine;
+  /** P(card insured value >= price). */
+  cardBeatsPrice: number | null;
+  /** P(instant buyback payout >= price). */
+  sellBackBeatsPrice: number | null;
+  /** P(card insured value >= 2x price). */
+  doubleUp: number | null;
+  /** Best first, at most 6. */
+  chase: ChaseCard[];
+  /** Age of the oldest pool snapshot used, minutes; null when only the odds were needed. */
+  poolAgeMinutes: number | null;
+  /** Plain-language reasons for any null field. */
+  notes: string[];
+  updatedAt: string;
+}
+
+export interface GachaOddsPayload {
+  odds: GachaOdds;
+}
