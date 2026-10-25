@@ -5,10 +5,14 @@ import type {
   HomeListingsPayload,
   HotBidsPayload,
   MarketplacePage,
+  PullLuckPayload,
   SolPrice,
+  WalletPullsPayload,
 } from "@/lib/types";
 import getActivity, { type ActivityParams, type ActivityPayload } from "@/services/Activity/getActivity";
 import getHighlights from "@/services/Highlights/getHighlights";
+import getLuck from "@/services/Luck/getLuck";
+import getWalletPulls from "@/services/Luck/getWalletPulls";
 import getMarket, { type Market, type MarketParams } from "@/services/Market/getMarket";
 import getSolPrice from "@/services/Price/getSolPrice";
 import getHoldings from "@/services/Scanner/getHoldings";
@@ -68,6 +72,12 @@ const api = createApi({
     activity: build.query<ActivityPayload, ActivityParams>({
       queryFn: (params, { signal }) => run(getActivity(params, signal)),
     }),
+    luck: build.query<PullLuckPayload, string>({
+      queryFn: (memo, { signal }) => run(getLuck(memo, signal)),
+    }),
+    walletPulls: build.query<WalletPullsPayload, string>({
+      queryFn: (wallet, { signal }) => run(getWalletPulls(wallet, signal)),
+    }),
     holdings: build.query<MarketplacePage, string>({
       queryFn: (wallet, { signal }) => run(getHoldings(wallet, signal)),
     }),
@@ -100,6 +110,8 @@ export const {
   useMarketQuery,
   useScannerInfiniteQuery,
   useActivityQuery,
+  useLuckQuery,
+  useWalletPullsQuery,
   useHoldingsQuery,
   useSuggestQuery,
 } = api;

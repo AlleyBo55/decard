@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useWalletActivity } from "@/hooks/pages/Wallet/useWalletActivity";
 import { useWalletHoldings } from "@/hooks/pages/Wallet/useWalletHoldings";
@@ -123,6 +124,9 @@ export function WalletView({ wallet }: { wallet: string }) {
               <a href={solscanAddr(wallet)} target="_blank" rel="noreferrer" className="text-sm font-extrabold text-azure-deep hover:text-poke-deep">
                 Solscan ↗
               </a>
+              <Link href={`/luck?wallet=${encodeURIComponent(wallet)}`} className="text-sm font-extrabold text-azure-deep hover:text-poke-deep">
+                Pull luck →
+              </Link>
             </div>
             {badges.length > 0 && (
               <div className="flex items-center gap-2 flex-wrap mt-1">

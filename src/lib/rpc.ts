@@ -1,8 +1,9 @@
 import "server-only";
 import fetcher, { createAPIError, isAPIError } from "@/helpers/fetcher";
-import { SOLANA_RPC, HELIUS_RPC, CC_MARKETPLACE_PROGRAM, CC_TREASURY } from "./constants";
+import { SOLANA_RPC, SOLANA_ARCHIVE_RPC, HELIUS_RPC, CC_MARKETPLACE_PROGRAM, CC_TREASURY } from "./constants";
 import { cached } from "./cache";
 import { decodeActivity, linkReprices, type SigInfo } from "./decode";
+import type { WalletPullsPayload } from "./types";
 
 export { decodeActivity };
 
@@ -298,5 +299,74 @@ export function getCardActivity(mint: string, limit = 20) {
   return cached(`rpc:card:${mint}:${limit}`, 15_000, async () => {
     const rows = await loadLinkedHistory(mint, limit);
     return rows.map((r) => ({ ...r, assetMint: mint, _mintCandidates: [mint] }));
+  });
+}
+
+// --- Gacha pack history -----------------------------------------------------------
+
+/** A getSignaturesForAddress row. The RPC copies the transaction's memo text into `memo`. */
+interface MemoSig extends SigInfo {
+  memo?: string | null;
+}
+
+// A pack's payment and award transactions both carry its memo, e.g. "[47] cc-…:buyback".
+const PACK_MEMO = /cc-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}/gi;
+const SIG_PAGE = 1000;
+const PACK_PAGES = 3;
+export const WALLET_PULL_LIMIT = 50;
+
+/**
+ * One page of signatures from an RPC with full history: Helius when configured,
+ * else the archive public RPC. The default keyless RPC is the last resort because
+ * it only keeps recent signatures, so older pulls would silently go missing.
+ */
+async function historySignatures(address: string, before?: string): Promise<MemoSig[]> {
+  const opts: Record<string, unknown> = { limit: SIG_PAGE };
+  if (before) opts.before = before;
+  const params = [address, opts];
+  try {
+    return await rpcCall<MemoSig[]>("getSignaturesForAddress", params, "helius");
+  } catch {
+    // Not configured, cooling down or failing: try the archive node next.
+  }
+  try {
+    const body = { jsonrpc: "2.0", id: 1, method: "getSignaturesForAddress", params };
+    return unwrap<MemoSig[]>("getSignaturesForAddress", await post<RpcEnvelope<MemoSig[]>>(SOLANA_ARCHIVE_RPC, body, 1, false));
+  } catch {
+    return rpcCall<MemoSig[]>("getSignaturesForAddress", params, "public");
+  }
+}
+
+/**
+ * A wallet's gacha pack memos, newest first: the latest 50, read from at most
+ * 3,000 transactions. Each pull is scored separately through /api/luck, whose
+ * immutable results are cached, so this is the only per-wallet upstream read.
+ */
+export function getWalletPackMemos(wallet: string): Promise<WalletPullsPayload> {
+  return cached(`rpc:packs:${wallet}`, 20_000, async () => {
+    const newest = new Map<string, number | null>();
+    let scanned = 0;
+    let before: string | undefined;
+    let exhausted = false;
+    for (let page = 0; page < PACK_PAGES && newest.size < WALLET_PULL_LIMIT; page++) {
+      const rows = await historySignatures(wallet, before);
+      scanned += rows.length;
+      for (const row of rows) {
+        if (row.err || typeof row.memo !== "string") continue;
+        for (const match of row.memo.matchAll(PACK_MEMO)) {
+          const memo = match[0].toLowerCase();
+          if (!newest.has(memo)) newest.set(memo, row.blockTime ?? null);
+        }
+      }
+      if (rows.length < SIG_PAGE) {
+        exhausted = true;
+        break;
+      }
+      before = rows[rows.length - 1].signature;
+    }
+    const memos = [...newest.entries()]
+      .slice(0, WALLET_PULL_LIMIT)
+      .map(([memo, blockTime]) => ({ memo, blockTime }));
+    return { wallet, memos, scanned, complete: exhausted && newest.size <= WALLET_PULL_LIMIT };
   });
 }

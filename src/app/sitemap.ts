@@ -54,6 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/scanner", lastModified: now, changeFrequency: "hourly" as const, priority: 0.9 },
     { path: "/cards", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
     { path: "/tape", lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
+    { path: "/luck", lastModified: "2026-10-22", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/guide", lastModified: "2026-10-23", changeFrequency: "monthly" as const, priority: 0.8 },
     { path: "/pokemon-card-value-checker", lastModified: "2026-10-23", changeFrequency: "daily" as const, priority: 0.9 },
     { path: "/pokemon", lastModified: now, changeFrequency: "daily" as const, priority: 0.8 },
