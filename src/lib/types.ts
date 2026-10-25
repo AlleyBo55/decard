@@ -241,3 +241,79 @@ export type HomeListingsPayload = Pick<
 >;
 export type HomeActivityPayload = Pick<HighlightsPayload, "recentSales" | "recentActivity">;
 export type HotBidsPayload = Pick<HighlightsPayload, "hotBids">;
+
+// --- Gacha pull luck (Collector Crypt public VRF witness) ---
+
+export type GachaTier = "common" | "uncommon" | "rare" | "epic";
+
+/** One historical pull scored against the exact candidate pool available when it was awarded. */
+export interface PullLuck {
+  memo: string;
+  pulledAt: string | null;
+  poolVersion: string;
+  tier: GachaTier;
+  /** Probability of rolling this exact tier (0..1). */
+  tierChance: number;
+  /** Committed leaf value of the awarded card. */
+  insuredValue: number;
+  /** Midrank percentile: P(worse) + 0.5 × P(equal), 0..1. */
+  luckScore: number;
+  /** Probability that a possible pull was worth strictly less, 0..1. */
+  beatRate: number;
+  /** Probability that a possible pull was worth the same or more, 0..1. */
+  equalOrBetterRate: number;
+  /** Probability of the exact same insured value, 0..1. */
+  tieRate: number;
+  tierCandidates: number;
+  tierAvailable: number;
+  tierUnavailable: number;
+  machineEv: number | null;
+  targetEv: number | null;
+  /** New packs commit exact integer thresholds; older witnesses publish machine weights. */
+  oddsBasis: "committed" | "published";
+  selectionVerified: boolean;
+  card: { mint: string; name: string };
+  wallet: string | null;
+  transactionSignature: string | null;
+  officialVerifierUrl: string;
+}
+
+export interface PullLuckPayload {
+  result: PullLuck;
+}
+
+/** A pack memo found in a wallet's on-chain history. A pack's payment and award share one memo. */
+export interface WalletPackMemo {
+  memo: string;
+  /** Unix seconds of the newest transaction carrying the memo. */
+  blockTime: number | null;
+}
+
+export interface WalletPullsPayload {
+  wallet: string;
+  /** Newest first, at most 50. */
+  memos: WalletPackMemo[];
+  /** Transactions read from the wallet's history. */
+  scanned: number;
+  /** True when the whole history was read and every pack memo is listed. */
+  complete: boolean;
+}
+
+/** Luck across a wallet's scored pulls. */
+export interface WalletLuckSummary {
+  scored: number;
+  /** Mean luck score, 0..1. Fair luck averages 0.5. */
+  meanScore: number;
+  /** About how often a fair run of the same number of pulls averages lower, 0..1. */
+  runPercentile: number;
+  best: PullLuck | null;
+  tiers: Record<GachaTier, number>;
+  insuredTotal: number;
+  /** Pulls that report machine EV; the value fields below cover only these. */
+  valueSample: number;
+  valueInsured: number;
+  /** Sum of machine EV (expected insured value per pull). Null when no pull reports it. */
+  expectedTotal: number | null;
+  /** valueInsured / expectedTotal. */
+  valueRatio: number | null;
+}

@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { WalletSearch } from "@/components/WalletSearch";
 import { SolTicker } from "@/components/SolTicker";
-import { Pokedex, TownMap, Pulse, Books, BallSearch } from "@/components/icons";
+import { Pokedex, TownMap, Pulse, Books, BallSearch, Sparkle } from "@/components/icons";
 import { clsx } from "@/lib/clsx";
 
 const LINKS = [
   { href: "/", label: "Home", Icon: Pokedex },
   { href: "/scanner", label: "Scanner", Icon: TownMap },
   { href: "/tape", label: "Live Tape", Icon: Pulse },
+  { href: "/luck", label: "Pull Luck", Icon: Sparkle },
   { href: "/guide", label: "Guide", Icon: Books },
 ];
 
@@ -83,7 +84,7 @@ export function Nav() {
         aria-label="Main"
         className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-sand bg-cream-hi/95 backdrop-blur pb-safe"
       >
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {LINKS.map(({ href, label, Icon }) => {
             const active = isActive(href);
             return (
