@@ -3,6 +3,7 @@ import { WalletSearch } from "@/components/WalletSearch";
 import { HeroCatch } from "@/components/HeroCatch";
 import { HeroStats } from "@/components/home/HeroStats";
 import { TickerBands } from "@/components/home/TickerBands";
+import { HomeLiveGacha } from "@/components/home/HomeLiveGacha";
 import { HomeSections } from "@/components/home/HomeSections";
 import { DialogBox, MoreLink, SectionHead, TypeChip } from "@/components/ui";
 import { Reveal } from "@/components/motion";
@@ -79,6 +80,8 @@ export default function Home() {
       </section>
 
       <TickerBands />
+
+      <HomeLiveGacha />
 
       <HomeSections />
 

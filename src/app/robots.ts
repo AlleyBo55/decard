@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         // data it reads (card rails, listings, the links to card pages).
         // next.config marks every /api response noindex. Per-card and per-wallet
         // history stays closed: each URL is a paid RPC call and adds nothing to search.
-        disallow: ["/api/activity?*mint=", "/api/activity?*wallet=", "/api/luck/wallet"],
+        disallow: ["/api/activity?*mint=", "/api/activity?*wallet=", "/api/luck/wallet", "/api/gacha/odds"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
