@@ -1,0 +1,1146 @@
+/* Pull receipt dialog: a Gen 1 Pokédex. Phones get a bottom sheet with the
+   screen on top; tablets and desktops get the clamshell, screen on the left
+   and the controls on the lid. Global and pr- prefixed like gacha.css (every
+   *.css is global under the Turbopack rule), unlayered, and it reuses the
+   gx- lens, LEDs, seam, bezel and LCD from gacha.css. */
+
+:root {
+  --pr-shell-bg:
+    radial-gradient(120% 70% at 8% 0%, rgb(255 255 255 / 0.2), transparent 55%),
+    linear-gradient(168deg, #ef5126 0%, var(--color-poke) 42%, #c92e0b 100%);
+  --pr-shell-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.35), inset 0 0 0 2px var(--color-poke-deep),
+    inset 0 -5px 0 var(--color-poke-deep), 0 6px 0 var(--color-poke-dark), 0 28px 44px -26px rgb(41 38 61 / 0.7);
+}
+
+.pr-root {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+.pr-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(24 22 38 / 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.pr-place {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+.pr-place > * {
+  pointer-events: auto;
+}
+
+/* Phone: one red sheet that scrolls, the screen half on top. */
+.pr-device {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 94dvh;
+  border-radius: 26px 26px 0 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  outline: none;
+  color: #fff;
+  background: var(--pr-shell-bg);
+  box-shadow: var(--pr-shell-shadow);
+}
+.pr-panel {
+  position: relative;
+  min-width: 0;
+}
+.pr-front {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px 12px 14px;
+}
+/* The lid scrolls instead: its blocks must keep their height. */
+.pr-right > .pr-front > * {
+  flex-shrink: 0;
+}
+.pr-lid {
+  display: none;
+}
+/* The seam's negative margins expect the shell padding, not a flex gap. */
+.pr-left > .pr-front {
+  gap: 0;
+  padding-top: 4px;
+}
+
+/* Drag zone on the phone sheet: the grab bar and the top row. */
+.pr-grab {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  touch-action: none;
+  cursor: grab;
+}
+.pr-grab::before {
+  content: "";
+  width: 44px;
+  height: 5px;
+  border-radius: 99px;
+  background: rgb(126 28 7 / 0.55);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.25);
+}
+
+.pr-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 52px 0 4px;
+}
+.pr-top .gx-lens {
+  --l: 40px;
+}
+/* The screen half's top row is a drag handle on the phone sheet. */
+.pr-left .pr-top {
+  touch-action: none;
+}
+
+/* Sticky on the phone sheet so it stays in reach while the sheet scrolls. */
+.pr-close {
+  position: sticky;
+  top: 8px;
+  align-self: flex-end;
+  margin: 0 12px -44px 0;
+  flex: none;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 3px 0 var(--color-ink);
+  transition: transform 0.12s var(--ease-out), box-shadow 0.12s var(--ease-out);
+}
+.pr-close:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--color-ink);
+}
+
+/* Phone hinge: a horizontal barrel between the screen and the controls. */
+.pr-hinge {
+  flex: none;
+  height: 16px;
+  margin: 0 -2px;
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgb(0 0 0 / 0.18) 18% 19%, transparent 19% 81%, rgb(0 0 0 / 0.18) 81% 82%, transparent 82%),
+    linear-gradient(180deg, #8e1f07 0%, #c92e0b 30%, #ef5126 50%, #c92e0b 70%, #7e1c07 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 1px 0 rgb(0 0 0 / 0.2);
+}
+
+/* Tablet and desktop: the clamshell. Two equal shells either side of a hinge,
+   so the lid folded shut covers the screen half exactly. */
+@media (min-width: 768px) and (min-height: 560px) {
+  .pr-place {
+    align-items: center;
+    padding: 24px;
+  }
+  .pr-device {
+    flex-direction: row;
+    align-items: stretch;
+    width: min(1080px, 100%);
+    /* 740px on desktops; portrait tablets get most of their extra height. */
+    height: min(max(740px, 72dvh), calc(100dvh - 48px));
+    max-height: none;
+    overflow: visible;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    perspective: 2400px;
+  }
+  .pr-grab {
+    display: none;
+  }
+  .pr-panel {
+    flex: 1 1 0;
+  }
+  .pr-left,
+  .pr-right > .pr-front,
+  .pr-lid {
+    border-radius: 26px;
+    background: var(--pr-shell-bg);
+    box-shadow: var(--pr-shell-shadow);
+  }
+  .pr-left {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px 16px;
+  }
+  .pr-left > .pr-front {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+  }
+  .pr-right {
+    transform-style: preserve-3d;
+    transform-origin: -8px 50%;
+  }
+  .pr-right > .pr-front {
+    position: absolute;
+    inset: 0;
+    padding: 16px 18px 18px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .pr-lid {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    transform: rotateY(180deg);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .pr-hinge {
+    width: 16px;
+    height: auto;
+    margin: 40px 0;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #7e1c07 0%, #c92e0b 30%, #ef5126 50%, #c92e0b 70%, #7e1c07 100%);
+  }
+  .pr-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    margin: 0;
+  }
+  .pr-top {
+    padding-right: 4px;
+  }
+}
+
+/* ------------------------------------------------------------- the lid */
+@media (min-width: 768px) and (min-height: 560px) {
+  .pr-lid-emblem {
+    display: grid;
+    place-items: center;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.22), transparent 60%),
+      rgb(126 28 7 / 0.28);
+    box-shadow:
+      inset 0 5px 12px rgb(0 0 0 / 0.28),
+      0 2px 0 rgb(255 255 255 / 0.25);
+  }
+  .pr-lid .pokeball {
+    --s: 124px;
+  }
+  .pr-lid-word {
+    font-size: 26px;
+  }
+  .pr-lid-tag {
+    font-family: var(--ff-pixel);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: rgb(255 255 255 / 0.85);
+    text-shadow: 0 2px 0 var(--color-poke-dark);
+  }
+}
+
+/* ---------------------------------------------------------- the screen */
+.pr-left .gx-bezel {
+  margin-top: 2px;
+}
+@media (min-width: 768px) and (min-height: 560px) {
+  .pr-left .gx-bezel {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+  .pr-left .gx-screen {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* Game Boy text box under the screen. */
+.pr-say {
+  margin-top: 12px;
+  min-height: 66px;
+  padding: 0.85rem 1.1rem;
+  color: var(--color-ink);
+}
+.pr-say p {
+  font-family: var(--ff-pixel);
+  font-size: 10px;
+  line-height: 1.9;
+  min-height: 3.8em;
+}
+.pr-cursor {
+  display: inline-block;
+  width: 0.6em;
+  margin-left: 2px;
+  color: var(--color-poke);
+  animation: bob 0.9s steps(2, jump-none) infinite;
+}
+
+/* ----------------------------------------------------------- the stage */
+.pr-stage {
+  --pr-tint: rgb(255 203 5 / 0.5);
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: min(54dvh, 430px);
+  min-height: 300px;
+  overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  background:
+    radial-gradient(70% 55% at 50% 42%, rgb(255 255 255 / 0.95), transparent 72%),
+    var(--pattern),
+    linear-gradient(180deg, #fbf6ea 0%, #f1e8d6 62%, #e3d5ba 100%);
+}
+@media (min-width: 768px) and (min-height: 560px) {
+  .pr-stage {
+    height: 100%;
+    min-height: 0;
+  }
+}
+.pr-stage[data-phase="drop"],
+.pr-stage[data-phase="wobble"],
+.pr-stage[data-phase="catch"] {
+  cursor: pointer;
+}
+
+/* "Item get!" sunburst behind the slab, tinted by rarity. */
+.pr-rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: -1;
+  width: max(170%, 640px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: repeating-conic-gradient(from 0deg, var(--pr-tint) 0deg 7deg, transparent 7deg 18deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 0%, rgb(0 0 0 / 0.55) 34%, transparent 68%);
+  mask-image: radial-gradient(closest-side, #000 0%, rgb(0 0 0 / 0.55) 34%, transparent 68%);
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-out);
+  animation: pr-spin 40s linear infinite;
+}
+.pr-stage[data-phase="reveal"] .pr-rays,
+.pr-stage[data-phase="idle"] .pr-rays {
+  opacity: 0.6;
+}
+
+.pr-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  z-index: 0;
+  width: 48%;
+  height: 20px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(41 38 61 / 0.34), transparent);
+  animation: pr-floor 5.5s ease-in-out infinite;
+}
+
+/* The ball: a big CSS Poké Ball; the glint blinks on each wobble. */
+.pr-ball {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 96px;
+  height: 96px;
+  margin: -48px 0 0 -48px;
+}
+.pr-ball .pokeball {
+  --s: 96px;
+  display: block;
+  box-shadow: 0 12px 18px -10px rgb(41 38 61 / 0.6);
+}
+.pr-ball-glint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34%;
+  height: 34%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(closest-side, #fff, rgb(255 90 74 / 0.9) 60%, transparent);
+}
+.pr-stage[data-phase="wobble"] .pr-ball-glint {
+  animation: pr-glint 0.42s ease-out 0.2s 3;
+}
+.pr-stage[data-phase="catch"] .pr-ball-glint {
+  opacity: 1;
+  background: radial-gradient(closest-side, #fff, rgb(255 255 255 / 0.9) 55%, transparent);
+}
+
+.pr-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 48%, #fff 0%, rgb(255 255 255 / 0.85) 38%, rgb(255 246 214 / 0) 78%);
+  opacity: 0;
+  animation: pr-flash 0.6s ease-out forwards;
+}
+
+.pr-stars {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 7;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.pr-star {
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  background: var(--color-pika);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  opacity: 0;
+  animation: pr-star 0.85s var(--ease-out) var(--d, 0s) forwards;
+}
+.pr-star:nth-child(3n) {
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+}
+.pr-star:nth-child(3n + 1) {
+  background: #7fd3ff;
+}
+
+/* ------------------------------------------------------------ the slab */
+.pr-slab {
+  position: relative;
+  z-index: 3;
+  height: min(80%, 480px);
+  aspect-ratio: 3 / 5;
+}
+.pr-float {
+  height: 100%;
+  animation: pr-float 5.5s ease-in-out infinite;
+}
+.pr-tilt {
+  position: relative;
+  height: 100%;
+  border-radius: 16px;
+  transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.55s var(--ease-out);
+}
+.pr-tilt[data-active="true"] {
+  transition: transform 0.08s linear;
+}
+.pr-flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+.pr-flip[data-flipped="true"] {
+  transform: rotateY(180deg);
+}
+.pr-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--color-sand);
+  background: var(--color-cream-hi);
+  padding: 8px;
+  box-shadow: var(--shadow-lift);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.pr-face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.pr-back {
+  transform: rotateY(180deg);
+}
+
+/* Holo glare follows the pointer or the gyro; the sweep is one band of light
+   every few seconds, so the slab looks alive with nobody touching it. */
+.pr-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s;
+  mix-blend-mode: soft-light;
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.75), transparent 45%),
+    linear-gradient(115deg, transparent 18%, rgb(255 203 5 / 0.38) 34%, rgb(99 144 240 / 0.34) 48%, rgb(249 85 135 / 0.3) 62%, transparent 78%);
+  background-size:
+    100% 100%,
+    240% 240%;
+  background-position:
+    center,
+    var(--mx, 50%) var(--my, 50%);
+}
+.pr-tilt[data-active="true"] .pr-glare {
+  opacity: 1;
+}
+.pr-sweep {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  pointer-events: none;
+}
+.pr-sweep::before {
+  content: "";
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: 0;
+  width: 42%;
+  translate: -170% 0;
+  rotate: 16deg;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.7), transparent);
+  mix-blend-mode: overlay;
+}
+.pr-stage[data-phase="reveal"] .pr-sweep::before,
+.pr-stage[data-phase="idle"] .pr-sweep::before {
+  animation: pr-sweep 5.4s ease-in-out 0.25s infinite;
+}
+
+/* Grade stamp, slammed onto the slab's corner. */
+.pr-stamp {
+  position: absolute;
+  right: -16%;
+  bottom: 8%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 10px 8px;
+  border-radius: 10px;
+  border: 3px solid var(--color-ink);
+  background: var(--color-poke-deep);
+  color: #fff;
+  font-family: var(--ff-pixel);
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 var(--color-ink);
+  pointer-events: none;
+}
+.pr-stamp small {
+  border-radius: 4px;
+  border: 1.5px solid rgb(255 255 255 / 0.7);
+  padding: 3px 4px 2px;
+  font-size: 7px;
+}
+.pr-stage[data-stamped="true"] .pr-shake {
+  animation: pr-shake 0.34s var(--ease-out);
+}
+.pr-shake {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  perspective: 1200px;
+}
+
+.pr-skip,
+.pr-tool {
+  position: relative;
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 13px;
+  border-radius: 99px;
+  border: 2px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1;
+  box-shadow: 0 2px 0 var(--color-ink);
+  transition: transform 0.1s var(--ease-out), box-shadow 0.1s;
+}
+.pr-skip:active,
+.pr-tool:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--color-ink);
+}
+.pr-skip {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: var(--color-ink);
+  color: var(--color-pika);
+}
+.pr-tool[aria-pressed="true"] {
+  background: var(--color-pika);
+}
+.pr-tools {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 8;
+  display: flex;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------- the controls */
+.pr-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 0 var(--color-poke-dark);
+}
+.pr-label em {
+  font-style: normal;
+  color: rgb(255 255 255 / 0.75);
+}
+
+/* Stats on the dex's green LCD. Figures in Nunito 900: Pixelify draws 5 like 8. */
+.pr-lcd .gx-lcd-value {
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+}
+.pr-listed {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgb(255 255 255 / 0.92);
+}
+
+.pr-keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.pr-key {
+  min-height: 44px;
+  border-radius: 10px;
+  border: 2.5px solid var(--color-ink);
+  background: linear-gradient(180deg, #4f9fe6 0%, var(--color-azure) 55%, var(--color-azure-deep) 100%);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.3);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.35),
+    0 4px 0 var(--color-ink);
+  transition:
+    transform 0.1s var(--ease-out),
+    box-shadow 0.1s var(--ease-out),
+    filter 0.2s;
+}
+.pr-key:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.35),
+    0 1px 0 var(--color-ink);
+}
+.pr-key[aria-pressed="true"] {
+  background: linear-gradient(180deg, #ffe680 0%, var(--color-pika) 50%, var(--color-pika-deep) 100%);
+  color: var(--color-ink);
+  text-shadow: none;
+}
+@media (hover: hover) {
+  .pr-key:hover,
+  .pr-skey:hover {
+    filter: brightness(1.07);
+  }
+}
+
+.pr-custom {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pr-input {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  box-shadow: inset 0 2px 4px rgb(41 38 61 / 0.18);
+}
+.pr-input:focus-within {
+  outline: 3px solid var(--color-pika);
+  outline-offset: 1px;
+}
+.pr-input[data-invalid="true"] {
+  border-color: var(--color-down);
+  background: #fff1ee;
+}
+.pr-input > span {
+  margin-right: 4px;
+  font-weight: 900;
+  color: var(--color-ink-mute);
+}
+.pr-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-weight: 900;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.pr-input input::placeholder {
+  color: var(--color-ink-mute);
+  font-weight: 800;
+}
+.pr-ghost {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 2.5px solid var(--color-ink);
+  background: rgb(126 28 7 / 0.35);
+  color: #fff;
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+}
+.pr-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffe2dc;
+}
+
+/* The multiple on a second Game Boy LCD, with an EXP bar to 5x. */
+.pr-meter {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--color-gb-3);
+  color: var(--color-gb-0);
+  box-shadow:
+    0 0 0 3px #3a3751,
+    inset 0 0 0 2px var(--color-gb-2),
+    inset 0 5px 12px rgb(15 56 15 / 0.32);
+}
+.pr-meter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(15 56 15 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(15 56 15 / 0.07) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+.pr-meter[data-level="gold"] {
+  animation: pr-gold 1.6s ease-in-out 1;
+}
+.pr-meter-head {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pr-meter-label {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.pr-mult {
+  position: relative;
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 40px;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.pr-meter[data-level="gold"] .pr-mult {
+  text-shadow: 2px 2px 0 var(--color-pika);
+}
+.pr-meter .gx-burst {
+  left: 50%;
+  top: 40%;
+}
+.pr-exp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pr-exp-label {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+}
+.pr-exp-track {
+  position: relative;
+  flex: 1;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 99px;
+  border: 2px solid var(--color-gb-0);
+  background: rgb(15 56 15 / 0.16);
+}
+.pr-exp-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 99px;
+  background: var(--color-gb-1);
+}
+.pr-meter[data-level="green"] .pr-exp-fill {
+  background: var(--color-gb-0);
+}
+.pr-meter[data-level="gold"] .pr-exp-fill {
+  background: linear-gradient(90deg, var(--color-pika-deep), var(--color-pika), #fff3b0, var(--color-pika)) 0 0 / 200% 100%;
+  animation: gx-shimmer 2s linear infinite;
+}
+.pr-exp-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20%;
+  width: 2px;
+  background: var(--color-gb-0);
+  opacity: 0.6;
+}
+.pr-meter-note {
+  position: relative;
+  margin-top: 9px;
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.8;
+}
+
+.pr-share {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.pr-skey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 8px;
+  border-radius: 12px;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 var(--color-ink);
+  transition:
+    transform 0.1s var(--ease-out),
+    box-shadow 0.1s var(--ease-out),
+    filter 0.2s;
+}
+.pr-skey:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--color-ink);
+}
+.pr-skey svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  --pr-ico-bg: var(--color-cream-hi);
+}
+.pr-skey[data-brand="x"] svg {
+  color: #0f1419;
+}
+.pr-skey[data-brand="telegram"] svg {
+  color: #229ed9;
+}
+.pr-skey[data-brand="reddit"] svg {
+  color: #ff4500;
+}
+.pr-skey[data-brand="discord"] svg {
+  color: #5865f2;
+}
+.pr-skey[data-brand="native"] {
+  background: var(--color-pika);
+}
+
+.pr-link {
+  display: flex;
+  align-items: stretch;
+  min-height: 44px;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 2.5px solid var(--color-ink);
+  background: #2b2840;
+}
+.pr-link code {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+  overflow: hidden;
+  font-family: var(--ff-mono);
+  font-size: 12.5px;
+  color: #e9e4f7;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.pr-link button {
+  flex: none;
+  padding: 0 14px;
+  border-left: 2.5px solid var(--color-ink);
+  background: var(--color-pika);
+  color: var(--color-ink);
+  font-family: var(--ff-pixel);
+  font-size: 9px;
+}
+
+/* What the link preview will show: the actual PNG. */
+.pr-shot {
+  position: relative;
+  aspect-ratio: 1200 / 630;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 3px solid var(--color-ink);
+  background: var(--color-cream-lo);
+  box-shadow: 0 4px 0 var(--color-ink);
+}
+.pr-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    opacity 0.3s,
+    filter 0.3s;
+}
+.pr-shot[data-busy="true"] img {
+  opacity: 0.55;
+  filter: saturate(0.6) blur(1px);
+}
+.pr-shot-tag {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  border-radius: 6px;
+  padding: 5px 7px 4px;
+  background: var(--color-ink);
+  color: var(--color-pika);
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1;
+}
+
+.pr-fine {
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.88);
+}
+
+/* Phone: the main actions stay pinned under the scrolling sheet. */
+.pr-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: auto;
+  padding: 14px 12px max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgb(201 46 11 / 0), #c92e0b 34%);
+}
+.pr-dock .btn {
+  min-height: 48px;
+  border: 2.5px solid var(--color-ink);
+}
+@media (min-width: 768px) and (min-height: 560px) {
+  .pr-dock {
+    display: none;
+  }
+}
+
+.pr-toast {
+  position: absolute;
+  left: 50%;
+  bottom: max(96px, calc(env(safe-area-inset-bottom) + 84px));
+  z-index: 95;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  translate: -50% 0;
+  border-radius: 12px;
+  border: 2px solid var(--color-pika);
+  padding: 10px 14px;
+  background: var(--color-ink);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 12px 26px -12px rgb(0 0 0 / 0.6);
+  pointer-events: none;
+}
+@media (min-width: 768px) and (min-height: 560px) {
+  .pr-toast {
+    bottom: 40px;
+  }
+}
+
+/* --------------------------------------------------------- keyframes */
+@keyframes pr-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes pr-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -9px;
+  }
+}
+@keyframes pr-floor {
+  0%,
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+  50% {
+    scale: 0.86;
+    opacity: 0.75;
+  }
+}
+@keyframes pr-glint {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+@keyframes pr-flash {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pr-star {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(0) scale(0.3);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(calc(var(--r, 120px) * -1)) scale(1);
+  }
+}
+@keyframes pr-sweep {
+  0% {
+    translate: -170% 0;
+  }
+  24%,
+  100% {
+    translate: 340% 0;
+  }
+}
+@keyframes pr-shake {
+  20% {
+    translate: -5px 1px;
+  }
+  45% {
+    translate: 4px -1px;
+  }
+  70% {
+    translate: -2px 0;
+  }
+}
+@keyframes pr-gold {
+  0%,
+  100% {
+    background: var(--color-gb-3);
+  }
+  30% {
+    background: #f6e27a;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pr-rays,
+  .pr-float,
+  .pr-floor,
+  .pr-sweep::before {
+    animation: none !important;
+  }
+  .pr-tilt {
+    transform: none !important;
+  }
+}

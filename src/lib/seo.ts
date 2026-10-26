@@ -29,7 +29,7 @@ export function pageMetadata({
   description: string;
   /** Site-relative, e.g. "/scanner". Resolved against metadataBase. */
   path: string;
-  image?: { url: string; alt: string };
+  image?: { url: string; alt: string; width?: number; height?: number };
 }): Metadata {
   const full = `${title} · ${SITE_NAME}`;
   const images = [image ?? OG_IMAGE];
