@@ -7,10 +7,22 @@ import { dealScore, fmtNum, fmtPct, fmtUsd, gradeShort, shortCardName, timeAgo, 
 import { SITE_URL, cardImage, ccAssetUrl, solscanAddr } from "@/lib/constants";
 import { categoryPath, jsonLd, pageMetadata } from "@/lib/seo";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
+import {
+  compactGrade,
+  fmtMultiple,
+  fmtPack,
+  parsePack,
+  pullMultiple,
+  pullPath,
+  rarityTier,
+  receiptImagePath,
+  type RarityTier,
+} from "@/lib/pull";
 import type { CardDetail, CardMarket, CardOffer } from "@/lib/types";
 import { CardFlip } from "@/components/card/CardFlip";
 import { CardActivity } from "@/components/card/CardActivity";
 import { RelatedCards } from "@/components/card/RelatedCards";
+import { PullReceipt, type ReceiptLive } from "@/components/card/pull/PullReceipt";
 import { WalletName } from "@/components/ActivityRow";
 import { GradePill, HPBar, Kicker, Skeleton, StatBar, TypeChip } from "@/components/ui";
 
@@ -31,25 +43,50 @@ function cardDescription(card: CardDetail) {
   return `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ mint: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps<"/card/[mint]">): Promise<Metadata> {
   const { mint } = await params;
   const card = ADDRESS.test(mint) ? await loadCard(mint) : null;
   if (!card) return { title: "Card not found" };
   // Lead with what people search for: card, grade, then set.
   const name = `${shortCardName(card.itemName)} ${gradeShort(card.gradingCompany, card.grade)}`.trim();
-  return pageMetadata({
+  // ?pull=50 is a shared pull receipt: the link preview shows the receipt for
+  // that pack price. The canonical stays the plain card page.
+  const pack = parsePack((await searchParams).pull);
+  const insured = Number(card.insuredValue) || 0;
+  const base = pageMetadata({
     title: card.set ? `${name} price · ${card.set}` : `${name} price`,
     description: cardDescription(card),
     path: `/card/${mint}`,
-    image: { url: cardImage(mint, "front", 1024), alt: card.itemName },
+    image: {
+      url: receiptImagePath(mint, pack),
+      width: 1200,
+      height: 630,
+      alt: pack
+        ? `${name} pulled from a ${fmtPack(pack)} pack, insured at ${fmtUsd(insured)}`
+        : `${name}: insured value, listing, best bid and population`,
+    },
   });
+  if (!pack) return base;
+  const multiple = pullMultiple(insured, pack);
+  const title = `Pulled ${name} from a ${fmtPack(pack)} pack`;
+  const description = `${multiple != null ? `Insured value ${fmtUsd(insured)}, ${fmtMultiple(multiple)} the pack price. ` : ""}Pack price set by the sharer. Live price, pop report and bids on Decard.`;
+  return {
+    ...base,
+    openGraph: { ...base.openGraph, title, description, url: pullPath(mint, pack) },
+    twitter: { ...base.twitter, title, description },
+  };
 }
 
+const RARITY_CLS: Record<RarityTier, string> = {
+  LEGENDARY: "bg-[#6f35fc] text-white",
+  RARE: "bg-poke-deep text-white",
+  UNCOMMON: "bg-azure text-white",
+  COMMON: "bg-cream-lo text-ink-soft",
+};
+
 function rarity(pop: number) {
-  if (pop <= 10) return { label: "LEGENDARY", cls: "bg-[#6f35fc] text-white" };
-  if (pop <= 50) return { label: "RARE", cls: "bg-poke-deep text-white" };
-  if (pop <= 250) return { label: "UNCOMMON", cls: "bg-azure text-white" };
-  return { label: "COMMON", cls: "bg-cream-lo text-ink-soft" };
+  const label = rarityTier(pop);
+  return { label, cls: RARITY_CLS[label] };
 }
 
 function certUrl(company: string | null, cert: string | null) {
@@ -227,6 +264,27 @@ async function Trainer({ market }: { market: MarketData }) {
   );
 }
 
+/** Shown to people who open a shared pull receipt link (?pull=50). */
+function SharedPull({ pack, insured }: { pack: number; insured: number }) {
+  const multiple = pullMultiple(insured, pack);
+  return (
+    <aside aria-label="Shared pull" className="dialog flex flex-wrap items-center gap-x-5 gap-y-4 animate-pop">
+      <span className="pokeball pokeball-wobble" style={{ ["--s" as string]: "38px" }} aria-hidden />
+      <div className="min-w-0 flex-1 basis-64">
+        <p className="font-pixel text-[9px] text-poke-deep">SHARED PULL</p>
+        <p className="mt-2 text-lg font-extrabold leading-snug">
+          Pulled from a {fmtPack(pack)} pack.
+          {multiple != null && ` Insured value is ${fmtMultiple(multiple)} the pack price.`}
+        </p>
+        <p className="mt-1 text-sm text-ink-mute">The pack price comes from whoever shared the link.</p>
+      </div>
+      <Link href="/luck" className="btn btn-yellow">
+        Score your own pulls →
+      </Link>
+    </aside>
+  );
+}
+
 // --- Fallbacks, sized like what they stand in for. ---
 
 function ListingPriceSkeleton() {
@@ -268,13 +326,14 @@ function TrainerSkeleton() {
   );
 }
 
-export default async function CardPage({ params }: { params: Promise<{ mint: string }> }) {
+export default async function CardPage({ params, searchParams }: PageProps<"/card/[mint]">) {
   const { mint } = await params;
   if (!ADDRESS.test(mint)) notFound();
   // Start the live reads now, alongside the catalogue read. Neither rejects:
   // the market read resolves null on failure, offers resolve null.
   const market: MarketData = getCardMarket(mint);
   const offers: OffersData = getCardOffers(mint).catch(() => null);
+  const pack = parsePack((await searchParams).pull);
   // Upstream failures throw here and render error.tsx; only a real 404 is "not found".
   const card = await loadCard(mint);
   if (!card) notFound();
@@ -284,6 +343,20 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
   const grade = gradeShort(card.gradingCompany, card.grade);
   const cert = certUrl(card.gradingCompany, card.gradingID);
   const tier = pop ? rarity(pop.gradePopulation) : null;
+
+  // The share dialog reads the same live data the sections below stream in.
+  const receiptLive: ReceiptLive = {
+    listed: market.then((m) => {
+      // The market endpoint sends the price as a string despite the type.
+      const price = Number(m?.listing?.price);
+      if (!m?.listing || !(price > 0)) return null;
+      return {
+        price: m.listing.currency === "USDC" ? fmtUsd(price) : `${price} SOL`,
+        venue: venueName(m.listing.marketplace),
+      };
+    }),
+    bestBid: offers.then((list) => (list?.[0] ? Number(list[0].price) : null)),
+  };
 
   // Mirrors the visible breadcrumb, so Google can show it instead of the long mint URL.
   const crumbs = [
@@ -321,10 +394,30 @@ export default async function CardPage({ params }: { params: Promise<{ mint: str
         <span className="text-ink truncate">{shortCardName(card.itemName)}</span>
       </nav>
 
+      {pack && <SharedPull pack={pack} insured={insured} />}
+
       <div className="grid gap-12 lg:grid-cols-[minmax(300px,420px)_1fr] items-start">
         <div className="lg:sticky lg:top-24 flex flex-col gap-6">
           <CardFlip mint={card.nftAddress} name={card.itemName} images={card.images} />
           <div className="flex flex-wrap justify-center gap-3">
+            <PullReceipt
+              card={{
+                mint: card.nftAddress,
+                name: card.itemName,
+                short: shortCardName(card.itemName),
+                grade: compactGrade(grade),
+                insured,
+                pop: pop?.gradePopulation ?? null,
+                tier: pop ? rarityTier(pop.gradePopulation) : null,
+                front: cardImage(card.nftAddress, "front", 768, { images: card.images }),
+                frontSet: [512, 768, 1024]
+                  .map((w) => `${cardImage(card.nftAddress, "front", w, { images: card.images })} ${w}w`)
+                  .join(", "),
+                back: cardImage(card.nftAddress, "back", 768, { images: card.images }),
+              }}
+              live={receiptLive}
+              initialPack={pack}
+            />
             <a href={ccAssetUrl(card.nftAddress)} target="_blank" rel="noreferrer" className="btn btn-red">
               View on Collector Crypt ↗
             </a>
