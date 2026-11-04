@@ -26,7 +26,7 @@ export function trackShare(method: ShareMethod, mint: string, pack: number | nul
   gtag("event", "share_pull", { method, item_id: mint, pack_price: pack ?? 0 });
 }
 
-/** "decard-mega-charizard-x-ex-psa-10.png" */
+/** "decard-mega-charizard-x-ex-psa-10.jpg", matching the JPEG /og/card serves. */
 export function receiptFileName(title: string) {
   const slug = title
     .normalize("NFKD")
@@ -35,5 +35,5 @@ export function receiptFileName(title: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 60);
-  return `decard-${slug || "pull"}.png`;
+  return `decard-${slug || "pull"}.jpg`;
 }

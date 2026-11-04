@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
+import { cached } from "@/lib/cache";
 import { getCard, getCardMarket, getCardOffers } from "@/lib/cc";
 import { cardImage } from "@/lib/constants";
 import { fmtNum, fmtUsd, gradeShort, shortAddr, shortCardName, venueName } from "@/lib/format";
@@ -42,7 +43,24 @@ const MARKET_MS = 3_000;
 const OFFERS_MS = 2_500;
 const ART_MS = 4_000;
 
-const CACHE = "public, s-maxage=600, stale-while-revalidate=86400";
+// A render costs 120-190 ms of CPU, so the finished JPEG is kept in memory for
+// a day per card and pack price, and a CDN may keep it for a week.
+const DAY_MS = 86_400_000;
+const CACHE = "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400";
+
+/** Collector Crypt has no such card. */
+class NotFound extends Error {}
+
+/**
+ * Some live read or the slab photo didn't make it in time. The image is still
+ * served, but thrown so the cache doesn't keep a degraded image for a day: the
+ * failure (and this image with it) is replayed for a minute, then retried.
+ */
+class Partial extends Error {
+  constructor(readonly jpeg: Uint8Array<ArrayBuffer>) {
+    super("Share image rendered without some live data");
+  }
+}
 
 let fonts: Promise<[Buffer, Buffer]> | null = null;
 function loadFonts() {
@@ -175,17 +193,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
   if (!ADDRESS.test(mint)) return new Response("Not found", { status: 404 });
   const pack = parsePack(req.nextUrl.searchParams.get("pack"));
 
-  // Live reads start alongside the catalogue read.
-  const marketRead = within(getCardMarket(mint), MARKET_MS);
-  const offersRead = within(getCardOffers(mint), OFFERS_MS);
-  let card: CardDetail | null;
+  let jpeg: Uint8Array<ArrayBuffer>;
   try {
-    card = await getCard(mint);
-  } catch {
-    // Collector Crypt is down: the site's default image, not cached.
+    jpeg = await cached(`og:card:${mint}:${pack ?? ""}`, DAY_MS, () => render(mint, pack), { errorTtlMs: 60_000 });
+  } catch (e) {
+    if (e instanceof NotFound) return new Response("Not found", { status: 404 });
+    if (e instanceof Partial) return new Response(e.jpeg, { headers: { "Content-Type": "image/jpeg", "Cache-Control": "no-store" } });
+    // Collector Crypt is down or the render failed: the site's default image, not cached.
     return Response.redirect(new URL("/og", req.url), 302);
   }
-  if (!card) return new Response("Not found", { status: 404 });
+  return new Response(jpeg, { headers: { "Content-Type": "image/jpeg", "Cache-Control": CACHE } });
+}
+
+/** The share image as a JPEG: about a fifth of the PNG that ImageResponse draws, and every link preview takes it. */
+async function render(mint: string, pack: number | null): Promise<Uint8Array<ArrayBuffer>> {
+  // Live reads start alongside the catalogue read, which throws when Collector Crypt is down.
+  const marketRead = within(getCardMarket(mint), MARKET_MS);
+  const offersRead = within(getCardOffers(mint), OFFERS_MS);
+  const card = await getCard(mint);
+  if (!card) throw new NotFound();
 
   const [market, offers, art, [press, nunito]] = await Promise.all([
     marketRead,
@@ -224,7 +250,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
   const title = name.length > 60 ? `${name.slice(0, 58).trimEnd()}…` : name;
   const heroPx = heroSize(hero, 340);
 
-  return new ImageResponse(
+  const png = new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", background: CREAM, fontFamily: "Nunito", color: INK, position: "relative" }}>
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 14, background: POKE, display: "flex" }} />
@@ -364,7 +390,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
         { name: "Press", data: press, weight: 400, style: "normal" },
         { name: "Nunito", data: nunito, weight: 800, style: "normal" },
       ],
-      headers: { "Cache-Control": CACHE },
     },
   );
+  const jpeg = new Uint8Array(await sharp(Buffer.from(await png.arrayBuffer())).jpeg({ quality: 80 }).toBuffer());
+  if (!art || !market || !offers) throw new Partial(jpeg);
+  return jpeg;
 }

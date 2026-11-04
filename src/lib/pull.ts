@@ -51,9 +51,12 @@ export function rarityTier(pop: number): RarityTier {
   return "COMMON";
 }
 
-/** Card page URL that carries the pack price, so the link preview shows the receipt for it. */
+/**
+ * Card page URL that carries the pack price, so the link preview shows the receipt for it.
+ * A path, not a query: the plain card page never reads searchParams, so it can be cached.
+ */
 export function pullPath(mint: string, pack: number | null): string {
-  return pack ? `/card/${mint}?pull=${pack}` : `/card/${mint}`;
+  return pack ? `/card/${mint}/pull/${pack}` : `/card/${mint}`;
 }
 
 /** The receipt image for a card, with or without a pack price. */
