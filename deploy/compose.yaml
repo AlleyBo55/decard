@@ -10,7 +10,9 @@ services:
     expose:
       - "3000"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      # 127.0.0.1, not localhost: in this Alpine image localhost resolves to ::1 first, and the
+      # Next.js server listens on IPv4 only (HOSTNAME=0.0.0.0), so a localhost probe is refused.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
       interval: 10s
       timeout: 5s
       retries: 3
