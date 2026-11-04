@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, cache } from "react";
 import { getCard, getCardMarket, getCardOffers } from "@/lib/cc";
-import { dealScore, fmtNum, fmtPct, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
+import { dealScore, fmtNum, fmtPct, fmtSol, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
 import { SITE_URL, cardImage, ccAssetUrl, solscanAddr } from "@/lib/constants";
 import { categoryPath, clip, jsonLd, pageMetadata } from "@/lib/seo";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
@@ -119,8 +119,8 @@ async function ListingPrice({ market }: { market: MarketData }) {
   return (
     <div>
       <Kicker>{listing ? "Listed price" : "Not listed"}</Kicker>
-      <p className="mt-3 font-display font-bold text-5xl leading-none tabular-nums">
-        {listing ? (listing.currency === "USDC" ? fmtUsd(listing.price) : `${listing.price} SOL`) : "·"}
+      <p className="mt-3 font-num font-extrabold text-5xl leading-none tabular-nums">
+        {listing ? (listing.currency === "USDC" ? fmtUsd(listing.price) : fmtSol(listing.price)) : "·"}
       </p>
       {listing && (
         <p className="mt-2 text-sm text-ink-mute">
@@ -183,7 +183,7 @@ async function BestBid({ offers }: { offers: OffersData }) {
   return (
     <div>
       <span className="font-pixel text-[9px] text-ink-mute">BEST BID</span>
-      <p className="mt-2 font-display font-bold text-2xl text-warn">{bestBid ? fmtUsd(bestBid) : "·"}</p>
+      <p className="mt-2 font-num font-extrabold text-2xl tabular-nums text-warn">{bestBid ? fmtUsd(bestBid) : "·"}</p>
     </div>
   );
 }
@@ -227,7 +227,7 @@ async function LiveBids({ offers, insured }: { offers: OffersData; insured: numb
           {list.slice(0, 8).map((o, i) => (
             <li key={o.id} className="flex items-center gap-3 py-2.5">
               <span className="font-pixel text-[9px] text-ink-mute w-5">{i + 1}</span>
-              <span className="font-display font-bold text-xl tabular-nums text-warn">{fmtUsd(Number(o.price))}</span>
+              <span className="font-num font-extrabold text-xl tabular-nums text-warn">{fmtUsd(Number(o.price))}</span>
               {insured > 0 && (
                 <span className="text-xs text-ink-mute">{Math.round((Number(o.price) / insured) * 100)}% of ins</span>
               )}
@@ -351,7 +351,7 @@ export async function CardPage({ mint, pack }: { mint: string; pack: number | nu
       const price = Number(m?.listing?.price);
       if (!m?.listing || !(price > 0)) return null;
       return {
-        price: m.listing.currency === "USDC" ? fmtUsd(price) : `${price} SOL`,
+        price: m.listing.currency === "USDC" ? fmtUsd(price) : fmtSol(price),
         venue: venueName(m.listing.marketplace),
       };
     }),
@@ -453,7 +453,7 @@ export async function CardPage({ mint, pack }: { mint: string; pack: number | nu
               <div className="flex gap-8">
                 <div>
                   <span className="font-pixel text-[9px] text-ink-mute">INSURED</span>
-                  <p className="mt-2 font-display font-bold text-2xl">{insured ? fmtUsd(insured) : "·"}</p>
+                  <p className="mt-2 font-num font-extrabold text-2xl tabular-nums">{insured ? fmtUsd(insured) : "·"}</p>
                 </div>
                 <Suspense fallback={<BestBidSkeleton />}>
                   <BestBid offers={offers} />

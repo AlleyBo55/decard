@@ -154,11 +154,11 @@ async function CurrentPrices() {
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <dt className="font-pixel text-[8px] text-ink-mute">ASKING</dt>
-                    <dd className="mt-1 font-display text-xl font-bold text-ink">{fmtUsd(asking)}</dd>
+                    <dd className="mt-1 font-num text-xl font-extrabold tabular-nums text-ink">{fmtUsd(asking)}</dd>
                   </div>
                   <div>
                     <dt className="font-pixel text-[8px] text-ink-mute">INSURED REF.</dt>
-                    <dd className="mt-1 font-display text-xl font-bold text-ink">{fmtUsd(insured)}</dd>
+                    <dd className="mt-1 font-num text-xl font-extrabold tabular-nums text-ink">{fmtUsd(insured)}</dd>
                   </div>
                 </dl>
                 {score != null && score > 0 && (

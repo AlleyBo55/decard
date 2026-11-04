@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import type { CardRow } from "@/lib/types";
 import type { ScannerParams } from "@/services/Scanner/getScanner";
 import { useScanner } from "@/hooks/pages/Scanner/useScanner";
-import { dealScore, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
+import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
 import { cardImage } from "@/lib/constants";
 import { listingUsd, useMediaQuery, useSolPrice } from "@/lib/hooks";
 import { PRIMARY_CATEGORIES, TYPES, typeFor } from "@/lib/poke-types";
@@ -36,8 +36,8 @@ function PriceCell({ c, solUsd }: { c: CardRow; solUsd: number | null }) {
   const usd = listingUsd(c.listing.price, c.listing.currency, solUsd);
   return (
     <div className="flex flex-col items-end md:items-start">
-      <span className="font-display font-bold text-lg leading-none tabular-nums">
-        {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : `${c.listing.price}◎`}
+      <span className="font-num font-extrabold text-lg leading-none tabular-nums">
+        {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : fmtSol(c.listing.price)}
       </span>
       <span className="mt-1 text-[11px] text-ink-mute">
         {venueName(c.listing.marketplace)}
@@ -263,7 +263,7 @@ export function ScannerTable({
         <p className="text-ink-soft">
           {first ? (
             <>
-              <b className="font-display text-2xl text-ink align-[-2px]">
+              <b className="font-num font-extrabold text-2xl tabular-nums text-ink align-[-2px]">
                 <CountUp value={first.findTotal} />
               </b>{" "}
               matching cards

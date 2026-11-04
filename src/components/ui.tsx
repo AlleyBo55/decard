@@ -190,7 +190,7 @@ export function HPBar({ value, label = "DEAL", className }: { value: number; lab
       <span className="hp-track">
         <span className="hp-fill" style={{ width: `${Math.max(v, 3)}%`, ["--hp-color" as string]: color }} />
       </span>
-      <span className="font-pixel text-[9px] tabular-nums w-7 text-right text-ink-soft">{v}</span>
+      <span className="font-num font-extrabold text-[12px] tabular-nums w-7 text-right text-ink-soft">{v}</span>
     </div>
   );
 }

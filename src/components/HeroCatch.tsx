@@ -6,7 +6,7 @@ import type { CardRow } from "@/lib/types";
 import type { CatchPhase } from "@/components/Pokeball3D";
 import { useHomeListings } from "@/hooks/pages/Home/useHighlights";
 import { cardImage } from "@/lib/constants";
-import { dealScore, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { clsx } from "@/lib/clsx";
 
 type Ball3D = typeof import("@/components/Pokeball3D").default;
@@ -165,7 +165,7 @@ export function HeroCatch() {
                   {caught.listing
                     ? caught.listing.currency === "USDC"
                       ? fmtUsd(caught.listing.price)
-                      : `${caught.listing.price} SOL`
+                      : fmtSol(caught.listing.price)
                     : "Unlisted"}
                   {Number(caught.insuredValue) > 0 && ` · insured ${fmtUsd(Number(caught.insuredValue))}`}
                   {score != null && score > 0 && <b className="text-up"> · {score}% under</b>}

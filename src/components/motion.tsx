@@ -51,7 +51,11 @@ export function HoloCard({ children, className }: { children: React.ReactNode; c
 type CountKind = "int" | "usd" | "usdCompact";
 
 function formatCount(v: number, kind: CountKind) {
-  if (kind === "usd") return "$" + Intl.NumberFormat("en", { maximumFractionDigits: v < 100 ? 2 : 0 }).format(v);
+  if (kind === "usd") {
+    // Same money rule as fmtUsd: full cents under $100 ("$10.80"), whole dollars whole.
+    const digits = Math.abs(v) < 100 && !Number.isInteger(v) ? 2 : 0;
+    return "$" + Intl.NumberFormat("en", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
+  }
   if (kind === "usdCompact")
     return "$" + Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(v);
   return Math.round(v).toLocaleString("en");

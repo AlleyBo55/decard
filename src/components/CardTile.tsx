@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { CardRow } from "@/lib/types";
 import { cardImage } from "@/lib/constants";
-import { dealScore, fmtUsd, gradeShort, shortCardName, venueName } from "@/lib/format";
+import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName, venueName } from "@/lib/format";
 import { listingUsd } from "@/lib/hooks";
 import { HoloCard } from "@/components/motion";
 import { GradePill, HPBar, TypeIcon } from "@/components/ui";
@@ -90,8 +90,8 @@ export function CardTile({
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <GradePill label={gradeShort(c.gradingCompany, c.grade)} />
           {c.listing ? (
-            <span className="font-display font-bold text-lg leading-none tabular-nums">
-              {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : `${c.listing.price}◎`}
+            <span className="font-num font-extrabold text-lg leading-none tabular-nums">
+              {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : fmtSol(c.listing.price)}
             </span>
           ) : (
             <span className="text-xs text-ink-mute">Unlisted</span>

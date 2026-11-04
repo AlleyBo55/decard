@@ -120,7 +120,7 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
       </div>
 
       <div className="text-right shrink-0">
-        <div className={clsx("font-display font-bold text-lg leading-none tabular-nums", d.tone === "sale" ? "text-up" : "text-ink")}>
+        <div className={clsx("font-num font-extrabold text-lg leading-none tabular-nums", d.tone === "sale" ? "text-up" : "text-ink")}>
           {price ?? ""}
         </div>
         <div className="mt-1 text-[11px] text-ink-mute tabular-nums">{timeAgo(a.blockTime)} ago</div>

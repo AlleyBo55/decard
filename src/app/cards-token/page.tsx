@@ -416,7 +416,7 @@ export default async function CardsTokenPage() {
               {windows.map(([label, value]) => (
                 <div key={label} className="paper p-4">
                   <dt className="font-pixel text-[9px] text-ink-mute">{label.toUpperCase()}</dt>
-                  <dd className="mt-2 font-display text-2xl font-bold tabular-nums">{fmtUsdShort(value)}</dd>
+                  <dd className="mt-2 font-num text-2xl font-extrabold tabular-nums">{fmtUsdShort(value)}</dd>
                 </div>
               ))}
             </dl>

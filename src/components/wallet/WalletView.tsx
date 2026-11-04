@@ -148,7 +148,7 @@ export function WalletView({ wallet }: { wallet: string }) {
             ).map(([label, value]) => (
               <div key={label}>
                 <dt className="font-pixel text-[9px] text-ink-mute">{label}</dt>
-                <dd className="mt-1.5 font-display font-bold text-3xl leading-none">{holdings.isLoading ? "…" : value}</dd>
+                <dd className="mt-1.5 font-num font-extrabold text-3xl leading-none tabular-nums">{holdings.isLoading ? "…" : value}</dd>
               </div>
             ))}
           </dl>

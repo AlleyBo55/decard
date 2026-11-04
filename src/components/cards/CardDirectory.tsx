@@ -4,7 +4,7 @@ import { BrowseByFranchise } from "@/components/hubs/BrowseByFranchise";
 import { Kicker } from "@/components/ui";
 import { getCatalog } from "@/lib/catalog";
 import { cardImage, SITE_URL } from "@/lib/constants";
-import { fmtNum, fmtUsd } from "@/lib/format";
+import { fmtNum, fmtSol, fmtUsd } from "@/lib/format";
 import { categoryName, jsonLd } from "@/lib/seo";
 import type { CatalogCard } from "@/lib/types";
 
@@ -100,7 +100,7 @@ const LIST_CLASS = [
   "[&_img]:row-span-full [&_img]:self-center [&_img]:h-[60px] [&_img]:w-9 [&_img]:rounded-md [&_img]:bg-cream-lo [&_img]:object-contain",
   "[&_a]:col-start-2 [&_a]:row-start-2 [&_a]:break-words [&_a]:font-bold [&_a]:leading-snug [&_a]:text-ink [&_a]:underline [&_a]:decoration-sand-dark [&_a]:underline-offset-4 [&_a:hover]:text-poke-deep",
   "[&_p]:col-start-2 [&_p]:row-start-3 [&_p]:mt-1 [&_p]:text-sm [&_p]:text-ink-soft",
-  "[&>li>span]:col-start-3 [&>li>span]:row-span-full [&>li>span]:self-center [&>li>span]:font-display [&>li>span]:font-bold [&>li>span]:tabular-nums [&>li>span]:text-ink",
+  "[&>li>span]:col-start-3 [&>li>span]:row-span-full [&>li>span]:self-center [&>li>span]:font-num [&>li>span]:font-extrabold [&>li>span]:tabular-nums [&>li>span]:text-ink",
 ].join(" ");
 
 /** "PSA GEM-MT 10 · Pokémon · Base Set · 1999 · No. 4", skipping what the listing doesn't say. */
@@ -112,7 +112,7 @@ function details(card: CatalogCard) {
 }
 
 function askingPrice(card: CatalogCard) {
-  return card.currency === "SOL" ? `${fmtNum(card.price)}◎` : fmtUsd(card.price);
+  return card.currency === "SOL" ? fmtSol(card.price) : fmtUsd(card.price);
 }
 
 export async function CardDirectory({ page }: { page: number }) {

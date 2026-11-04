@@ -147,7 +147,7 @@ export function HomeSections() {
                             </span>
                           </span>
                           <span className="text-right">
-                            <span className="block font-display font-bold text-lg leading-none text-warn">
+                            <span className="block font-num font-extrabold text-lg leading-none tabular-nums text-warn">
                               {fmtUsd(b.topBid)}
                             </span>
                             {Number(b.insuredValue) > 0 && (

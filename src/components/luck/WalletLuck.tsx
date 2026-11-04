@@ -291,7 +291,7 @@ function PullRow({ row }: { row: WalletPullRow }) {
         </p>
       </div>
       <div className="w-20 shrink-0 text-right">
-        <p className="font-display text-lg font-bold leading-none tabular-nums">
+        <p className="font-num text-lg font-extrabold leading-none tabular-nums">
           {scoreOutOf100(result.luckScore)}
           <span className="text-xs text-ink-mute">/100</span>
         </p>

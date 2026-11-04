@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useHomeListings } from "@/hooks/pages/Home/useHighlights";
-import { fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 
 const SLOGANS = [
   "Gotta scan 'em all",
@@ -45,7 +45,10 @@ export function TickerBands() {
             <span>{shortCardName(c.itemName).toUpperCase()}</span>
             <span>{gradeShort(c.gradingCompany, c.grade)}</span>
             {c.listing && (
-              <span>{c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : `${c.listing.price} SOL`}</span>
+              // The price in the round number face: pixel digits ($, 0, 8, B) were hard to read at speed.
+              <span className="font-num font-black text-[15px] tabular-nums tracking-normal">
+                {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : fmtSol(c.listing.price)}
+              </span>
             )}
           </Link>
         ))

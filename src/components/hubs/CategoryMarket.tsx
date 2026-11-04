@@ -36,7 +36,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="paper p-4">
       <dt className="font-pixel text-[9px] text-ink-mute">{label}</dt>
-      <dd className="mt-2 font-display text-2xl font-bold tabular-nums text-ink">{value}</dd>
+      <dd className="mt-2 font-num text-2xl font-extrabold tabular-nums text-ink">{value}</dd>
     </div>
   );
 }
@@ -76,7 +76,7 @@ function GradeTable({ grades, complete }: { grades: HubGrade[]; complete: boolea
                 <GradePill label={g.label} />
               </td>
               {complete && <td className="p-4 tabular-nums">{g.count}</td>}
-              <td className="p-4 font-display text-lg font-bold tabular-nums text-ink">{fmtUsd(g.lowest.listing.price)}</td>
+              <td className="p-4 font-num text-lg font-extrabold tabular-nums text-ink">{fmtUsd(g.lowest.listing.price)}</td>
               {complete && <td className="p-4 tabular-nums">{fmtUsd(g.median)}</td>}
               <td className="p-4">
                 <Link href={`/card/${g.lowest.nftAddress}`} prefetch={false} className={link}>

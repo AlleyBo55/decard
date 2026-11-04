@@ -13,7 +13,16 @@ export function fmtUsd(n: number | null | undefined, opts?: { compact?: boolean 
   if (opts?.compact && Math.abs(n) >= 1000) {
     return "$" + Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(n);
   }
-  return "$" + Intl.NumberFormat("en", { maximumFractionDigits: n < 100 ? 2 : 0 }).format(n);
+  // Under $100, cents show in full ("$10.80", not "$10.8"); whole dollars stay whole ("$50").
+  const digits = Math.abs(n) < 100 && !Number.isInteger(n) ? 2 : 0;
+  return "$" + Intl.NumberFormat("en", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+}
+
+/** A SOL amount with thousands separators: "961,539 SOL", "12.5 SOL". Listing prices sometimes arrive as strings. */
+export function fmtSol(n: number | string | null | undefined): string {
+  const v = typeof n === "string" ? Number(n) : n;
+  if (v == null || !Number.isFinite(v)) return EMPTY;
+  return `${Intl.NumberFormat("en", { maximumFractionDigits: Math.abs(v) < 100 ? 2 : 0 }).format(v)} SOL`;
 }
 
 export function fmtNum(n: number | null | undefined, compact = false): string {

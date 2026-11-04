@@ -284,8 +284,10 @@
 .gx-lcd-value {
   display: block;
   margin-top: 6px;
-  font-family: var(--ff-pixel);
-  font-size: 17px;
+  font-family: var(--ff-num);
+  font-weight: 900;
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
   line-height: 1.1;
   white-space: nowrap;
   text-shadow: 1px 1px 0 rgb(15 56 15 / 0.18);
@@ -718,8 +720,10 @@
   padding: 4px 5px 3px;
   background: var(--color-ink);
   color: var(--color-pika);
-  font-family: var(--ff-pixel);
-  font-size: 10px;
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 

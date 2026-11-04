@@ -122,8 +122,9 @@
   text-shadow: 2px 2px 0 rgb(255 255 255 / 0.65);
 }
 .tk-card-hpnum {
-  font-family: var(--ff-pixel);
-  font-size: 18px;
+  font-family: var(--ff-num);
+  font-weight: 900;
+  font-size: 22px;
   line-height: 1;
   color: var(--color-poke-dark);
   font-variant-numeric: tabular-nums;
@@ -290,8 +291,8 @@
   position: relative;
   isolation: isolate;
   justify-self: start;
-  font-family: var(--ff-display);
-  font-weight: 700;
+  font-family: var(--ff-num);
+  font-weight: 800;
   font-size: 30px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -386,8 +387,8 @@
   color: var(--color-ink-soft);
 }
 .tk-move-dmg {
-  font-family: var(--ff-display);
-  font-weight: 700;
+  font-family: var(--ff-num);
+  font-weight: 800;
   font-size: 22px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -658,8 +659,8 @@
 }
 .tk-fw-value {
   margin-top: 4px;
-  font-family: var(--ff-display);
-  font-weight: 700;
+  font-family: var(--ff-num);
+  font-weight: 800;
   font-size: clamp(20px, 5vw, 30px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -681,8 +682,8 @@
   animation: pop-in 0.6s var(--ease-pop) 0.3s both;
 }
 .tk-fw-hub-value {
-  font-family: var(--ff-display);
-  font-weight: 700;
+  font-family: var(--ff-num);
+  font-weight: 800;
   font-size: clamp(34px, 9vw, 58px);
   line-height: 1;
   color: var(--color-poke-deep);
@@ -805,8 +806,8 @@
 }
 .tk-live-value {
   margin-top: 6px;
-  font-family: var(--ff-display);
-  font-weight: 700;
+  font-family: var(--ff-num);
+  font-weight: 800;
   font-size: clamp(22px, 4vw, 30px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -867,15 +868,18 @@
   min-width: 3.1rem;
   padding: 5px 6px 4px;
   border-radius: 7px;
-  font-family: var(--ff-pixel);
-  font-size: 9px;
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
   text-align: center;
   background: var(--color-cream-lo);
   color: var(--color-ink-soft);
 }
 .tk-rip-mult[data-level="green"] {
-  background: #cdeed8;
+  /* Light enough for the up-green text to clear 4.5:1 (#cdeed8 gave 4.28). */
+  background: #e0f5e7;
   color: var(--color-up);
 }
 .tk-rip-mult[data-level="gold"] {

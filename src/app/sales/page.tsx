@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GradePill, Kicker, MoreLink, Tag } from "@/components/ui";
 import { cardImage, SITE_NAME, SITE_URL, solscanTx } from "@/lib/constants";
-import { activityDisplay, fmtUsd, gradeShort, shortAddr, shortCardName } from "@/lib/format";
+import { activityDisplay, fmtSol, fmtUsd, gradeShort, shortAddr, shortCardName } from "@/lib/format";
 import { knownLabel } from "@/lib/labels";
 import { getRecentSales, type SalesSnapshot } from "@/lib/sales";
 import { jsonLd, pageMetadata } from "@/lib/seo";
@@ -50,7 +50,7 @@ function WalletLink({ address }: { address: string | null }) {
 
 function SaleRow({ sale }: { sale: Activity }) {
   const mint = sale.cardName ? sale.assetMint : null;
-  const price = sale.priceUsdc != null ? fmtUsd(sale.priceUsdc) : `${sale.priceSol} SOL`;
+  const price = sale.priceUsdc != null ? fmtUsd(sale.priceUsdc) : fmtSol(sale.priceSol);
   return (
     <li className="flex items-center gap-3 py-3">
       {mint ? (
@@ -91,7 +91,7 @@ function SaleRow({ sale }: { sale: Activity }) {
         )}
       </div>
       <div className="shrink-0 text-right">
-        <p className="font-display text-lg font-bold leading-none tabular-nums text-up">{price}</p>
+        <p className="font-num text-lg font-extrabold leading-none tabular-nums text-up">{price}</p>
         <a href={solscanTx(sale.signature)} target="_blank" rel="noreferrer" className="mt-1 inline-block text-[11px] text-ink-mute hover:text-poke-deep">
           Solscan ↗
         </a>
@@ -126,7 +126,7 @@ function SalesBody({ data }: { data: SalesSnapshot }) {
         {stats.map(([label, value]) => (
           <div key={label} className="paper p-4">
             <dt className="font-pixel text-[9px] text-ink-mute">{label}</dt>
-            <dd className="mt-2 font-display text-2xl font-bold tabular-nums text-ink">{value}</dd>
+            <dd className="mt-2 font-num text-2xl font-extrabold tabular-nums text-ink">{value}</dd>
           </div>
         ))}
       </dl>
