@@ -39,8 +39,8 @@ export function GuideBook({ sections }: { sections: GuideSection[] }) {
               </a>
               {s.terms.map((t) => (
                 <a
-                  key={t.no}
-                  href={`#term-${t.no}`}
+                  key={t.id}
+                  href={`#${t.id}`}
                   className="menu-item ml-4 text-sm text-ink-mute hover:text-ink flex gap-2"
                 >
                   <span className="font-pixel text-[8px] pt-1">#{String(t.no).padStart(3, "0")}</span>
@@ -61,7 +61,7 @@ export function GuideBook({ sections }: { sections: GuideSection[] }) {
             </div>
             <div className="dash-divide">
               {s.terms.map((t) => (
-                <article key={t.no} id={`term-${t.no}`} className="scroll-mt-28 py-7 grid sm:grid-cols-[88px_1fr] gap-x-6 gap-y-2">
+                <article key={t.id} id={t.id} className="scroll-mt-28 py-7 grid sm:grid-cols-[88px_1fr] gap-x-6 gap-y-2">
                   <span className="font-pixel text-[11px] text-ink-mute pt-2">#{String(t.no).padStart(3, "0")}</span>
                   <div className="flex flex-col gap-2 max-w-2xl">
                     <h3 className="h-display text-2xl sm:text-3xl">{t.term}</h3>

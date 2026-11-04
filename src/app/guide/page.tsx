@@ -3,33 +3,58 @@ import Link from "next/link";
 import { GUIDE } from "@/lib/guide";
 import { GuideBook } from "@/components/guide/GuideBook";
 import { DialogBox, Kicker } from "@/components/ui";
-import { pageMetadata } from "@/lib/seo";
+import { SITE_URL } from "@/lib/constants";
+import { jsonLd, pageMetadata } from "@/lib/seo";
 
 const count = GUIDE.reduce((n, s) => n + s.terms.length, 0);
 
 export const metadata: Metadata = pageMetadata({
-  title: "Graded card guide: PSA vs CGC, pop reports, gem rate",
+  title: "Card glossary: PSA vs CGC, hobby and crypto slang",
   description:
-    "New to tokenized graded cards? A plain-language guide to grading, PSA vs CGC vs BGS, pop reports, gem rate, insured value, deal score, vaults and redeeming.",
+    "Plain-language glossary for tokenized graded cards: PSA vs CGC vs BGS, pop reports, SIR and manga rares, plus the collector and Solana slang you see on X.",
   path: "/guide",
 });
 
-const faqLd = {
+const pageUrl = `${SITE_URL}/guide`;
+const glossaryId = `${pageUrl}#glossary`;
+const structured = {
   "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: GUIDE.flatMap((s) =>
-    s.terms.map((t) => ({
-      "@type": "Question",
-      name: `What is ${t.term.toLowerCase()}?`,
-      acceptedAnswer: { "@type": "Answer", text: `${t.short} ${t.body}` },
-    })),
-  ),
+  "@graph": [
+    {
+      "@type": "FAQPage",
+      mainEntity: GUIDE.flatMap((s) =>
+        s.terms.map((t) => ({
+          "@type": "Question",
+          name: `What is ${t.term.toLowerCase()}?`,
+          acceptedAnswer: { "@type": "Answer", text: `${t.short} ${t.body}` },
+        })),
+      ),
+    },
+    // The glossary itself: one DefinedTerm per entry, each at its stable anchor.
+    {
+      "@type": "DefinedTermSet",
+      "@id": glossaryId,
+      name: "Decard glossary of graded card, collector and crypto terms",
+      url: pageUrl,
+      inLanguage: "en",
+      hasDefinedTerm: GUIDE.flatMap((s) =>
+        s.terms.map((t) => ({
+          "@type": "DefinedTerm",
+          "@id": `${pageUrl}#${t.id}`,
+          url: `${pageUrl}#${t.id}`,
+          name: t.term,
+          description: `${t.short} ${t.body}`,
+          inDefinedTermSet: { "@id": glossaryId },
+        })),
+      ),
+    },
+  ],
 };
 
 export default function GuidePage() {
   return (
     <section className="pt-10 flex flex-col gap-12">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structured) }} />
       <header className="grid gap-8 lg:grid-cols-[1fr_auto] items-end">
         <div className="flex flex-col gap-4">
           <Kicker>Trainer&apos;s guide</Kicker>
@@ -38,7 +63,7 @@ export default function GuidePage() {
           </h1>
           <p className="text-lg text-ink-soft max-w-2xl">
             {count} entries covering everything a new trainer meets on Decard, from grading and pop reports to
-            bids, vaults and collector slang. Plain words, no jargon left unexplained.
+            bids and vaults, plus the collector and crypto slang you see on X. Plain words, no jargon left unexplained.
           </p>
         </div>
         <DialogBox className="max-w-sm hidden md:block">
