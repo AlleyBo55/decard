@@ -20,6 +20,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/api/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex" }] }];
   },
+  // Shared pull receipts moved from /card/<mint>?pull=50 to /card/<mint>/pull/50
+  // so the card page never reads searchParams and can be cached. Only a
+  // well-formed pack price redirects (lib/pull.ts parsePack); anything else
+  // stays on the card page. Next passes the query through, so the target keeps
+  // a ?pull=50 it ignores.
+  async redirects() {
+    return [
+      {
+        source: "/card/:mint",
+        has: [{ type: "query", key: "pull", value: "(?<pack>\\d{1,6}(?:\\.\\d{1,2})?)" }],
+        destination: "/card/:mint/pull/:pack",
+        permanent: true,
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {

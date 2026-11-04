@@ -17,8 +17,9 @@ export function WalletName({ address, title }: { address: string; title?: string
       href={`/wallet/${address}`}
       onClick={(e) => e.stopPropagation()}
       title={title ?? address}
+      // py-1 lifts the tap target past 24px tall; -my-1 keeps the line where it was.
       className={clsx(
-        "font-bold hover:text-poke-deep transition-colors",
+        "inline-block py-1 -my-1 font-bold hover:text-poke-deep transition-colors",
         label ? "text-azure-deep" : "font-mono text-[13px] text-ink-soft",
       )}
     >
@@ -119,7 +120,7 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
       </div>
 
       <div className="text-right shrink-0">
-        <div className={clsx("font-display font-bold text-lg leading-none tabular-nums", d.tone === "sale" ? "text-up" : "text-ink")}>
+        <div className={clsx("font-num font-extrabold text-lg leading-none tabular-nums", d.tone === "sale" ? "text-up" : "text-ink")}>
           {price ?? ""}
         </div>
         <div className="mt-1 text-[11px] text-ink-mute tabular-nums">{timeAgo(a.blockTime)} ago</div>

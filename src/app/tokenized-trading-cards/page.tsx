@@ -6,9 +6,9 @@ import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import { categoryPath, jsonLd, OG_IMAGE } from "@/lib/seo";
 
 const PATH = "/tokenized-trading-cards";
-const TITLE = "Tokenized trading cards on Solana: Collector Crypt guide";
+const TITLE = "Tokenized trading cards on Solana & Collector Crypt";
 const DESCRIPTION =
-  "How tokenized graded cards work on Solana: vault custody, Collector Crypt NFTs, USDC trading, insured value, deal scores, population reports, redemption and risks.";
+  "How tokenized graded cards work on Solana: vault custody, Collector Crypt NFTs, USDC trading, insured value, deal scores, pop reports, redemption and risks.";
 const PUBLISHED = "2026-10-23";
 
 export const metadata: Metadata = {

@@ -47,6 +47,7 @@
   --font-sans: var(--ff-sans);
   --font-display: var(--ff-display);
   --font-pixel: var(--ff-pixel);
+  --font-num: var(--ff-num);
   --font-mono: var(--ff-mono);
 }
 
@@ -56,6 +57,8 @@
   --ff-sans: var(--font-nunito), ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
   --ff-display: var(--font-pixelify), var(--font-nunito), ui-rounded, sans-serif;
   --ff-pixel: var(--font-press), ui-monospace, monospace;
+  /* Prices and amounts: the pixel faces made $, 0, 8, B and K hard to tell apart. */
+  --ff-num: var(--font-nunito), ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
   --ff-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --shadow-soft: 0 1px 0 rgb(41 38 61 / 0.05), 0 12px 28px -16px rgb(41 38 61 / 0.35);
   --shadow-lift: 0 2px 0 rgb(41 38 61 / 0.06), 0 22px 40px -18px rgb(41 38 61 / 0.45);

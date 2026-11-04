@@ -1,0 +1,1187 @@
+/* $CARDS token page. Global and tk- prefixed, like gacha.css: the Turbopack
+   CSS rule in next.config.ts treats every *.css as global. Rules stay
+   unlayered, so they only set what Tailwind utilities never need to override
+   on the same element. Motion is transform and opacity only; globals.css
+   shortens every animation for prefers-reduced-motion. */
+
+:root {
+  --tk-fire: #ee8130;
+  --tk-fire-hot: #ffe066;
+}
+
+/* ------------------------------------------------------------ pixel art */
+.tk-px-k { fill: var(--color-ink); }
+.tk-px-g { fill: var(--color-pika); }
+.tk-px-G { fill: var(--color-pika-deep); }
+.tk-px-r { fill: var(--color-poke); }
+.tk-px-R { fill: var(--color-poke-deep); }
+.tk-px-w { fill: var(--color-cream-hi); }
+.tk-px-s { fill: var(--color-sand); }
+.tk-px-h { fill: #fff; }
+.tk-px-o { fill: var(--tk-fire); }
+.tk-px-y { fill: var(--tk-fire-hot); }
+.tk-stroke { stroke: var(--color-ink); }
+
+/* -------------------------------------------------------------- hero */
+.tk-mint-code {
+  font-family: var(--ff-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-all;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: var(--color-cream-lo);
+  border: 1px solid var(--color-sand);
+  color: var(--color-ink);
+}
+.tk-copy {
+  min-width: 7.25rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+}
+.tk-out {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  box-shadow: 0 3px 0 var(--color-ink);
+}
+
+/* Coinbase listing status pill. */
+.tk-cb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.95rem 0.5rem 0.7rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  box-shadow: 0 3px 0 rgb(41 38 61 / 0.14);
+  font-weight: 800;
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+.tk-cb-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-warn-fill);
+  box-shadow: 0 0 0 2px var(--color-ink);
+}
+.tk-cb[data-state="trading"] .tk-cb-dot {
+  background: var(--color-up-fill);
+  animation: ping 1.8s var(--ease-out) infinite;
+}
+.tk-cb[data-state="unknown"] .tk-cb-dot {
+  background: var(--color-sand-dark);
+}
+
+.tk-card-enter {
+  animation: pop-in 0.7s var(--ease-pop) 0.1s both;
+}
+
+/* ------------------------------------------------------- trading card */
+.tk-card-holo {
+  width: min(100%, 372px);
+  margin-inline: auto;
+  border-radius: 22px;
+}
+.tk-card {
+  position: relative;
+  border-radius: 22px;
+  border: 11px solid transparent;
+  padding: 10px 12px 9px;
+  color: var(--color-ink);
+  /* Fire-type face inside a yellow TCG border (gradient border trick). */
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgb(255 255 255 / 0.55), transparent 60%) padding-box,
+    linear-gradient(172deg, #fde7cc 0%, #f9cfa6 48%, #f4b184 100%) padding-box,
+    linear-gradient(150deg, #fff1a8 0%, var(--color-pika) 28%, var(--color-pika-deep) 62%, #ffe27a 100%) border-box;
+  box-shadow:
+    0 0 0 3px var(--color-ink),
+    0 10px 0 rgb(41 38 61 / 0.16),
+    0 34px 54px -26px rgb(41 38 61 / 0.65);
+}
+.tk-card-stage {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+.tk-card-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 5px;
+}
+.tk-card-name {
+  font-family: var(--ff-pixel);
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 2px 2px 0 rgb(255 255 255 / 0.65);
+}
+.tk-card-hpnum {
+  font-family: var(--ff-num);
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--color-poke-dark);
+  font-variant-numeric: tabular-nums;
+}
+.tk-card-hpword {
+  font-size: 9px;
+  margin-right: 4px;
+}
+.tk-card-hp {
+  margin-top: 7px;
+}
+.tk-card-hp .hp-track {
+  height: 10px;
+  background: var(--color-cream-hi);
+}
+
+.tk-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 3px solid var(--color-ink);
+  background:
+    radial-gradient(60% 42% at 50% 96%, rgb(255 224 102 / 0.9), transparent 70%),
+    radial-gradient(130% 100% at 50% 110%, #ffb347 0%, #ff7a3d 38%, #d8401b 70%, #8f1d09 100%);
+  box-shadow: inset 0 0 0 3px rgb(255 255 255 / 0.28);
+  isolation: isolate;
+}
+/* Holo foil: a slow diagonal sheen that only moves (transform). */
+.tk-art::after {
+  content: "";
+  position: absolute;
+  inset: -60% -60%;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent 0 18%,
+    rgb(255 255 255 / 0.22) 22%,
+    rgb(99 144 240 / 0.16) 26%,
+    rgb(249 85 135 / 0.14) 30%,
+    transparent 34% 52%
+  );
+  mix-blend-mode: soft-light;
+  animation: tk-sheen 7s linear infinite;
+}
+@keyframes tk-sheen {
+  from {
+    transform: translate3d(-12%, -6%, 0);
+  }
+  to {
+    transform: translate3d(12%, 6%, 0);
+  }
+}
+.tk-art-chip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  font-size: 0.72rem;
+  box-shadow: 0 2px 0 rgb(41 38 61 / 0.35);
+}
+.tk-coin {
+  position: relative;
+  z-index: 2;
+  width: 34%;
+  height: auto;
+  margin-top: -4%;
+  filter: drop-shadow(0 3px 0 rgb(41 38 61 / 0.35));
+  animation: float 4.5s ease-in-out infinite;
+}
+.tk-flame-b {
+  opacity: 0;
+}
+.tk-flame {
+  animation: tk-flick 0.44s steps(1, end) infinite;
+}
+.tk-flame-b {
+  animation-delay: -0.22s;
+}
+@keyframes tk-flick {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.tk-art-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 9%;
+  width: 26%;
+  height: 7%;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: rgb(41 38 61 / 0.4);
+  animation: tk-shadow 4.5s ease-in-out infinite;
+}
+@keyframes tk-shadow {
+  50% {
+    transform: scaleX(0.72);
+    opacity: 0.55;
+  }
+}
+.tk-spark {
+  position: absolute;
+  z-index: 2;
+  opacity: 0;
+  animation: tk-twinkle 2.6s ease-in-out infinite;
+}
+@keyframes tk-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tk-card-dex {
+  margin-top: 7px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10.5px;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1.35;
+  text-align: center;
+  background: linear-gradient(90deg, #d4ae52, #f7e9b0 50%, #d4ae52);
+  box-shadow: inset 0 0 0 1px rgb(41 38 61 / 0.25);
+}
+
+/* Live price line on the card (PriceTicker). Fixed height: no shift when it updates. */
+.tk-ticker {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  height: 54px;
+  margin-top: 9px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 2px solid var(--color-ink);
+  background: var(--color-cream-hi);
+}
+.tk-ticker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1;
+  color: var(--color-ink-mute);
+}
+.tk-ticker-price {
+  position: relative;
+  isolation: isolate;
+  justify-self: start;
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tk-flash {
+  position: absolute;
+  inset: -6px -8px;
+  z-index: -1;
+  border-radius: 8px;
+  pointer-events: none;
+  animation: tk-flash 1.3s var(--ease-out) forwards;
+}
+.tk-flash[data-dir="up"] {
+  background: rgb(61 190 110 / 0.5);
+}
+.tk-flash[data-dir="down"] {
+  background: rgb(227 53 13 / 0.38);
+}
+@keyframes tk-flash {
+  from {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+.tk-ticker-change {
+  font-weight: 900;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tk-ticker-change[data-tone="up"],
+[data-tone="up"] > .tk-tone {
+  color: var(--color-up);
+}
+.tk-ticker-change[data-tone="down"],
+[data-tone="down"] > .tk-tone {
+  color: var(--color-down);
+}
+.tk-ticker-unit {
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--color-ink-mute);
+}
+
+.tk-moves {
+  display: grid;
+  gap: 6px;
+  margin-top: 9px;
+}
+.tk-move {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border-radius: 9px;
+  background: rgb(251 248 242 / 0.78);
+}
+.tk-move-cost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.tk-energy {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  background: var(--tk-fire);
+  color: var(--color-ink);
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.16),
+    0 0 0 1.5px var(--color-ink);
+}
+.tk-move-name {
+  display: block;
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.15;
+}
+.tk-move-text {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink-soft);
+}
+.tk-move-dmg {
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tk-card-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+  padding-top: 7px;
+  border-top: 2px solid rgb(41 38 61 / 0.22);
+  font-size: 11px;
+  line-height: 1.3;
+}
+.tk-card-foot dt {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tk-card-foot dd {
+  font-weight: 800;
+}
+.tk-card-credit {
+  margin-top: 6px;
+  font-size: 9.5px;
+  font-style: italic;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* -------------------------------------------------------- base stats */
+.tk-stats {
+  display: grid;
+  gap: 13px;
+}
+.tk-stat-note {
+  margin-top: 3px;
+  padding-left: calc(10rem + 1.5rem);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-ink-mute);
+}
+.tk-line-svg {
+  display: block;
+  width: 100%;
+  height: 132px;
+  margin-top: 12px;
+  overflow: visible;
+}
+.tk-line-path {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.tk-line-wipe {
+  fill: var(--color-cream-hi);
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  animation: tk-wipe 1.2s var(--ease-out) 0.15s both;
+}
+@keyframes tk-wipe {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.tk-line-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin-top: 14px;
+}
+.tk-line-facts dt {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--color-ink-mute);
+}
+.tk-line-facts dd {
+  margin-top: 4px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.tk-line-date {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--color-ink-mute);
+}
+.tk-line-empty {
+  padding: 2rem 0;
+  color: var(--color-ink-soft);
+}
+
+/* ---------------------------------------------------------- flywheel */
+.tk-fw {
+  display: grid;
+  justify-items: center;
+  gap: 30px;
+}
+.tk-seg > label {
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-weight: 800;
+  font-size: 0.88rem;
+  line-height: 1;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+.tk-seg > label:hover {
+  color: var(--color-ink);
+}
+.tk-seg > label:has(input:checked) {
+  background: var(--color-ink);
+  color: var(--color-cream-hi);
+  box-shadow: 0 2px 0 rgb(41 38 61 / 0.25);
+}
+.tk-seg > label:has(input:focus-visible) {
+  outline: 3px solid var(--color-azure);
+  outline-offset: 2px;
+}
+/* Show the checked window's numbers. Without :has() every window shows, stacked. */
+.tk-fw:has(input[value="24h"]:checked) [data-w]:not([data-w="24h"]),
+.tk-fw:has(input[value="7d"]:checked) [data-w]:not([data-w="7d"]),
+.tk-fw:has(input[value="30d"]:checked) [data-w]:not([data-w="30d"]),
+.tk-fw:has(input[value="all"]:checked) [data-w]:not([data-w="all"]) {
+  display: none;
+}
+
+.tk-fw-stage {
+  position: relative;
+  width: min(100%, 540px);
+  aspect-ratio: 1;
+}
+.tk-fw-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.tk-fw-track {
+  fill: none;
+  stroke: var(--color-cream-lo);
+  stroke-width: 22;
+}
+.tk-fw-dash {
+  fill: none;
+  stroke: var(--color-pika-deep);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 0.3 0.7;
+}
+/* Rotating the dashed ring reads as dashes flowing round it, without repainting the stroke. */
+.tk-fw-flow {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+  animation: spin 30s linear infinite;
+}
+.tk-fw-chev {
+  fill: none;
+  stroke: var(--color-poke-deep);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* The ball rests in each node, then rolls on to the next. */
+.tk-fw-orbit {
+  transform-box: view-box;
+  transform-origin: 200px 200px;
+  animation: tk-orbit 9s cubic-bezier(0.55, 0, 0.3, 1) infinite;
+}
+@keyframes tk-orbit {
+  0%,
+  7% {
+    rotate: 0deg;
+  }
+  33.33%,
+  40.33% {
+    rotate: 120deg;
+  }
+  66.67%,
+  73.67% {
+    rotate: 240deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+
+.tk-fw-node {
+  position: absolute;
+  z-index: 1;
+  left: var(--x);
+  top: var(--y);
+  width: 35%;
+  translate: -50% -50%;
+  padding: 0 8px 10px;
+  border-radius: 14px;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  box-shadow: 0 5px 0 rgb(41 38 61 / 0.14);
+  text-align: center;
+  animation: tk-rise 0.6s var(--ease-pop) both;
+}
+.tk-fw-node[data-step="1"] {
+  --x: 50%;
+  --y: 12.5%;
+}
+.tk-fw-node[data-step="2"] {
+  --x: 82.5%;
+  --y: 68.75%;
+  animation-delay: 0.12s;
+}
+.tk-fw-node[data-step="3"] {
+  --x: 17.5%;
+  --y: 68.75%;
+  animation-delay: 0.24s;
+}
+@keyframes tk-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+}
+.tk-fw-icon {
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin: -17px auto 4px;
+  padding: 5px;
+  border-radius: 999px;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  animation: tk-hit 9s linear infinite;
+}
+.tk-fw-node[data-step="2"] .tk-fw-icon {
+  animation-delay: 3s;
+}
+.tk-fw-node[data-step="3"] .tk-fw-icon {
+  animation-delay: 6s;
+}
+@keyframes tk-hit {
+  0% {
+    transform: scale(1.3);
+  }
+  7%,
+  100% {
+    transform: scale(1);
+  }
+}
+.tk-fw-title {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--color-ink-mute);
+}
+.tk-fw-value {
+  margin-top: 4px;
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: clamp(20px, 5vw, 30px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tk-fw-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-ink-mute);
+}
+.tk-fw-hub {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 38%;
+  translate: -50% -50%;
+  text-align: center;
+  animation: pop-in 0.6s var(--ease-pop) 0.3s both;
+}
+.tk-fw-hub-value {
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: clamp(34px, 9vw, 58px);
+  line-height: 1;
+  color: var(--color-poke-deep);
+  font-variant-numeric: tabular-nums;
+}
+.tk-fw-hub-text {
+  margin-top: 6px;
+  font-weight: 800;
+  font-size: clamp(11.5px, 2.6vw, 14px);
+  line-height: 1.3;
+}
+.tk-fw-hub-note {
+  margin-top: 6px;
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+  color: var(--color-ink-mute);
+}
+@media (max-width: 479px) {
+  .tk-fw-node {
+    width: 36%;
+    padding: 0 5px 8px;
+  }
+  .tk-fw-icon {
+    width: 28px;
+    height: 28px;
+    margin: -14px auto 3px;
+    padding: 4px;
+  }
+  .tk-fw-title {
+    font-size: 7px;
+  }
+  .tk-fw-sub {
+    font-size: 10.5px;
+  }
+  .tk-fw-hub {
+    top: 41%;
+    width: 44%;
+  }
+}
+
+/* ------------------------------------------------------------ live rips */
+.tk-dex {
+  border-radius: 22px;
+  padding: 12px;
+  color: #fff;
+  background:
+    radial-gradient(120% 70% at 8% 0%, rgb(255 255 255 / 0.2), transparent 55%),
+    linear-gradient(168deg, #ef5126 0%, var(--color-poke) 42%, #c92e0b 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.35),
+    inset 0 0 0 2px var(--color-poke-deep),
+    inset 0 -5px 0 var(--color-poke-deep),
+    0 6px 0 var(--color-poke-dark),
+    0 28px 44px -26px rgb(41 38 61 / 0.7);
+}
+.tk-dex-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 4px 12px;
+}
+.tk-lens {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 4px solid #fff;
+  background: radial-gradient(circle at 34% 30%, #bfe3ff 0 14%, #4fa3e8 32%, var(--color-azure-deep) 100%);
+  box-shadow: 0 0 0 2px var(--color-poke-dark);
+}
+.tk-led {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--color-poke-dark);
+}
+.tk-dex-title {
+  font-family: var(--ff-pixel);
+  font-size: 11px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 var(--color-poke-dark);
+}
+.tk-screen {
+  border-radius: 14px;
+  padding: 14px;
+  background: #23203a;
+  box-shadow:
+    inset 0 0 0 3px #151325,
+    inset 0 8px 18px rgb(0 0 0 / 0.35);
+}
+.tk-live {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 900px) {
+  .tk-live {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+}
+.tk-live-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tk-live-stat {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.14);
+}
+.tk-live-label {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+  color: var(--color-pika);
+}
+.tk-live-value {
+  margin-top: 6px;
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: clamp(22px, 4vw, 30px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.tk-live-note {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: #cfcbe4;
+}
+.tk-rips {
+  display: grid;
+  grid-auto-rows: 46px;
+  gap: 6px;
+  height: calc(5 * 46px + 4 * 6px);
+  overflow: hidden;
+}
+.tk-rip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 0 6px;
+  border-radius: 11px;
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  animation: tk-rip-in 0.5s var(--ease-pop) both;
+}
+@keyframes tk-rip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.95);
+  }
+}
+.tk-rip-empty {
+  display: flex;
+  padding: 0 14px;
+  background: rgb(255 255 255 / 0.06);
+  color: #cfcbe4;
+  font-size: 13px;
+  font-weight: 700;
+  animation: none;
+}
+.tk-rip-pack {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 14px;
+}
+.tk-rip-price {
+  font-weight: 900;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.tk-rip-mult {
+  min-width: 3.1rem;
+  padding: 5px 6px 4px;
+  border-radius: 7px;
+  font-family: var(--ff-num);
+  font-weight: 800;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: center;
+  background: var(--color-cream-lo);
+  color: var(--color-ink-soft);
+}
+.tk-rip-mult[data-level="green"] {
+  /* Light enough for the up-green text to clear 4.5:1 (#cdeed8 gave 4.28). */
+  background: #e0f5e7;
+  color: var(--color-up);
+}
+.tk-rip-mult[data-level="gold"] {
+  background: var(--color-pika);
+  color: var(--color-ink);
+}
+@media (max-width: 559px) {
+  /* Icon-only category chip on phones; the label stays for screen readers. */
+  .tk-rip-chip {
+    font-size: 0;
+    gap: 0;
+    padding: 0.2rem;
+  }
+}
+
+/* ------------------------------------------------------------- chart */
+.tk-chart {
+  position: relative;
+  height: 220px;
+  margin-left: 46px;
+  border-bottom: 2px solid var(--color-ink);
+}
+.tk-chart-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.tk-chart-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed var(--color-sand-dark);
+}
+.tk-chart-tick {
+  position: absolute;
+  right: 100%;
+  top: 0;
+  margin-right: 8px;
+  translate: 0 -50%;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-ink-mute);
+  white-space: nowrap;
+}
+.tk-bar {
+  fill: var(--color-poke);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: tk-grow-y 0.7s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 14ms);
+}
+.tk-bar-top {
+  fill: var(--color-poke-deep);
+}
+.tk-bar-zero {
+  fill: var(--color-sand-dark);
+  animation: none;
+}
+@keyframes tk-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+.tk-chart-note {
+  position: absolute;
+  z-index: 1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 2px solid var(--color-ink);
+  background: var(--color-cream-hi);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  translate: 12px 50%;
+  animation: pop-in 0.5s var(--ease-pop) 0.9s both;
+}
+.tk-chart-note[data-side="left"] {
+  translate: calc(-100% - 12px) 50%;
+}
+.tk-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0 0 46px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-ink-mute);
+}
+.tk-chart-cap {
+  margin-top: 14px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+.tk-chart-table {
+  margin-top: 12px;
+}
+.tk-chart-table summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--color-azure-deep);
+}
+.tk-chart-table table {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 420px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.tk-chart-table th,
+.tk-chart-table td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px dashed var(--color-sand);
+}
+.tk-chart-table th {
+  font-weight: 800;
+  color: var(--color-ink-mute);
+}
+
+/* ------------------------------------------------------------ supply */
+.tk-supply-bar {
+  display: flex;
+  gap: 3px;
+  height: 38px;
+  padding: 3px;
+  border-radius: 12px;
+  border: 3px solid var(--color-ink);
+  background: var(--color-ink);
+  overflow: hidden;
+}
+.tk-supply-seg {
+  flex-basis: 0;
+  min-width: 7px;
+  border-radius: 6px;
+  transform-origin: 0 50%;
+  animation: tk-grow-x 0.9s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 150ms);
+}
+@keyframes tk-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+[data-seg="circ"] {
+  background: linear-gradient(var(--color-up-fill), #2fa65c);
+}
+[data-seg="unlock"] {
+  background: repeating-linear-gradient(-45deg, var(--color-pika) 0 6px, var(--color-pika-deep) 6px 12px);
+}
+[data-seg="locked"] {
+  background: var(--color-sand);
+}
+[data-seg="burned"] {
+  background: linear-gradient(var(--tk-fire), var(--color-poke));
+}
+.tk-supply-legend {
+  display: grid;
+  gap: 10px 20px;
+  margin-top: 16px;
+}
+@media (min-width: 560px) {
+  .tk-supply-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tk-supply-legend li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 10px;
+}
+.tk-supply-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--color-ink);
+}
+.tk-supply-name {
+  font-weight: 800;
+}
+.tk-supply-num {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.tk-supply-pct {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--color-ink-mute);
+}
+.tk-supply-note {
+  grid-column: 2 / -1;
+  font-size: 12px;
+  color: var(--color-ink-mute);
+}
+
+/* ---------------------------------------------------- Game Boy countdown */
+.tk-lcd {
+  padding: 14px 14px 18px;
+  border-radius: 12px 12px 36px 12px;
+  background: linear-gradient(160deg, #a7a8b8, #8b8c9e);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.35),
+    inset 0 -3px 0 rgb(41 38 61 / 0.25),
+    0 4px 0 rgb(41 38 61 / 0.2);
+}
+.tk-lcd-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 98px;
+  padding: 14px 8px;
+  border-radius: 4px;
+  background: var(--color-gb-3);
+  box-shadow:
+    inset 0 0 0 3px var(--color-gb-2),
+    inset 0 8px 14px rgb(15 56 15 / 0.22);
+}
+/* Dot-matrix grid. */
+.tk-lcd-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(15 56 15 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(15 56 15 / 0.07) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+.tk-lcd-row {
+  display: flex;
+  justify-content: center;
+  gap: clamp(8px, 2.5vw, 18px);
+}
+.tk-lcd-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 2.6em;
+}
+.tk-lcd-num {
+  font-family: var(--ff-pixel);
+  font-size: clamp(20px, 5.4vw, 30px);
+  line-height: 1;
+  color: var(--color-gb-0);
+  font-variant-numeric: tabular-nums;
+}
+.tk-lcd-unit {
+  font-family: var(--ff-pixel);
+  font-size: 8px;
+  line-height: 1;
+  color: var(--color-gb-0);
+}
+.tk-lcd-done {
+  font-family: var(--ff-pixel);
+  font-size: clamp(16px, 4vw, 22px);
+  color: var(--color-gb-0);
+}
+.tk-lcd-power {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-family: var(--ff-pixel);
+  font-size: 7px;
+  color: #2d2b40;
+}
+.tk-lcd-power::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-poke);
+  box-shadow: 0 0 6px 1px rgb(227 53 13 / 0.7);
+}
+
+/* ------------------------------------------------- scroll-in replays */
+/* ViewTrigger parks below-the-fold blocks at their first frame (off screen) and releases them on entry. */
+[data-tk-wait] .tk-bar:not(.tk-bar-zero) {
+  animation: none;
+  transform: scaleY(0);
+}
+[data-tk-wait] .tk-supply-seg {
+  animation: none;
+  transform: scaleX(0);
+}
+[data-tk-wait] span[style*="hp-in"] {
+  animation: none !important;
+  transform: scaleX(0);
+}
+[data-tk-wait] .tk-line-wipe {
+  animation: none;
+  transform: scaleX(1);
+}
+[data-tk-wait] .tk-fw-node,
+[data-tk-wait] .tk-fw-hub,
+[data-tk-wait] .tk-chart-note {
+  animation: none;
+  opacity: 0;
+}

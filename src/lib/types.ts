@@ -107,6 +107,39 @@ export interface MarketplacePage {
   cardsQtyByCategory: Record<string, number>;
 }
 
+/** A listed card as the catalogue (lib/catalog.ts) keeps it: only what the sitemap and /cards render. */
+export interface CatalogCard {
+  nftAddress: string;
+  itemName: string;
+  grade: string | null;
+  gradingCompany: string | null;
+  category: string;
+  set: string | null;
+  year: number | null;
+  /** Card number within the set. */
+  serial: string | null;
+  price: number | null;
+  currency: Currency | null;
+  /** When the listing last changed (sitemap lastmod). */
+  updatedAt: string | null;
+  /** images.frontS (337px WebP), for thumbnails. */
+  thumb: string | null;
+  /** images.frontM (675px WebP), also in the card page's srcset; the image sitemap entry. */
+  image: string | null;
+}
+
+/** Every listed graded card, from one walk of the marketplace. Shared between requests: read-only. */
+export interface Catalog {
+  /** Marketplace name order. */
+  cards: CatalogCard[];
+  /** Listings per category as Collector Crypt counts them (graded or not). */
+  categoryCounts: Record<string, number>;
+  /** False when the walk failed midway and nothing complete was at hand. */
+  complete: boolean;
+  /** When the walk ended, ms since epoch. */
+  fetchedAt: number;
+}
+
 export type OrderBy =
   | "listedDateDesc"
   | "listedDateAsc"

@@ -1,3 +1,4 @@
+import { CATEGORY_HUBS } from "@/lib/category-hubs";
 import { REPO_URL, SITE_URL } from "@/lib/constants";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import { categoryName, categoryPath } from "@/lib/seo";
@@ -8,6 +9,11 @@ export const dynamic = "force-static";
 
 const categories = PRIMARY_CATEGORIES.map(
   (c) => `- [${categoryName(c)}](${SITE_URL}${categoryPath(c)}): live ${categoryName(c)} graded card listings ranked by deal score.`,
+).join("\n");
+
+const hubs = CATEGORY_HUBS.map(
+  (hub) =>
+    `- [${hub.name} cards](${SITE_URL}/cards/${hub.slug}): live graded ${hub.name} listings with the lowest and median asking price by grade, plus a short collector's guide and FAQ.`,
 ).join("\n");
 
 const body = `# Decard
@@ -28,9 +34,14 @@ const body = `# Decard
 - [Recent sales](${SITE_URL}/sales): the latest settled Collector Crypt sales decoded from Solana, with card, grade, price, seller, buyer and transaction link, plus count, USDC volume and median for the window.
 - [Live trade tape](${SITE_URL}/tape): decoded marketplace sales, listings and bids as they land.
 - [Tokenized trading cards on Solana](${SITE_URL}/tokenized-trading-cards): sourced guide to vault custody, Collector Crypt, on-chain ownership, USDC trading, insured value, deal scores, population reports, redemption and risks.
-- [Trainer's guide](${SITE_URL}/guide): plain-language glossary of grading, PSA vs CGC vs BGS, pop reports, gem rate, insured value, bids and vaults.
+- [$CARDS token](${SITE_URL}/cards-token): Collector Crypt's Solana token (CARDS): live price, market cap, supply and holders; how much gacha revenue buys back and burns CARDS (DefiLlama data), total burned, the next unlock and whether Coinbase lists it yet.
+- [Trainer's guide](${SITE_URL}/guide): plain-language glossary of grading, PSA vs CGC vs BGS, pop reports, gem rate, insured value, bids and vaults, plus collector slang (slab, grail, SIR, manga rare, case break) and crypto and Solana slang (seed phrase, SPL token, degen, WAGMI).
 - Card pages (${SITE_URL}/card/{mint}): listing price, insured value, best bid, population report and on-chain history for one card. Every listed card is in the [sitemap](${SITE_URL}/sitemap.xml).
 - Wallet pages (${SITE_URL}/wallet/{address}): any Solana wallet's graded cards, insured total and marketplace activity.
+
+## Franchise hubs
+
+${hubs}
 
 ## Categories
 

@@ -11,7 +11,7 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
   return (
     <div className="flex flex-col gap-1.5">
       <span className="font-pixel text-[9px] text-ink-mute uppercase">{label}</span>
-      <span className="font-display font-bold text-[1.7rem] leading-none">{children}</span>
+      <span className="font-num font-extrabold text-[1.7rem] leading-none tabular-nums">{children}</span>
     </div>
   );
 }

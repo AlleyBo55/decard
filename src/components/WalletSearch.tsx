@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { cardImage } from "@/lib/constants";
-import { fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { BallSearch } from "@/components/icons";
 import { GradePill } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
@@ -183,7 +183,7 @@ export function WalletSearch({
               <GradePill label={gradeShort(r.gradingCompany, r.grade)} />
               {r.price != null && (
                 <span className="text-sm font-extrabold tabular-nums shrink-0">
-                  {r.currency === "USDC" ? fmtUsd(r.price) : `${r.price}◎`}
+                  {r.currency === "USDC" ? fmtUsd(r.price) : fmtSol(r.price)}
                 </span>
               )}
             </button>

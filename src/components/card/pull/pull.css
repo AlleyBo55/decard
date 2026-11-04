@@ -953,7 +953,7 @@
   font-size: 9px;
 }
 
-/* What the link preview will show: the actual PNG. */
+/* What the link preview will show: the actual share image. */
 .pr-shot {
   position: relative;
   aspect-ratio: 1200 / 630;

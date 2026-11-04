@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, motion, useInView } from "motion/react";
-import { useEffect, useRef } from "react";
+import { Children, useEffect, useRef } from "react";
 import { clsx } from "@/lib/clsx";
 
 /**
@@ -51,7 +51,11 @@ export function HoloCard({ children, className }: { children: React.ReactNode; c
 type CountKind = "int" | "usd" | "usdCompact";
 
 function formatCount(v: number, kind: CountKind) {
-  if (kind === "usd") return "$" + Intl.NumberFormat("en", { maximumFractionDigits: v < 100 ? 2 : 0 }).format(v);
+  if (kind === "usd") {
+    // Same money rule as fmtUsd: full cents under $100 ("$10.80"), whole dollars whole.
+    const digits = Math.abs(v) < 100 && !Number.isInteger(v) ? 2 : 0;
+    return "$" + Intl.NumberFormat("en", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
+  }
   if (kind === "usdCompact")
     return "$" + Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(v);
   return Math.round(v).toLocaleString("en");
@@ -127,7 +131,12 @@ export function Rail({ children, label }: { children: React.ReactNode; label: st
         aria-label={label}
         className="flex gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar py-4 -my-4 px-1 -mx-1"
       >
-        {children}
+        {/* A link can't take role="listitem", so each child gets its own item. */}
+        {Children.map(children, (child) => (
+          <div role="listitem" className="shrink-0 snap-start">
+            {child}
+          </div>
+        ))}
       </div>
       {(
         [

@@ -68,7 +68,7 @@ export function TapeBoard() {
               <Icon className="h-4 w-4 text-poke" />
               {label}
             </dt>
-            <dd className="mt-2 font-display font-bold text-4xl leading-none">{value}</dd>
+            <dd className="mt-2 font-num font-extrabold text-4xl leading-none tabular-nums">{value}</dd>
             <dd className="mt-1.5 text-xs text-ink-mute">{note}</dd>
           </div>
         ))}

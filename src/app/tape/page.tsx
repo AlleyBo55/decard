@@ -2,18 +2,50 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TapeBoard } from "@/components/tape/TapeBoard";
 import { Kicker } from "@/components/ui";
-import { pageMetadata } from "@/lib/seo";
+import { SITE_URL } from "@/lib/constants";
+import { ORGANIZATION_ID, WEBSITE_ID, breadcrumbLd, jsonLd, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = pageMetadata({
-  title: "Collector Crypt live sales and trade tape",
-  description:
-    "Every graded-card sale, listing and bid on the Collector Crypt marketplace program, decoded live with card, grade, price and wallets. Filter out bulk bid bots.",
-  path: "/tape",
-});
+const PATH = "/tape";
+const TITLE = "Collector Crypt live sales and trade tape";
+const DESCRIPTION =
+  "Every graded-card sale, listing and bid on the Collector Crypt marketplace program, decoded live with card, grade, price and wallets. Filter out bulk bid bots.";
+
+export const metadata: Metadata = pageMetadata({ title: TITLE, description: DESCRIPTION, path: PATH });
+
+const pageUrl = `${SITE_URL}${PATH}`;
+const structured = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: TITLE,
+      description: DESCRIPTION,
+      inLanguage: "en",
+      isAccessibleForFree: true,
+      isPartOf: { "@id": WEBSITE_ID },
+      publisher: { "@id": ORGANIZATION_ID },
+      breadcrumb: { "@id": `${pageUrl}#breadcrumbs` },
+    },
+    breadcrumbLd(`${pageUrl}#breadcrumbs`, [
+      { name: "Home", path: "/" },
+      { name: "Live tape", path: PATH },
+    ]),
+  ],
+};
 
 export default function TapePage() {
   return (
     <section className="pt-10 flex flex-col gap-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structured) }} />
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-bold text-ink-mute">
+        <Link href="/" className="hover:text-poke-deep">
+          Home
+        </Link>
+        <span aria-hidden>›</span>
+        <span className="text-ink">Live tape</span>
+      </nav>
       <header className="flex flex-col gap-4">
         <Kicker>Live trade tape</Kicker>
         <h1 className="h-display text-[clamp(2.4rem,5vw,3.8rem)]">

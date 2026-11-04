@@ -13,10 +13,13 @@ DexScreener, Magic Eden, GMGN and Arkham for card traders, wrapped in a Game Boy
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-2a75bb?style=flat-square&logo=typescript&logoColor=white)](./tsconfig.json)
 [![No API key](https://img.shields.io/badge/API_key-not_required-3dbe6e?style=flat-square)](#configuration)
 [![Pull luck: VRF verified](https://img.shields.io/badge/pull_luck-VRF_verified-9a2257?style=flat-square)](#live-gacha)
+[![$CARDS tracker](https://img.shields.io/badge/%24CARDS-buybacks_%2B_burns-ee8130?style=flat-square)](#cards-token)
+[![18 franchise hubs](https://img.shields.io/badge/franchise_hubs-18-6390f0?style=flat-square)](#franchise-hubs)
+[![Self-hosted](https://img.shields.io/badge/self--hosted-Docker_%2B_Caddy-1d5690?style=flat-square&logo=docker&logoColor=white)](#deploy)
 
-**[Open decard.fun](https://www.decard.fun)** · [Live gacha](https://www.decard.fun/luck#live) · [Listing scanner](https://www.decard.fun/scanner) · [Trade tape](https://www.decard.fun/tape) · [Trainer's guide](https://www.decard.fun/guide)
+**[Open decard.fun](https://www.decard.fun)** · [$CARDS token](https://www.decard.fun/cards-token) · [Franchise hubs](https://www.decard.fun/cards/pokemon) · [Live gacha](https://www.decard.fun/luck#live) · [Listing scanner](https://www.decard.fun/scanner) · [Trade tape](https://www.decard.fun/tape) · [Trainer's guide](https://www.decard.fun/guide)
 
-✨ **New:** [live gacha + pull luck](#live-gacha). Watch every rip, know your odds, prove your luck.
+🔥 **New:** the [$CARDS token tracker](#cards-token), [18 franchise hubs](#franchise-hubs), a slang-savvy glossary, and a [faster, leaner Decard](#faster-lighter).
 
 </div>
 
@@ -26,9 +29,51 @@ Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on 
 
 <a href="https://www.decard.fun"><img src=".github/assets/home.jpg" alt="Decard home page with live listing stats, card and wallet search, and a 3D Poké Ball" width="100%"></a>
 
+<a id="cards-token"></a>
+
+## 🔥 New: the $CARDS token tracker
+
+**Coinbase just put CARD on its listing roadmap. Decard shows what's actually behind the token.**
+
+Collector Crypt sells gacha packs around the clock, and part of that revenue buys $CARDS back to burn. [decard.fun/cards-token](https://www.decard.fun/cards-token) puts the whole loop on one page, next to the packs ripping right now.
+
+<a href="https://www.decard.fun/cards-token"><img src=".github/assets/cards-token.jpg" alt="Decard's $CARDS page: a holographic Pokédex card with the live price, the buyback flywheel and base stats" width="100%"></a>
+
+- 🃏 **Holographic Pokédex entry**: a live price that flashes green or red, HP as the price against the all-time high, plus 24h change, market cap and holders.
+- 🔄 **The flywheel**: pack sales → Collector Crypt revenue → CARDS bought back and burned, animated in pure CSS, for 24h, 7d, 30d and all time. Also how many cents of every $1 ripped end up as buybacks.
+- 📊 **Buybacks, day by day**: 60 days of buyback-and-burn bars from DefiLlama, with the biggest day called out.
+- 🔥 **Supply meter**: the 2B max supply split into circulating, not yet circulating, and burned.
+- ⏳ **Unlock countdown**: a Game Boy LCD ticking down to the next unlock.
+- 🟦 **Coinbase watch**: checks Coinbase Exchange for a live CARD market, so the badge flips on its own the day it lists.
+- 🎰 **Live rips**: packs and dollars ripped in the last couple of minutes, straight from the gacha feed.
+
+Every number is server-rendered and sourced, with an "as of" time. Not financial advice.
+
+<a id="franchise-hubs"></a>
+
+## 🗺️ New: 18 franchise hubs + a slang-savvy glossary
+
+Every franchise Collector Crypt lists now has its own landing page, with live asks by grade, the cheapest and priciest slabs, a short collector's guide and an FAQ:
+
+[Pokémon](https://www.decard.fun/cards/pokemon) · [One Piece](https://www.decard.fun/cards/one-piece) · [Dragon Ball](https://www.decard.fun/cards/dragon-ball) · [Riftbound](https://www.decard.fun/cards/riftbound) · [Marvel](https://www.decard.fun/cards/marvel) · [Yu-Gi-Oh!](https://www.decard.fun/cards/yu-gi-oh) · [Magic: The Gathering](https://www.decard.fun/cards/magic-the-gathering) · [Disney Lorcana](https://www.decard.fun/cards/lorcana) · [DC](https://www.decard.fun/cards/dc) · [Gundam](https://www.decard.fun/cards/gundam) · [Naruto](https://www.decard.fun/cards/naruto) · [Union Arena](https://www.decard.fun/cards/union-arena) · [Vibes](https://www.decard.fun/cards/vibes) · [Soccer](https://www.decard.fun/cards/soccer) · [Basketball](https://www.decard.fun/cards/basketball) · [Football](https://www.decard.fun/cards/football) · [Baseball](https://www.decard.fun/cards/baseball) · [Hockey](https://www.decard.fun/cards/hockey)
+
+<a href="https://www.decard.fun/cards/one-piece"><img src=".github/assets/hubs.jpg" alt="Decard's One Piece hub: live listings, prices by grade and a collector's guide" width="100%"></a>
+
+The [Trainer's Guide](https://www.decard.fun/guide) now speaks both hobby and crypto, with 35 new terms: slab, grail, SIR and SAR, manga rare, case break, crack and resub, BGS Black Label, seed phrase, SPL token, degen, ape in, diamond hands, WAGMI, LFG and more. Each one has its own link (`/guide#manga-rare`).
+
+<a id="faster-lighter"></a>
+
+## ⚡ New: faster and lighter
+
+- **Pages paint before the JavaScript loads.** The page wrapper used to stay invisible until hydration. Now the server HTML shows at once.
+- **Share images went from 492 KB PNGs to 84–117 KB JPEGs**, cached after the first render: about 2 ms of CPU each instead of 120–190 ms. The default share image is built once at build time.
+- **The full catalogue is crawlable again.** Collector Crypt moved its marketplace to cursor paging, which had cut the sitemap to 327 URLs. One in-memory walk now feeds a sitemap of 13.5k+ card URLs with image entries, and a `/cards` directory at 300 KB per page instead of 1 MB.
+- **Compressed API responses** (zstd/gzip through Caddy), a working keyless Solana RPC (PublicNode), and a `robots.txt` that welcomes search and AI answer engines but turns away SEO scraper bots.
+- **Structured data everywhere**: Organization, WebPage, CollectionPage, BreadcrumbList, FAQPage, ItemList and DefinedTermSet, with visible breadcrumbs.
+
 <a id="live-gacha"></a>
 
-## ✨ New: Live Gacha + Pull Luck
+## 🎰 Live Gacha + Pull Luck
 
 **Watch every rip. Know your odds. Prove your luck.**
 
@@ -104,10 +149,13 @@ There is no database and no indexer. Next.js route handlers read public sources,
 |---|---|---|
 | Collector Crypt marketplace API | listings, card details, insured values, bids, pop reports, holdings | none (optional `CC_API_KEY` raises rate limits) |
 | Collector Crypt image CDN | card images, pre-sized WebP | none |
-| Solana RPC: public endpoint, or Helius | trade tape, card and wallet history | none (optional `HELIUS_API_KEY`) |
+| Solana RPC: PublicNode, or Helius | trade tape, card and wallet history | none (optional `HELIUS_API_KEY`) |
 | Collector Crypt gacha site | live pulls, recent epic hits, machine odds, pool snapshots, VRF proofs | none |
 | Solana RPC: full-history public endpoint, or Helius | a wallet's gacha pack history | none |
 | Jupiter, then CoinGecko | live SOL price | none |
+| Jupiter, CoinGecko | CARDS price, supply, holders, all-time high, 30-day history | none |
+| DefiLlama | gacha pack sales, Collector Crypt revenue, CARDS buybacks and burns | none |
+| Coinbase Exchange | whether a CARD market is live yet | none |
 
 The server-side fetcher times out slow calls, retries throttled or failed reads with backoff, holds each upstream host to a rate limit and merges identical requests, so a burst of visitors costs one upstream call.
 
@@ -139,13 +187,15 @@ Never put a key in a `NEXT_PUBLIC_` variable: those values are baked into the Ja
 
 ## Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAlleyBo55%2Fdecard)
+decard.fun runs on one small VPS (Tencent Cloud Lighthouse, 2 vCPU / 2 GB) as a Docker container behind [Caddy](https://caddyserver.com), which handles HTTPS and renews its own Let's Encrypt certificates.
 
-1. Import the repo on Vercel, or click the button. No build settings to change.
-2. Under **Settings → Environment Variables**, set `NEXT_PUBLIC_SITE_URL` to your domain, plus any optional keys.
-3. Deploy. `NEXT_PUBLIC_` values are read at build time, so redeploy after changing them.
+1. **Server:** any Linux box with Docker and the Compose plugin, ports 80 and 443 open, and your domain's A records pointing at it.
+2. **GitHub secrets:** create a `production` environment that only `master` may deploy to, holding `LIGHTHOUSE_HOST`, `LIGHTHOUSE_USER`, `LIGHTHOUSE_SSH_KEY` (a key with no passphrase) and `LIGHTHOUSE_KNOWN_HOSTS` (from `ssh-keyscan -t ed25519 <host>`). The optional keys (`HELIUS_API_KEY`, `CC_API_KEY`, `NEXT_PUBLIC_GA_ID`) go there too.
+3. **Push to `master`.** [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the image, streams it to the server over SSH (no registry), and swaps the app container with [`deploy/compose.yaml`](deploy/compose.yaml). Edit [`deploy/Caddyfile`](deploy/Caddyfile) for your own domain.
 
-Search files come built in: `sitemap.xml` lists up to 20,000 listed graded cards and refreshes its data every 6 hours, and `llms.txt` gives AI assistants a plain-text summary of the site.
+The Dockerfile works on any container host. Vercel works too: import the repo and set `NEXT_PUBLIC_SITE_URL`. Expect the share images and the sitemap to use most of a free plan's CPU.
+
+Search files come built in: `sitemap.xml` lists every listed graded card with its image (from one in-memory catalogue walk every 6 hours), plus the franchise hubs and guides, and `llms.txt` gives AI assistants a plain-text summary of the site.
 
 ## Tech
 

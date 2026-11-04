@@ -77,21 +77,21 @@ export function DexEntry({ counts }: { counts: Record<string, number> }) {
               <div className="leader-row">
                 <span className="font-bold text-ink-soft">Listed</span>
                 <span className="leader" />
-                <span className="font-display font-bold text-xl">
+                <span className="font-num font-extrabold text-xl tabular-nums">
                   {isLoading ? "…" : <CountUp value={data?.listed ?? 0} />}
                 </span>
               </div>
               <div className="leader-row">
                 <span className="font-bold text-ink-soft">Floor</span>
                 <span className="leader" />
-                <span className="font-display font-bold text-xl text-up">
+                <span className="font-num font-extrabold text-xl tabular-nums text-up">
                   {isLoading ? "…" : <CountUp value={usd(data?.floor)} kind="usd" />}
                 </span>
               </div>
               <div className="leader-row">
                 <span className="font-bold text-ink-soft">Top listing</span>
                 <span className="leader" />
-                <span className="font-display font-bold text-xl text-azure-deep">
+                <span className="font-num font-extrabold text-xl tabular-nums text-azure-deep">
                   {isLoading ? "…" : <CountUp value={usd(data?.ceiling)} kind="usdCompact" />}
                 </span>
               </div>

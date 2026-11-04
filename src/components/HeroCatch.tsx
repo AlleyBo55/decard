@@ -6,15 +6,15 @@ import type { CardRow } from "@/lib/types";
 import type { CatchPhase } from "@/components/Pokeball3D";
 import { useHomeListings } from "@/hooks/pages/Home/useHighlights";
 import { cardImage } from "@/lib/constants";
-import { dealScore, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { clsx } from "@/lib/clsx";
 
 type Ball3D = typeof import("@/components/Pokeball3D").default;
 
 /**
  * The three.js ball is a ~900KB chunk, so it is only fetched once the hero is
- * on screen and the browser is idle, or on the first tap. If the chunk fails,
- * the CSS ball simply stays.
+ * on screen and the browser is idle, or on the first tap. Touch and small
+ * screens wait for the tap. If the chunk fails, the CSS ball simply stays.
  */
 function loadBall3D(onLoad: (ball: Ball3D) => void) {
   import("@/components/Pokeball3D").then(
@@ -79,6 +79,8 @@ export function HeroCatch() {
   useEffect(() => {
     const el = stage.current;
     if (!webgl || Pokeball3D || !el) return;
+    // On phones, compiling three.js unasked was a long main-thread block (TBT, slow first taps).
+    if (window.matchMedia("(pointer: coarse), (max-width: 767px)").matches) return;
     let idle: number | undefined;
     let timer: number | undefined;
     const mount = () => loadBall3D((ball) => setPokeball3D(() => ball));
@@ -163,7 +165,7 @@ export function HeroCatch() {
                   {caught.listing
                     ? caught.listing.currency === "USDC"
                       ? fmtUsd(caught.listing.price)
-                      : `${caught.listing.price} SOL`
+                      : fmtSol(caught.listing.price)
                     : "Unlisted"}
                   {Number(caught.insuredValue) > 0 && ` · insured ${fmtUsd(Number(caught.insuredValue))}`}
                   {score != null && score > 0 && <b className="text-up"> · {score}% under</b>}

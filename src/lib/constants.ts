@@ -1,7 +1,10 @@
 export const CC_API = "https://api.collectorcrypt.com";
 export const CC_NFT = "https://nft.collectorcrypt.com";
 export const CC_GACHA = "https://gacha.collectorcrypt.com";
-export const SOLANA_RPC = "https://rpc.solanatracker.io/public";
+// Keyless default RPC (PublicNode), also the fallback when Helius is down. It
+// answers one getTransaction per JSON-RPC batch and keeps only recent ledger
+// history. No published rate limit; see helpers/rateLimiter.ts.
+export const SOLANA_RPC = "https://solana-rpc.publicnode.com";
 // Keyless RPC with full signature history. SOLANA_RPC only serves recent
 // signatures, which hides older gacha pulls; used only for wallet pack history.
 export const SOLANA_ARCHIVE_RPC = "https://api.mainnet-beta.solana.com";

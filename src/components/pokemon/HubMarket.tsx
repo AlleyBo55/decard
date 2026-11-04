@@ -41,7 +41,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="paper p-4">
       <dt className="font-pixel text-[9px] text-ink-mute">{label}</dt>
-      <dd className="mt-2 font-display text-2xl font-bold tabular-nums text-ink">{value}</dd>
+      <dd className="mt-2 font-num text-2xl font-extrabold tabular-nums text-ink">{value}</dd>
     </div>
   );
 }
@@ -49,8 +49,11 @@ function Stat({ label, value }: { label: string; value: string }) {
 function TileGrid({ cards }: { cards: CardRow[] }) {
   return (
     <div role="list" className="grid grid-cols-2 justify-items-center gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      {/* The tile is a link, and a link can't take role="listitem" itself. */}
       {cards.map((c) => (
-        <CardTile key={c.nftAddress} c={c} solUsd={null} className="!w-full max-w-[200px]" />
+        <div key={c.nftAddress} role="listitem" className="w-full max-w-[200px]">
+          <CardTile c={c} solUsd={null} className="!w-full max-w-[200px]" />
+        </div>
       ))}
     </div>
   );
@@ -77,7 +80,7 @@ function GradeTable({ grades }: { grades: HubGrade[] }) {
                 <GradePill label={g.label} />
               </td>
               <td className="p-4 tabular-nums">{g.count}</td>
-              <td className="p-4 font-display text-lg font-bold tabular-nums text-ink">{fmtUsd(g.lowest.listing.price)}</td>
+              <td className="p-4 font-num text-lg font-extrabold tabular-nums text-ink">{fmtUsd(g.lowest.listing.price)}</td>
               <td className="p-4 tabular-nums">{fmtUsd(g.median)}</td>
               <td className="p-4">
                 <Link href={`/card/${g.lowest.nftAddress}`} prefetch={false} className="font-bold text-azure-deep hover:text-poke-deep">
