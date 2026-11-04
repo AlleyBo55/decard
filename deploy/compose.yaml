@@ -1,0 +1,41 @@
+# decard on the Tencent Cloud Lighthouse instance, in ~/decard. The deploy workflow copies this
+# file and the Caddyfile there, writes app.env (server-only API keys) and .env (the image to run),
+# then runs `docker compose up -d`. Run any other compose command from ~/decard too.
+name: decard
+services:
+  app:
+    image: "${DECARD_IMAGE:?DECARD_IMAGE is written to .env by the deploy workflow}"
+    env_file: app.env
+    restart: unless-stopped
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      options:
+        max-size: 10m
+        max-file: "5"
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    labels:
+      # Changes with the Caddyfile, so `docker compose up` recreates Caddy to load the new one.
+      decard.caddyfile-sha256: "${CADDYFILE_SHA256:-}"
+volumes:
+  caddy_data:
+  caddy_config:

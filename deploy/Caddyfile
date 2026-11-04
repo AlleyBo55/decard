@@ -1,0 +1,11 @@
+# Caddy (deploy/compose.yaml) terminates TLS and proxies to the Next.js container. It gets and
+# renews Let's Encrypt certificates itself once both names resolve to the Lighthouse instance
+# and ports 80 and 443 are open in its firewall.
+www.decard.fun {
+	reverse_proxy app:3000
+}
+
+# The canonical host is www (NEXT_PUBLIC_SITE_URL in .github/workflows/deploy.yml).
+decard.fun {
+	redir https://www.decard.fun{uri} permanent
+}

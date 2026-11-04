@@ -1,0 +1,12 @@
+# Build context for the Dockerfile: no local secrets, build output or screenshots.
+.git
+.github
+.next
+.shots*
+.vercel
+.env*
+node_modules
+deploy
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store

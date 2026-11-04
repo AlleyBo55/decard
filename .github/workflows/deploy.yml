@@ -1,0 +1,100 @@
+# Deploys decard to a Tencent Cloud Lighthouse instance on every push to master.
+#
+# The runner builds the image and streams it to the instance over SSH (no registry), then
+# docker compose (deploy/compose.yaml) swaps the app container. Caddy in the same compose project
+# serves https://www.decard.fun and renews its own certificates.
+#
+# Secrets live in the "production" environment (Settings → Environments), which only master may
+# deploy to, so no other branch or workflow can read them. Required: LIGHTHOUSE_HOST,
+# LIGHTHOUSE_USER, LIGHTHOUSE_SSH_KEY, LIGHTHOUSE_KNOWN_HOSTS. Optional (see .env.example):
+# HELIUS_API_KEY, CC_API_KEY, NEXT_PUBLIC_GA_ID.
+name: Deploy to Lighthouse
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+# One deploy at a time: a second push waits for the first instead of racing it.
+concurrency:
+  group: deploy-lighthouse
+  cancel-in-progress: false
+permissions:
+  contents: read
+env:
+  IMAGE: decard:${{ github.sha }}
+defaults:
+  run:
+    # bash -eo pipefail: a failed `docker save` fails the step instead of shipping a broken stream.
+    shell: bash
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # GitHub rejects this job on any branch but master (the environment's branch policy).
+    environment: production
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build image
+        env:
+          # Inlined into the bundle at build time.
+          NEXT_PUBLIC_SITE_URL: https://www.decard.fun
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}
+        run: docker build --build-arg NEXT_PUBLIC_SITE_URL --build-arg NEXT_PUBLIC_GA_ID -t "$IMAGE" .
+
+      - name: Configure SSH
+        env:
+          LIGHTHOUSE_HOST: ${{ secrets.LIGHTHOUSE_HOST }}
+          LIGHTHOUSE_USER: ${{ secrets.LIGHTHOUSE_USER }}
+          LIGHTHOUSE_SSH_KEY: ${{ secrets.LIGHTHOUSE_SSH_KEY }}
+          LIGHTHOUSE_KNOWN_HOSTS: ${{ secrets.LIGHTHOUSE_KNOWN_HOSTS }}
+        run: |
+          for name in LIGHTHOUSE_HOST LIGHTHOUSE_USER LIGHTHOUSE_SSH_KEY LIGHTHOUSE_KNOWN_HOSTS; do
+            if [ -z "${!name}" ]; then echo "::error::Secret $name is not set"; exit 1; fi
+          done
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$LIGHTHOUSE_SSH_KEY" > ~/.ssh/lighthouse
+          chmod 600 ~/.ssh/lighthouse
+          # Pinned host key, so the API keys in app.env only ever go to the real instance.
+          printf '%s\n' "$LIGHTHOUSE_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host lighthouse
+            HostName $LIGHTHOUSE_HOST
+            User $LIGHTHOUSE_USER
+            IdentityFile ~/.ssh/lighthouse
+            IdentitiesOnly yes
+            BatchMode yes
+            StrictHostKeyChecking yes
+          EOF
+
+      - name: Copy image and config to the instance
+        env:
+          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
+          CC_API_KEY: ${{ secrets.CC_API_KEY }}
+        run: |
+          docker save "$IMAGE" | gzip | ssh lighthouse 'gunzip | docker load'
+          tar -C deploy -cf - compose.yaml Caddyfile | ssh lighthouse 'mkdir -p ~/decard && tar -xf - -C ~/decard'
+          printf 'HELIUS_API_KEY=%s\nCC_API_KEY=%s\n' "$HELIUS_API_KEY" "$CC_API_KEY" \
+            | ssh lighthouse 'umask 077 && cat > ~/decard/app.env'
+
+      - name: Start the new version
+        run: |
+          ssh lighthouse bash -s -- "$IMAGE" <<'EOF'
+          set -euo pipefail
+          cd ~/decard
+          printf 'DECARD_IMAGE=%s\nCADDYFILE_SHA256=%s\n' "$1" "$(sha256sum Caddyfile | cut -d' ' -f1)" > .env
+          docker compose up -d --remove-orphans
+          for _ in $(seq 30); do
+            if docker compose exec -T app wget -q --spider http://127.0.0.1:3000/robots.txt 2>/dev/null; then
+              echo "decard is up on $1"
+              # Keep the three newest images; roll back by setting DECARD_IMAGE in .env to one of them.
+              docker image ls --filter 'reference=decard:*' --format '{{.Repository}}:{{.Tag}}' \
+                | tail -n +4 | xargs -r docker image rm >/dev/null \
+                || echo "::warning::Could not remove old decard images"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::decard did not answer on :3000/robots.txt within 60 seconds"
+          docker compose logs --tail 100 app
+          exit 1
+          EOF

@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // The Docker image (Dockerfile) runs the self-contained .next/standalone/server.js.
+  output: "standalone",
   experimental: {
     // `next dev` restarted on a saved Turbopack cache can reload a page in a
     // loop (~100 times in 6s): the restored client chunk list sends "restart",
