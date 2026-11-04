@@ -29,8 +29,9 @@ const POLICIES: Record<string, HostPolicy> = {
   "api.collectorcrypt.com": process.env.CC_API_KEY
     ? { rps: 100, burst: 200, concurrency: 48 }
     : { rps: 30, burst: 100, concurrency: 32 },
-  // Keyless public RPC. Batches are charged per call inside them (see `cost`).
-  "rpc.solanatracker.io": { rps: 8, burst: 40, concurrency: 4 },
+  // PublicNode keyless RPC (SOLANA_RPC). No published limit: stay polite. Batches
+  // are charged per call inside them (see `cost`).
+  "solana-rpc.publicnode.com": { rps: 5, burst: 20, concurrency: 4 },
   // Solana Foundation keyless RPC, used only for wallet pack history: 40 calls per 10s per method per IP.
   "api.mainnet-beta.solana.com": { rps: 3, burst: 10, concurrency: 4 },
   // Collector Crypt's gacha site (VRF witness, live feed, pools). No published limit: stay polite.

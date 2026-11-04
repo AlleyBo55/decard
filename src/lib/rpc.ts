@@ -17,9 +17,10 @@ export { decodeActivity };
 // is retried once on the keyless public RPC and Helius sits out a short
 // cooldown so a burst doesn't keep hitting it.
 //
-// Public RPC, confirmed by probing: getSignaturesForAddress, getTransaction
-// (jsonParsed) and JSON-RPC batches of up to 60 work; DAS and
-// getTokenAccountsByOwner are blocked and intentionally unused.
+// Public RPC (PublicNode), confirmed by probing: getSignaturesForAddress and
+// getTransaction (jsonParsed) work, but a JSON-RPC batch may carry only one
+// getTransaction and getMultipleAccounts takes at most 10 keys, so both are
+// split into calls that small. DAS and getTokenAccountsByOwner are unused.
 
 interface RpcRequest {
   jsonrpc: "2.0";
@@ -42,11 +43,13 @@ type RpcRoute = "auto" | "helius" | "public";
 const HELIUS_TIMEOUT_MS = 7_000;
 const HELIUS_COOLDOWN_MS = 30_000;
 /**
- * The public RPC takes JSON-RPC batches this large. Batches only ever go there:
- * a Helius batch would have to stay at 10 items or fewer, since each item counts
- * toward its 10 req/s.
+ * getTransaction calls per JSON-RPC batch on the public RPC: PublicNode allows
+ * one. Batches only ever go there: a Helius batch would have to stay at 10
+ * items or fewer, since each item counts toward its 10 req/s.
  */
-const PUBLIC_BATCH = 60;
+const PUBLIC_BATCH = 1;
+/** Keys per getMultipleAccounts on the public RPC (PublicNode's cap; Helius takes 100). */
+const PUBLIC_ACCOUNT_KEYS = 10;
 /** Helius throttled, out of credits, rejecting the key, or down. */
 const HELIUS_DOWN_STATUS = new Set([401, 402, 403, 408, 425, 429]);
 const HELIUS_DOWN_CODES = new Set(["TIMEOUT", "NETWORK_ERROR", "RATE_LIMITED", "PARSE_ERROR"]);
@@ -122,14 +125,38 @@ export async function rpcCall<T>(method: string, params: unknown[], route: RpcRo
   } else if (route === "helius") {
     throw createAPIError("Helius is not configured or is cooling down.", 503, "HELIUS_UNAVAILABLE");
   }
+  return publicCall<T>(method, params);
+}
+
+/** One call on the public RPC. A getMultipleAccounts over its key cap is split, its values kept in key order. */
+async function publicCall<T>(method: string, params: unknown[]): Promise<T> {
+  const [keys, ...rest] = params;
+  if (method === "getMultipleAccounts" && Array.isArray(keys) && keys.length > PUBLIC_ACCOUNT_KEYS) {
+    const parts: unknown[][] = [];
+    for (let i = 0; i < keys.length; i += PUBLIC_ACCOUNT_KEYS) parts.push(keys.slice(i, i + PUBLIC_ACCOUNT_KEYS));
+    const answers = await Promise.all(
+      parts.map((part) => publicCall<{ context?: unknown; value?: unknown[] }>(method, [part, ...rest])),
+    );
+    return {
+      context: answers[0]?.context,
+      value: answers.flatMap((a, i) => (Array.isArray(a?.value) ? a.value : parts[i].map(() => null))),
+    } as T;
+  }
+  const body = { jsonrpc: "2.0", id: 1, method, params };
   return unwrap<T>(method, await post<RpcEnvelope<T>>(SOLANA_RPC, body, 1, false));
 }
 
-/** Many calls of one method as JSON-RPC batches on the public RPC. Items it doesn't answer come back null. */
+/**
+ * Many calls of one method as JSON-RPC batches on the public RPC. Items it
+ * doesn't answer, and those of a batch that failed, come back null; it throws
+ * only when every batch failed.
+ */
 async function publicBatch<T>(method: string, paramsList: unknown[][]): Promise<(T | null)[]> {
   const chunks: unknown[][][] = [];
   for (let i = 0; i < paramsList.length; i += PUBLIC_BATCH) chunks.push(paramsList.slice(i, i + PUBLIC_BATCH));
-  const answered = await Promise.all(
+  // At one call per batch, a single throttled call must not sink the rest: its
+  // row decodes without the transaction and is read again on the next poll.
+  const answered = await Promise.allSettled(
     chunks.map(async (chunk) => {
       const reqs: RpcRequest[] = chunk.map((params, id) => ({ jsonrpc: "2.0", id, method, params }));
       const res = await post<RpcEnvelope<T>[] | RpcEnvelope<T>>(SOLANA_RPC, reqs, reqs.length, false);
@@ -138,7 +165,9 @@ async function publicBatch<T>(method: string, paramsList: unknown[][]): Promise<
       return reqs.map((r) => byId.get(r.id)?.result ?? null);
     }),
   );
-  return answered.flat();
+  const failed = answered.filter((a): a is PromiseRejectedResult => a.status === "rejected");
+  if (failed.length > 0 && failed.length === answered.length) throw failed[0].reason;
+  return answered.flatMap((a, i) => (a.status === "fulfilled" ? a.value : chunks[i].map(() => null)));
 }
 
 function signaturesFor(address: string, limit: number, before: string | undefined, route: RpcRoute) {
