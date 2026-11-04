@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const runtime = "nodejs";
+// Drawn once at build and served from the build output: the image never
+// changes between deploys, and a render cost ~57 ms of CPU per request.
+export const dynamic = "force-static";
 
 const size = { width: 1200, height: 630 };
 const INK = "#29263d";
@@ -111,7 +114,8 @@ export async function GET() {
         { name: "Press", data: press, weight: 400, style: "normal" },
         { name: "Nunito", data: nunito, weight: 800, style: "normal" },
       ],
-      headers: { "Cache-Control": "public, max-age=86400, immutable" },
+      // Browsers keep it a week; a CDN keeps it until a deploy purges it, as Next does for static pages.
+      headers: { "Cache-Control": "public, max-age=604800, s-maxage=31536000, immutable" },
     },
   );
 }

@@ -245,7 +245,7 @@ function ReceiptDialog({
     const data: ShareData = { title, text, url };
     // The file only goes along when it is already rendered for this pack price.
     if (shot && !busy) {
-      const file = new File([shot.blob], fileName, { type: "image/png" });
+      const file = new File([shot.blob], fileName, { type: "image/jpeg" });
       if (navigator.canShare?.({ files: [file] })) data.files = [file];
     }
     try {
@@ -488,7 +488,7 @@ function ReceiptDialog({
                     <DiscordLogo /> Discord
                   </button>
                   <a className="pr-skey" href={imgPath} download={fileName} onClick={() => track("download")}>
-                    <DownloadIcon /> Save PNG
+                    <DownloadIcon /> Save image
                   </a>
                   {canShare && (
                     <button type="button" className="pr-skey" data-brand="native" onClick={nativeShare}>
@@ -517,7 +517,7 @@ function ReceiptDialog({
 
               <p className="pr-fine">
                 You set the pack price; nothing checks it. Insured value is Collector Crypt&apos;s number, not a sale price.
-                Data refreshes every 10 minutes.
+                The share image&apos;s figures refresh once a day.
               </p>
             </div>
 
