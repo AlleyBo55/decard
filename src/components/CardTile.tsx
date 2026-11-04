@@ -33,7 +33,6 @@ export function CardTile({
   return (
     <Link
       href={`/card/${c.nftAddress}`}
-      role="listitem"
       className={clsx("group block snap-start shrink-0 w-[172px] sm:w-[188px] outline-none", className)}
     >
       <HoloCard className="rounded-[14px]">

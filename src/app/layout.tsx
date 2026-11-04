@@ -10,7 +10,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { RouteProgress } from "@/components/RouteProgress";
 import { Konami } from "@/components/Konami";
 import { REPO_URL, SITE_URL, SITE_NAME } from "@/lib/constants";
-import { OG_IMAGE, jsonLd } from "@/lib/seo";
+import { OG_IMAGE, ORGANIZATION_ID, WEBSITE_ID, jsonLd } from "@/lib/seo";
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID?.trim();
 /** GA4 measurement ID. Public by design (it ships in every page). Unset or malformed loads no analytics. */
@@ -86,13 +86,29 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// WebSite gives Google the site name to show in results. WebApplication and
-// SoftwareSourceCode tie decard.fun to its GitHub repo for search engines and AI assistants.
+// WebSite gives Google the site name to show in results, Organization the logo. WebApplication
+// and SoftwareSourceCode tie decard.fun to its GitHub repo for search engines and AI assistants.
 const appId = `${SITE_URL}/#app`;
 const siteLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: SITE_NAME, alternateName: "decard.fun", url: `${SITE_URL}/` },
+    {
+      "@type": "WebSite",
+      "@id": WEBSITE_ID,
+      name: SITE_NAME,
+      alternateName: "decard.fun",
+      url: `${SITE_URL}/`,
+      publisher: { "@id": ORGANIZATION_ID },
+    },
+    {
+      "@type": "Organization",
+      "@id": ORGANIZATION_ID,
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      // Drawn by app/apple-icon.tsx. The <head> link adds a ?hash for cache busting; the plain path serves the same PNG.
+      logo: `${SITE_URL}/apple-icon`,
+      sameAs: [REPO_URL],
+    },
     {
       "@type": "WebApplication",
       "@id": appId,

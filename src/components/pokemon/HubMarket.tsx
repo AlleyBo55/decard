@@ -49,8 +49,11 @@ function Stat({ label, value }: { label: string; value: string }) {
 function TileGrid({ cards }: { cards: CardRow[] }) {
   return (
     <div role="list" className="grid grid-cols-2 justify-items-center gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      {/* The tile is a link, and a link can't take role="listitem" itself. */}
       {cards.map((c) => (
-        <CardTile key={c.nftAddress} c={c} solUsd={null} className="!w-full max-w-[200px]" />
+        <div key={c.nftAddress} role="listitem" className="w-full max-w-[200px]">
+          <CardTile c={c} solUsd={null} className="!w-full max-w-[200px]" />
+        </div>
       ))}
     </div>
   );

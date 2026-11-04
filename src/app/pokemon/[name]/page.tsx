@@ -89,7 +89,7 @@ function byGrade(priced: Priced[]): HubGrade[] {
 }
 
 const description = (hub: PokemonHub) =>
-  `Live ${hub.name} Pokémon card prices by grade: lowest and median asking prices for PSA 10, PSA 9, CGC and BGS slabs listed on Collector Crypt and Magic Eden, with insured values.`;
+  `Live ${hub.name} Pokémon card prices by grade: lowest and median asking prices for PSA 10, PSA 9, CGC and BGS slabs on Collector Crypt and Magic Eden.`;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const hub = hubBySlug((await params).name);

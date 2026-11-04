@@ -2,6 +2,9 @@
 # renews Let's Encrypt certificates itself once both names resolve to the Lighthouse instance
 # and ports 80 and 443 are open in its firewall.
 www.decard.fun {
+	# Next gzips its HTML, but /api JSON went out uncompressed. Responses that already carry a
+	# Content-Encoding pass through untouched.
+	encode zstd gzip
 	reverse_proxy app:3000
 }
 

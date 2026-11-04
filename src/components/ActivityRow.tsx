@@ -17,8 +17,9 @@ export function WalletName({ address, title }: { address: string; title?: string
       href={`/wallet/${address}`}
       onClick={(e) => e.stopPropagation()}
       title={title ?? address}
+      // py-1 lifts the tap target past 24px tall; -my-1 keeps the line where it was.
       className={clsx(
-        "font-bold hover:text-poke-deep transition-colors",
+        "inline-block py-1 -my-1 font-bold hover:text-poke-deep transition-colors",
         label ? "text-azure-deep" : "font-mono text-[13px] text-ink-soft",
       )}
     >

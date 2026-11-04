@@ -5,7 +5,7 @@ import { Suspense, cache } from "react";
 import { getCard, getCardMarket, getCardOffers } from "@/lib/cc";
 import { dealScore, fmtNum, fmtPct, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
 import { SITE_URL, cardImage, ccAssetUrl, solscanAddr } from "@/lib/constants";
-import { categoryPath, jsonLd, pageMetadata } from "@/lib/seo";
+import { categoryPath, clip, jsonLd, pageMetadata } from "@/lib/seo";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import {
   compactGrade,
@@ -38,9 +38,11 @@ const ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 /** One catalogue read per request, shared by generateMetadata and the page. */
 const loadCard = cache((mint: string) => getCard(mint));
 
-/** Search snippet and Product description for one card. */
+/** Search snippet and Product description for one card. Long catalogue names would run past 160 characters. */
 function cardDescription(card: CardDetail) {
-  return `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`;
+  return clip(
+    `${card.itemName}. Insured at ${fmtUsd(Number(card.insuredValue))}. Live price, population report, bids and on-chain history on Decard.`,
+  );
 }
 
 export async function generateMetadata({ params, searchParams }: PageProps<"/card/[mint]">): Promise<Metadata> {

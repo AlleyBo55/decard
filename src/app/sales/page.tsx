@@ -11,7 +11,7 @@ import type { Activity } from "@/lib/types";
 const PATH = "/sales";
 const TITLE = "Recent tokenized card sales on Collector Crypt";
 const DESCRIPTION =
-  "The latest settled Collector Crypt sales of graded Pokémon and other tokenized cards: card, grade, price, buyer, seller and the Solana transaction behind each one.";
+  "Latest settled Collector Crypt sales of graded Pokémon and other tokenized cards: card, grade, price, buyer, seller and the Solana transaction behind each one.";
 
 // Static HTML rebuilt at most every 5 minutes: one treasury history read per rebuild,
 // however many people or crawlers open the page.

@@ -10,7 +10,7 @@ const count = GUIDE.reduce((n, s) => n + s.terms.length, 0);
 export const metadata: Metadata = pageMetadata({
   title: "Graded card guide: PSA vs CGC, pop reports, gem rate",
   description:
-    "New to tokenized graded cards? Plain-language guide to grading, PSA vs CGC vs BGS, population reports, gem rate, insured value, floor, bids, deal score, vaults, redeeming and collector slang.",
+    "New to tokenized graded cards? A plain-language guide to grading, PSA vs CGC vs BGS, pop reports, gem rate, insured value, deal score, vaults and redeeming.",
   path: "/guide",
 });
 

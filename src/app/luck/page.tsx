@@ -1,16 +1,41 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LiveGacha } from "@/components/gacha/LiveGacha";
 import { LuckAnalyzer } from "@/components/luck/LuckAnalyzer";
 import { Kicker } from "@/components/ui";
+import { SITE_URL } from "@/lib/constants";
 import { parsePackMemo, parseWalletAddress } from "@/lib/luck";
-import { pageMetadata } from "@/lib/seo";
+import { ORGANIZATION_ID, WEBSITE_ID, breadcrumbLd, jsonLd, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = pageMetadata({
-  title: "Collector Crypt pull luck analyzer",
-  description:
-    "Score every verified Collector Crypt Solana pack pull in a wallet, or a single pull, against the cards and tier odds available when it was awarded.",
-  path: "/luck",
-});
+const PATH = "/luck";
+const TITLE = "Collector Crypt pull luck analyzer";
+const DESCRIPTION =
+  "Score every verified Collector Crypt Solana pack pull in a wallet, or a single pull, against the cards and tier odds available when it was awarded.";
+
+export const metadata: Metadata = pageMetadata({ title: TITLE, description: DESCRIPTION, path: PATH });
+
+const pageUrl = `${SITE_URL}${PATH}`;
+const structured = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: TITLE,
+      description: DESCRIPTION,
+      inLanguage: "en",
+      isAccessibleForFree: true,
+      isPartOf: { "@id": WEBSITE_ID },
+      publisher: { "@id": ORGANIZATION_ID },
+      breadcrumb: { "@id": `${pageUrl}#breadcrumbs` },
+    },
+    breadcrumbLd(`${pageUrl}#breadcrumbs`, [
+      { name: "Home", path: "/" },
+      { name: "Gacha", path: PATH },
+    ]),
+  ],
+};
 
 const firstParam = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value) ?? "";
 
@@ -22,6 +47,14 @@ export default async function LuckPage({ searchParams }: PageProps<"/luck">) {
 
   return (
     <section className="pt-10 flex flex-col gap-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structured) }} />
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-bold text-ink-mute">
+        <Link href="/" className="hover:text-poke-deep">
+          Home
+        </Link>
+        <span aria-hidden>›</span>
+        <span className="text-ink">Gacha</span>
+      </nav>
       <header className="flex flex-col gap-4">
         <Kicker>Collector Crypt gacha hub</Kicker>
         <h1 className="h-display text-[clamp(2.4rem,5vw,3.8rem)]">

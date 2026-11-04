@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, motion, useInView } from "motion/react";
-import { useEffect, useRef } from "react";
+import { Children, useEffect, useRef } from "react";
 import { clsx } from "@/lib/clsx";
 
 /**
@@ -127,7 +127,12 @@ export function Rail({ children, label }: { children: React.ReactNode; label: st
         aria-label={label}
         className="flex gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar py-4 -my-4 px-1 -mx-1"
       >
-        {children}
+        {/* A link can't take role="listitem", so each child gets its own item. */}
+        {Children.map(children, (child) => (
+          <div role="listitem" className="shrink-0 snap-start">
+            {child}
+          </div>
+        ))}
       </div>
       {(
         [

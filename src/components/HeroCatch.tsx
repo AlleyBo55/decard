@@ -13,8 +13,8 @@ type Ball3D = typeof import("@/components/Pokeball3D").default;
 
 /**
  * The three.js ball is a ~900KB chunk, so it is only fetched once the hero is
- * on screen and the browser is idle, or on the first tap. If the chunk fails,
- * the CSS ball simply stays.
+ * on screen and the browser is idle, or on the first tap. Touch and small
+ * screens wait for the tap. If the chunk fails, the CSS ball simply stays.
  */
 function loadBall3D(onLoad: (ball: Ball3D) => void) {
   import("@/components/Pokeball3D").then(
@@ -79,6 +79,8 @@ export function HeroCatch() {
   useEffect(() => {
     const el = stage.current;
     if (!webgl || Pokeball3D || !el) return;
+    // On phones, compiling three.js unasked was a long main-thread block (TBT, slow first taps).
+    if (window.matchMedia("(pointer: coarse), (max-width: 767px)").matches) return;
     let idle: number | undefined;
     let timer: number | undefined;
     const mount = () => loadBall3D((ball) => setPokeball3D(() => ball));
