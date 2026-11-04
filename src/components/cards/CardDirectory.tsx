@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Kicker } from "@/components/ui";
-import { getMarketplace } from "@/lib/cc";
+import { getCatalog } from "@/lib/catalog";
 import { cardImage, SITE_URL } from "@/lib/constants";
-import { isGradedCard } from "@/lib/credible";
-import { jsonLd } from "@/lib/seo";
+import { fmtNum, fmtUsd } from "@/lib/format";
+import { categoryName, jsonLd } from "@/lib/seo";
+import type { CatalogCard } from "@/lib/types";
 
 const PAGE_SIZE = 200;
 export const CARD_DIRECTORY_MAX_PAGES = 100;
@@ -16,6 +16,11 @@ const BASE_DESCRIPTION =
 
 export function cardDirectoryPath(page: number) {
   return page === 1 ? "/cards" : `/cards/page/${page}`;
+}
+
+/** Directory pages that exist for `count` cards: at least one, at most the cap. */
+export function cardDirectoryPageCount(count: number) {
+  return Math.min(CARD_DIRECTORY_MAX_PAGES, Math.max(1, Math.ceil(count / PAGE_SIZE)));
 }
 
 export function cardDirectoryTitle(page: number) {
@@ -84,30 +89,42 @@ function Pagination({ currentPage, totalPages }: { currentPage: number; totalPag
   );
 }
 
-export async function CardDirectory({ page }: { page: number }) {
-  await connection();
+// Rows carry no classes or wrappers of their own: the list lays them out on a
+// grid (thumbnail | name over details | price) through these selectors. Row
+// markup is sent twice (the HTML and the RSC payload), so per-row classes were
+// most of the page's weight.
+const LIST_CLASS = [
+  "paper divide-y divide-sand",
+  "*:grid *:grid-cols-[2.25rem_minmax(0,1fr)_auto] *:grid-rows-[1fr_auto_auto_1fr] *:gap-x-3 *:px-3 *:py-2.5 sm:*:gap-x-4 sm:*:px-5",
+  "[&_img]:row-span-full [&_img]:self-center [&_img]:h-[60px] [&_img]:w-9 [&_img]:rounded-md [&_img]:bg-cream-lo [&_img]:object-contain",
+  "[&_a]:col-start-2 [&_a]:row-start-2 [&_a]:break-words [&_a]:font-bold [&_a]:leading-snug [&_a]:text-ink [&_a]:underline [&_a]:decoration-sand-dark [&_a]:underline-offset-4 [&_a:hover]:text-poke-deep",
+  "[&_p]:col-start-2 [&_p]:row-start-3 [&_p]:mt-1 [&_p]:text-sm [&_p]:text-ink-soft",
+  "[&>li>span]:col-start-3 [&>li>span]:row-span-full [&>li>span]:self-center [&>li>span]:font-display [&>li>span]:font-bold [&>li>span]:tabular-nums [&>li>span]:text-ink",
+].join(" ");
 
+/** "PSA GEM-MT 10 · Pokémon · Base Set · 1999 · No. 4", skipping what the listing doesn't say. */
+function details(card: CatalogCard) {
+  const grade = [card.gradingCompany, card.grade].filter(Boolean).join(" ");
+  return [grade, categoryName(card.category), card.set, card.year, card.serial && `No. ${card.serial}`]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function askingPrice(card: CatalogCard) {
+  return card.currency === "SOL" ? `${fmtNum(card.price)}◎` : fmtUsd(card.price);
+}
+
+export async function CardDirectory({ page }: { page: number }) {
   if (!Number.isSafeInteger(page) || page < 1 || page > CARD_DIRECTORY_MAX_PAGES) notFound();
 
-  const query = (pageNumber: number) => ({
-    step: PAGE_SIZE,
-    orderBy: "nameAsc" as const,
-    listPriceMin: 1,
-    page: pageNumber,
-  });
-  const cache = { revalidate: 21600 };
-  // Validate against page 1 before asking Collector Crypt for a page it does
-  // not have. Page 1 is shared with the sitemap and normally already cached.
-  const first = await getMarketplace(query(1), cache);
-  const availablePages = Number.isFinite(first.totalPages) ? Math.max(0, Math.floor(first.totalPages)) : 0;
-  const totalPages = Math.min(availablePages, CARD_DIRECTORY_MAX_PAGES);
+  // In-process catalogue: no upstream call unless it is cold or due a refresh.
+  const catalog = await getCatalog();
+  const totalPages = cardDirectoryPageCount(catalog.cards.length);
+  if (page > totalPages) notFound();
 
-  if (page > 1 && page > totalPages) notFound();
-
-  const marketplace = page === 1 ? first : await getMarketplace(query(page), cache);
-
-  const cards = marketplace.cards.filter(isGradedCard);
-  const displayedTotalPages = Math.max(1, totalPages);
+  const start = (page - 1) * PAGE_SIZE;
+  const cards = catalog.cards.slice(start, start + PAGE_SIZE);
+  const asOf = new Date(catalog.fetchedAt).toISOString();
   const path = cardDirectoryPath(page);
   const pageUrl = `${SITE_URL}${path}`;
   const title = cardDirectoryTitle(page);
@@ -118,11 +135,6 @@ export async function CardDirectory({ page }: { page: number }) {
     { name: "Graded card directory", path: "/cards" },
     ...(page > 1 ? [{ name: `Page ${page}`, path }] : []),
   ];
-  const entries = cards.map((card, index) => {
-    const position = (page - 1) * PAGE_SIZE + index + 1;
-    const url = `${SITE_URL}/card/${card.nftAddress}`;
-    return { card, position, url };
-  });
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -139,13 +151,13 @@ export async function CardDirectory({ page }: { page: number }) {
         "@type": "ItemList",
         "@id": `${pageUrl}#card-list`,
         name: listTitle,
-        numberOfItems: entries.length,
-        itemListElement: entries.map(({ card, position, url }) => ({
+        numberOfItems: cards.length,
+        // Position and URL only (Google's summary-page form): the names are in
+        // the list itself, and each one here would be sent twice more.
+        itemListElement: cards.map((card, index) => ({
           "@type": "ListItem",
-          position,
-          name: card.itemName,
-          item: url,
-          url,
+          position: start + index + 1,
+          url: `${SITE_URL}/card/${card.nftAddress}`,
         })),
       },
       {
@@ -191,80 +203,44 @@ export async function CardDirectory({ page }: { page: number }) {
         <div>
           <h2 className="font-display text-2xl font-bold text-ink">{listTitle}</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            {entries.length} graded {entries.length === 1 ? "card" : "cards"} on this page.
+            {cards.length > 0 && `Cards ${fmtNum(start + 1)}–${fmtNum(start + cards.length)} of `}
+            {fmtNum(catalog.cards.length)} graded cards listed, with asking prices as of{" "}
+            <time dateTime={asOf}>{asOf.slice(0, 16).replace("T", " ")} UTC</time>.
           </p>
         </div>
         <p className="font-pixel text-[9px] text-ink-mute">
-          Page {page} of {displayedTotalPages}
+          Page {page} of {totalPages}
         </p>
       </div>
 
-      {entries.length > 0 ? (
-        <ol className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {entries.map(({ card, position }) => (
-            <li key={`${card.nftAddress}-${position}`} className="paper p-4 sm:p-5">
-              <div className="flex gap-4 sm:gap-5">
-                <div className="w-16 shrink-0 self-start rounded-lg bg-cream-lo p-1 sm:w-20">
-                  <img
-                    src={cardImage(card.nftAddress, "front", 128, card)}
-                    alt=""
-                    width={128}
-                    height={213}
-                    loading="lazy"
-                    decoding="async"
-                    className="aspect-[3/5] h-auto w-full rounded-md object-contain"
-                  />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <span className="font-pixel text-[9px] text-poke-deep">#{position}</span>
-                  <h3 className="mt-2 font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
-                    <Link
-                      href={`/card/${card.nftAddress}`}
-                      prefetch={false}
-                      className="break-words underline decoration-sand-dark underline-offset-4 transition-colors hover:text-poke-deep focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-poke"
-                    >
-                      {card.itemName}
-                    </Link>
-                  </h3>
-
-                  <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
-                    <div>
-                      <dt className="font-pixel text-[8px] uppercase text-ink-mute">Grade</dt>
-                      <dd className="mt-1 break-words font-bold text-ink">
-                        {card.gradingCompany ?? "Unknown grader"} {card.grade ?? "Not provided"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-pixel text-[8px] uppercase text-ink-mute">Category</dt>
-                      <dd className="mt-1 break-words font-bold text-ink">{card.category || "Other"}</dd>
-                    </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <dt className="font-pixel text-[8px] uppercase text-ink-mute">Set</dt>
-                      <dd className="mt-1 break-words font-bold text-ink">{card.set || "Not provided"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-pixel text-[8px] uppercase text-ink-mute">Year</dt>
-                      <dd className="mt-1 font-bold tabular-nums text-ink">{card.year || "Not provided"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-pixel text-[8px] uppercase text-ink-mute">Card no.</dt>
-                      <dd className="mt-1 break-words font-bold text-ink">{card.serial || "Not provided"}</dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
+      {cards.length > 0 ? (
+        <ol className={LIST_CLASS}>
+          {cards.map((card, index) => (
+            // Index keys: the list never reorders in the browser, and a mint per row is 44 more bytes.
+            <li key={index}>
+              <img
+                src={card.thumb ?? cardImage(card.nftAddress, "front", 128)}
+                alt=""
+                width={36}
+                height={60}
+                loading="lazy"
+              />
+              <Link href={`/card/${card.nftAddress}`} prefetch={false}>
+                {card.itemName}
+              </Link>
+              <p>{details(card)}</p>
+              {card.price != null && <span>{askingPrice(card)}</span>}
             </li>
           ))}
         </ol>
       ) : (
         <div className="paper p-6 text-center sm:p-8">
-          <p className="font-display text-xl font-bold text-ink">No graded cards appear on this marketplace page.</p>
+          <p className="font-display text-xl font-bold text-ink">No graded cards are listed right now.</p>
           <p className="mt-2 text-sm text-ink-soft">The directory filters out ungraded items, packs and merchandise.</p>
         </div>
       )}
 
-      <Pagination currentPage={page} totalPages={displayedTotalPages} />
+      <Pagination currentPage={page} totalPages={totalPages} />
     </section>
   );
 }

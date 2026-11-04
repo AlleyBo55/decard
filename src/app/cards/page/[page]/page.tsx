@@ -13,7 +13,15 @@ type CardsPageProps = {
   params: Promise<{ page: string }>;
 };
 
-export const maxDuration = 30;
+// Cached HTML (ISR): a page is rendered on its first request, never during the
+// build, then re-rendered from the in-process catalogue at most hourly.
+// force-static also lets a cold catalogue walk run inside the render: its
+// uncached reads (revalidate: 0) would otherwise turn the page dynamic.
+export const dynamic = "force-static";
+export const revalidate = 3600;
+
+// Only serverless hosts read this. The first request after a start waits for the catalogue walk.
+export const maxDuration = 60;
 
 function parsePage(rawPage: string) {
   if (!/^[1-9]\d*$/.test(rawPage)) notFound();
