@@ -15,6 +15,8 @@ const LINKS = [
   { href: "/luck", label: "Gacha", Icon: Sparkle },
   { href: "/guide", label: "Guide", Icon: Books },
 ];
+// The mobile tab bar holds five; the desktop bar has room for the token page too.
+const DESKTOP_LINKS = [...LINKS.slice(0, 4), { href: "/cards-token", label: "$CARDS" }, ...LINKS.slice(4)];
 
 export function Logo() {
   return (
@@ -39,7 +41,7 @@ export function Nav() {
           <Logo />
 
           <nav aria-label="Main" className="hidden md:flex items-center gap-7 ml-6">
-            {LINKS.map(({ href, label }) => (
+            {DESKTOP_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}

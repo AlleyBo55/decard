@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { cardDirectoryPageCount, cardDirectoryPath } from "@/components/cards/CardDirectory";
 import { isAPIError } from "@/helpers/fetcher";
 import { getCatalog } from "@/lib/catalog";
+import { CATEGORY_HUBS } from "@/lib/category-hubs";
 import { SITE_URL } from "@/lib/constants";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import { POKEMON_HUBS } from "@/lib/pokemon-hubs";
@@ -34,6 +35,7 @@ const STATIC_PAGES: { path: string; lastModified?: string; changeFrequency: Chan
   { path: "/pokemon", changeFrequency: "daily", priority: 0.8 },
   { path: "/sales", changeFrequency: "hourly", priority: 0.8 },
   { path: "/tokenized-trading-cards", lastModified: "2026-10-23", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/cards-token", changeFrequency: "hourly", priority: 0.9 },
 ];
 
 /** Next writes sitemap URLs into the XML unescaped, so one stray "&" would break the whole file. */
@@ -54,6 +56,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${SITE_URL}${path}`,
     lastModified: lastModified ?? now,
     ...entry,
+  }));
+
+  // One landing page per franchise (Pokémon, One Piece, Dragon Ball, ...), live prices plus a guide.
+  const hubs: MetadataRoute.Sitemap = CATEGORY_HUBS.map((hub) => ({
+    url: `${SITE_URL}/cards/${hub.slug}`,
+    lastModified: now,
+    changeFrequency: "daily",
+    priority: 0.8,
   }));
 
   const guides: MetadataRoute.Sitemap = POKEMON_HUBS.map((hub) => ({
@@ -87,5 +97,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     images: c.image && xmlSafe(c.image) ? [c.image] : undefined,
   }));
 
-  return [...pages, ...guides, ...directoryPages, ...categories, ...cards];
+  return [...pages, ...hubs, ...guides, ...directoryPages, ...categories, ...cards];
 }

@@ -7,6 +7,7 @@ import { HomeLiveGacha } from "@/components/home/HomeLiveGacha";
 import { HomeSections } from "@/components/home/HomeSections";
 import { DialogBox, MoreLink, SectionHead, TypeChip } from "@/components/ui";
 import { Reveal } from "@/components/motion";
+import { BrowseByFranchise } from "@/components/hubs/BrowseByFranchise";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import { jsonLd } from "@/lib/seo";
 
@@ -85,6 +86,16 @@ export default function Home() {
 
       <HomeSections />
 
+      {/* One landing page per franchise: live prices by grade plus a short guide. */}
+      <section className="mt-24 flex flex-col gap-6">
+        <SectionHead
+          kicker="Pick your type"
+          title="Browse by franchise."
+          sub="Graded Pokémon, One Piece, Dragon Ball, Riftbound, Marvel, sports and more: live asks by grade for every slab on Collector Crypt and Magic Eden."
+        />
+        <BrowseByFranchise />
+      </section>
+
       {/* professor's tip */}
       <Reveal className="mt-24">
         <DialogBox className="max-w-3xl mx-auto !p-6 sm:!p-8">
@@ -125,6 +136,7 @@ export default function Home() {
           <MoreLink href="/pokemon-card-value-checker">Check a Pokémon card&apos;s value</MoreLink>
           <MoreLink href="/pokemon">Pokémon prices by Pokémon</MoreLink>
           <MoreLink href="/luck">Analyze a Collector Crypt gacha pull</MoreLink>
+          <MoreLink href="/cards-token">$CARDS price, buybacks and burns</MoreLink>
           <MoreLink href="/sales">Recent verified sales</MoreLink>
           <MoreLink href="/cards">Browse every listed card</MoreLink>
           <MoreLink href="/tokenized-trading-cards">How tokenized trading cards work</MoreLink>

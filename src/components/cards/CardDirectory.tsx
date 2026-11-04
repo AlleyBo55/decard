@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BrowseByFranchise } from "@/components/hubs/BrowseByFranchise";
 import { Kicker } from "@/components/ui";
 import { getCatalog } from "@/lib/catalog";
 import { cardImage, SITE_URL } from "@/lib/constants";
@@ -198,6 +199,8 @@ export async function CardDirectory({ page }: { page: number }) {
         <h1 className="h-display text-[clamp(2.4rem,5vw,3.8rem)]">{title}</h1>
         <p className="max-w-3xl text-lg leading-relaxed text-ink-soft">{description}</p>
       </header>
+
+      <BrowseByFranchise counts={catalog.categoryCounts} />
 
       <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-sand pb-4">
         <div>
