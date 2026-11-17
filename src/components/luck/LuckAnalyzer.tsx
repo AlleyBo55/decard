@@ -1,7 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
 import { useRouter } from "next/navigation";
+import { useLocale, useT } from "@/components/LocaleProvider";
+import { localizeHref } from "@/lib/i18n";
+import { fmt } from "@/lib/i18n/format";
+import type { ClientStrings } from "@/lib/i18n/strings/types";
 import { useState, type FormEvent } from "react";
 import { useLuck } from "@/hooks/pages/Luck/useLuck";
 import { cardImage, solscanTx } from "@/lib/constants";
@@ -9,7 +13,8 @@ import { fmtNum, fmtPct, fmtUsd, shortAddr } from "@/lib/format";
 import { parsePackMemo, parseWalletAddress } from "@/lib/luck";
 import type { PullLuck } from "@/lib/types";
 import { DexMessage, DialogBox, PokeLoader, SectionHead, StatBar } from "@/components/ui";
-import { scoreOutOf100, shareOrCopy, TIER_STYLE, titleCase, type ShareState } from "./shared";
+import { rich } from "@/components/gacha/rich";
+import { scoreOutOf100, shareOrCopy, TIER_STYLE, type ShareState } from "./shared";
 import { WalletLuck } from "./WalletLuck";
 
 type ErrorCopy = {
@@ -28,10 +33,10 @@ function parseTarget(input: string): Target | null {
 }
 
 /** A fixed UTC representation renders identically on the server and during hydration. */
-function stablePulledAt(value: string | null) {
-  if (!value) return "Not reported";
+function stablePulledAt(value: string | null, notReported: string) {
+  if (!value) return notReported;
   const timestamp = Date.parse(value);
-  if (Number.isNaN(timestamp)) return "Not reported";
+  if (Number.isNaN(timestamp)) return notReported;
   return new Date(timestamp).toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
 }
 
@@ -44,37 +49,19 @@ function safeHttpsUrl(value: string) {
   }
 }
 
-function requestErrorCopy(error: unknown): ErrorCopy {
+function requestErrorCopy(error: unknown, copy: ClientStrings["luck"]["errors"]): ErrorCopy {
   const value = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
   const message = typeof value.message === "string" ? value.message : "";
   const code = typeof value.code === "string" ? value.code : "";
   const status = typeof value.status === "number" ? value.status : null;
   const fingerprint = `${code} ${message}`.toLowerCase();
 
-  if (/legacy|provable[ _-]?pool|no[ _-]?snapshot/.test(fingerprint)) {
-    return {
-      title: "This legacy pull cannot be scored.",
-      body: "Older pulls without a provable historical pool snapshot do not contain enough data for a fair comparison.",
-    };
-  }
-  if (/not[ _-]?ready|pending|ready for verification|not available yet/.test(fingerprint)) {
-    return {
-      title: "This pull is not ready yet.",
-      body: "Collector Crypt has not published all verification data for this pull. Try this memo again later.",
-    };
-  }
+  if (/legacy|provable[ _-]?pool|no[ _-]?snapshot/.test(fingerprint)) return copy.legacy;
+  if (/not[ _-]?ready|pending|ready for verification|not available yet/.test(fingerprint)) return copy.pending;
   if (/unverified|did not verify|could not verify|verification[ _-]?failed|vrf|selection[ _-]?invalid|commit[ _-]?invalid/.test(fingerprint)) {
-    return {
-      title: "Collector Crypt did not verify this pull.",
-      body: "Decard will not show a luck score unless the official selection witness verifies successfully.",
-    };
+    return copy.unverified;
   }
-  if (/incomplete[ _-]?pull|historical data.*incomplete/.test(fingerprint)) {
-    return {
-      title: "This pull does not have complete historical data.",
-      body: "The saved pool or odds are incomplete, so Decard cannot calculate a defensible luck score.",
-    };
-  }
+  if (/incomplete[ _-]?pull|historical data.*incomplete/.test(fingerprint)) return copy.incomplete;
   if (
     status === 400 ||
     status === 404 ||
@@ -82,15 +69,9 @@ function requestErrorCopy(error: unknown): ErrorCopy {
       fingerprint,
     )
   ) {
-    return {
-      title: "That pack memo could not be analyzed.",
-      body: "Check that it belongs to a Collector Crypt Solana pull, then paste the memo or its official verify-selection URL again.",
-    };
+    return copy.badMemo;
   }
-  return {
-    title: "The luck data source is unavailable.",
-    body: "The upstream pull data could not be loaded. Your memo is still in the URL, so you can try again safely.",
-  };
+  return copy.unavailable;
 }
 
 function Metric({ label, value, detail }: { label: string; value: React.ReactNode; detail?: string }) {
@@ -104,15 +85,19 @@ function Metric({ label, value, detail }: { label: string; value: React.ReactNod
 }
 
 function LuckResult({ result }: { result: PullLuck }) {
+  const t = useT();
+  const copy = t.luck.result;
+  const m = copy.metrics;
   const [shareState, setShareState] = useState<ShareState>("idle");
   const score = scoreOutOf100(result.luckScore);
+  const tierLine = fmt(t.luck.tier, { tier: t.ui.gachaTiers[result.tier] });
   const verifierUrl = safeHttpsUrl(result.officialVerifierUrl);
-  const pulledAt = stablePulledAt(result.pulledAt);
+  const pulledAt = stablePulledAt(result.pulledAt, m.notReported);
 
   async function share() {
     const next = await shareOrCopy({
-      title: `Collector Crypt pull luck: ${score}/100`,
-      text: `${result.card.name} beat ${fmtPct(result.beatRate)} of possible pulls in its historical pool.`,
+      title: fmt(copy.shareTitle, { score }),
+      text: fmt(copy.shareText, { name: result.card.name, pct: fmtPct(result.beatRate) }),
       url: `${window.location.origin}/luck?memo=${encodeURIComponent(result.memo)}`,
     });
     if (next) setShareState(next);
@@ -127,7 +112,7 @@ function LuckResult({ result }: { result: PullLuck }) {
               <Link href={`/card/${encodeURIComponent(result.card.mint)}`} className="group block max-w-[260px]">
                 <img
                   src={cardImage(result.card.mint, "front", 512)}
-                  alt={`Front of ${result.card.name}`}
+                  alt={fmt(t.luck.cardFront, { name: result.card.name })}
                   width={337}
                   height={568}
                   className="w-full rounded-[14px] object-contain shadow-[0_12px_28px_rgb(44_38_29_/_0.22)] transition-transform group-hover:-rotate-1 group-hover:scale-[1.02]"
@@ -140,11 +125,11 @@ function LuckResult({ result }: { result: PullLuck }) {
                 <span
                   className={`inline-flex rounded-md border px-2 py-1 font-pixel text-[9px] uppercase ${TIER_STYLE[result.tier]}`}
                 >
-                  {titleCase(result.tier)} tier
+                  {tierLine}
                 </span>
                 {result.selectionVerified && (
                   <span className="inline-flex rounded-md border border-up/30 bg-up/12 px-2 py-1 font-pixel text-[9px] uppercase text-up">
-                    Selection verified
+                    {copy.verified}
                   </span>
                 )}
               </div>
@@ -162,58 +147,53 @@ function LuckResult({ result }: { result: PullLuck }) {
               </div>
 
               <div className="rounded-2xl border-2 border-ink bg-pika/25 p-5 shadow-[4px_4px_0_var(--color-ink)]">
-                <p className="font-pixel text-[10px] uppercase text-ink-mute">Historical percentile</p>
+                <p className="font-pixel text-[10px] uppercase text-ink-mute">{copy.percentile}</p>
                 <p className="mt-2 h-display text-[clamp(2rem,6vw,4rem)] leading-none tabular-nums">
-                  Luck score {score}/100
+                  {fmt(t.luck.score, { score })}
                 </p>
                 <div className="mt-5">
-                  <StatBar label="Luck" value={result.luckScore} max={1} display={`${score}/100`} color="var(--color-poke)" />
+                  <StatBar label={t.luck.bar} value={result.luckScore} max={1} display={`${score}/100`} color="var(--color-poke)" />
                 </div>
                 <p className="mt-5 text-lg font-extrabold">
-                  You beat <span className="text-up tabular-nums">{fmtPct(result.beatRate)}</span> of possible pulls.
+                  {rich(copy.beat, { pct: <span className="text-up tabular-nums">{fmtPct(result.beatRate)}</span> })}
                 </p>
                 <p className="mt-1 text-sm text-ink-soft">
-                  <span className="font-extrabold tabular-nums text-ink">{fmtPct(result.equalOrBetterRate)}</span> could
-                  match or beat it.
+                  {rich(copy.matchOrBeat, {
+                    pct: <span className="font-extrabold tabular-nums text-ink">{fmtPct(result.equalOrBetterRate)}</span>,
+                  })}
                 </p>
               </div>
 
               <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <Metric label="Insured value" value={fmtUsd(result.insuredValue)} detail="Historical committed leaf value" />
-                <Metric label="Tier chance" value={fmtPct(result.tierChance)} detail={`${titleCase(result.tier)} tier`} />
-                <Metric label="Exact tie chance" value={fmtPct(result.tieRate)} detail="Same insured value" />
-                <Metric label="Tier candidates" value={fmtNum(result.tierCandidates)} detail="Frozen candidate pool" />
-                <Metric label="Available at pull" value={fmtNum(result.tierAvailable)} detail="Eligible for selection" />
-                <Metric label="Unavailable at pull" value={fmtNum(result.tierUnavailable)} detail="Already removed" />
+                <Metric label={m.insured} value={fmtUsd(result.insuredValue)} detail={m.insuredDetail} />
+                <Metric label={m.tierChance} value={fmtPct(result.tierChance)} detail={tierLine} />
+                <Metric label={m.tie} value={fmtPct(result.tieRate)} detail={m.tieDetail} />
+                <Metric label={m.candidates} value={fmtNum(result.tierCandidates)} detail={m.candidatesDetail} />
+                <Metric label={m.available} value={fmtNum(result.tierAvailable)} detail={m.availableDetail} />
+                <Metric label={m.unavailable} value={fmtNum(result.tierUnavailable)} detail={m.unavailableDetail} />
+                <Metric label={m.basis} value={result.oddsBasis === "committed" ? m.committed : m.published} />
+                <Metric label={m.poolVersion} value={result.poolVersion} />
                 <Metric
-                  label="Odds basis"
-                  value={result.oddsBasis === "committed" ? "Committed thresholds" : "Published machine odds"}
-                />
-                <Metric label="Pool version" value={result.poolVersion} />
-                <Metric
-                  label="Pulled at"
+                  label={m.pulledAt}
                   value={result.pulledAt ? <time dateTime={result.pulledAt}>{pulledAt}</time> : pulledAt}
                 />
               </dl>
 
               <p className="text-xs text-ink-mute">
-                Insured value describes the historical pack witness. It is not a current market price or a profit
-                estimate. {result.oddsBasis === "committed"
-                  ? "Tier odds were committed with this pack."
-                  : "This older pack exposes published machine odds, not per-pack committed thresholds."}
+                {copy.note} {result.oddsBasis === "committed" ? copy.noteCommitted : copy.notePublished}
               </p>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-sand pt-5 text-sm font-extrabold">
                 <Link href={`/card/${encodeURIComponent(result.card.mint)}`} className="text-azure-deep hover:text-poke-deep">
-                  Card page →
+                  {copy.cardPage}
                 </Link>
                 {result.wallet && (
                   <Link
                     href={`/wallet/${encodeURIComponent(result.wallet)}`}
                     className="text-azure-deep hover:text-poke-deep"
-                    aria-label={`Open wallet ${result.wallet}`}
+                    aria-label={fmt(copy.walletLabel, { wallet: result.wallet })}
                   >
-                    Wallet {shortAddr(result.wallet)} →
+                    {fmt(copy.wallet, { wallet: shortAddr(result.wallet) })}
                   </Link>
                 )}
                 {result.transactionSignature && (
@@ -223,7 +203,7 @@ function LuckResult({ result }: { result: PullLuck }) {
                     rel="noopener noreferrer"
                     className="text-azure-deep hover:text-poke-deep"
                   >
-                    Solscan transaction ↗
+                    {copy.solscan}
                   </a>
                 )}
                 {verifierUrl && (
@@ -233,7 +213,7 @@ function LuckResult({ result }: { result: PullLuck }) {
                     rel="noopener noreferrer"
                     className="text-azure-deep hover:text-poke-deep"
                   >
-                    Official verifier ↗
+                    {copy.verifier}
                   </a>
                 )}
               </div>
@@ -243,12 +223,12 @@ function LuckResult({ result }: { result: PullLuck }) {
                   type="button"
                   onClick={share}
                   className="btn btn-red"
-                  aria-label={`Share luck result for ${result.card.name}`}
+                  aria-label={fmt(copy.shareLabel, { name: result.card.name })}
                 >
-                  {shareState === "shared" ? "Shared" : shareState === "copied" ? "Link copied" : "Share pull"}
+                  {shareState === "shared" ? t.luck.share.shared : shareState === "copied" ? t.luck.share.copied : copy.share}
                 </button>
                 <span role="status" aria-live="polite" className="text-xs text-ink-mute">
-                  {shareState === "failed" ? "Sharing failed. Copy the URL from the address bar." : ""}
+                  {shareState === "failed" ? t.luck.share.failed : ""}
                 </span>
               </div>
             </div>
@@ -257,16 +237,12 @@ function LuckResult({ result }: { result: PullLuck }) {
       </section>
 
       <DialogBox arrow={false} className="max-w-none">
-        <h3 className="font-display text-xl font-bold">How the score works</h3>
-        <p className="mt-3 text-sm leading-6 text-ink-soft">
-          Luck score = the chance of a lower insured-value pull + half the chance of an equal-value pull. Tier odds
-          are applied first, then cards inside the rolled tier are compared using the pool that was available at the
-          time.
-        </p>
-        <p className="mt-2 text-sm leading-6 text-ink-soft">
-          Equal insured values are ties. Each tie counts as half a win in the midrank percentile, rather than being
-          reported as a card this pull beat.
-        </p>
+        <h3 className="font-display text-xl font-bold">{copy.howTitle}</h3>
+        {copy.how.map((line, i) => (
+          <p key={i} className={`${i ? "mt-2" : "mt-3"} text-sm leading-6 text-ink-soft`}>
+            {line}
+          </p>
+        ))}
       </DialogBox>
     </div>
   );
@@ -274,6 +250,9 @@ function LuckResult({ result }: { result: PullLuck }) {
 
 export function LuckAnalyzer({ initialInput = "" }: { initialInput?: string }) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const t = useT();
+  const copy = t.luck.analyzer;
   const initialTarget = parseTarget(initialInput);
   const [input, setInput] = useState(initialInput);
   const [target, setTarget] = useState(initialTarget);
@@ -294,22 +273,18 @@ export function LuckAnalyzer({ initialInput = "" }: { initialInput?: string }) {
     setInvalidInput(false);
     if (next.kind === "memo" && next.value === memo && query.isError) void query.refetch();
     setTarget(next);
-    router.push(`/luck?${next.kind}=${encodeURIComponent(next.value)}`, { scroll: false });
+    router.push(localizeHref(locale, `/luck?${next.kind}=${encodeURIComponent(next.value)}`), { scroll: false });
   }
 
   const result = query.currentData?.result;
-  const errorCopy = query.isError ? requestErrorCopy(query.error) : null;
+  const errorCopy = query.isError ? requestErrorCopy(query.error, t.luck.errors) : null;
 
   return (
     <div className="flex flex-col gap-8">
       <form onSubmit={submit} className="paper p-5 sm:p-7" noValidate>
-        <SectionHead
-          kicker="Pack witness"
-          title="Analyze your pulls"
-          sub="Paste a Solana wallet to score every pack pull it opened, or one cc-… pack memo or official Collector Crypt verify-selection URL."
-        />
+        <SectionHead kicker={copy.kicker} title={copy.title} sub={copy.sub} />
         <label htmlFor="luck-memo" className="mt-6 block font-pixel text-[9px] uppercase text-ink-mute">
-          Wallet address, pack memo or verifier URL
+          {copy.label}
         </label>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row">
           <input
@@ -319,7 +294,7 @@ export function LuckAnalyzer({ initialInput = "" }: { initialInput?: string }) {
               setInput(event.target.value);
               if (invalidInput) setInvalidInput(false);
             }}
-            placeholder="Paste your wallet or a cc-… pack memo"
+            placeholder={copy.placeholder}
             autoComplete="off"
             autoCapitalize="none"
             spellCheck={false}
@@ -328,31 +303,27 @@ export function LuckAnalyzer({ initialInput = "" }: { initialInput?: string }) {
             className="min-w-0 flex-1 rounded-xl border-2 border-ink/80 bg-cream-hi px-4 py-3 font-mono text-sm text-ink outline-none transition-shadow placeholder:text-ink-mute/70 focus:border-ink focus:shadow-[0_0_0_4px_rgb(255_203_5_/_0.55)]"
           />
           <button type="submit" className="btn btn-red shrink-0" disabled={!input.trim()}>
-            Analyze luck
+            {copy.submit}
           </button>
         </div>
         <p id="luck-memo-help" className="mt-3 text-xs text-ink-mute">
-          Only the normalized wallet address or pack memo is sent. The result URL can be bookmarked or shared.
-          {" "}
+          {copy.help}{" "}
           <Link
             href="/luck?memo=cc-77161af0-8001-425b-9213-e5e1d24083d6"
             className="font-bold text-azure-deep hover:text-poke-deep"
           >
-            Try Collector Crypt&apos;s documented example →
+            {copy.example}
           </Link>
         </p>
       </form>
 
       {invalidInput && (
         <div role="alert">
-          <DexMessage title="Enter a wallet address or a Collector Crypt pack memo.">
-            Paste a Solana wallet address, a cc- memo with its complete ID, or the official verify-selection URL that
-            contains it.
-          </DexMessage>
+          <DexMessage title={copy.invalidTitle}>{copy.invalidBody}</DexMessage>
         </div>
       )}
 
-      {memo && query.isFetching && <PokeLoader label="Checking the historical pull" />}
+      {memo && query.isFetching && <PokeLoader label={copy.loading} />}
 
       {memo && errorCopy && !query.isFetching && (
         <div role="alert">
@@ -360,7 +331,7 @@ export function LuckAnalyzer({ initialInput = "" }: { initialInput?: string }) {
             title={errorCopy.title}
             action={
               <button type="button" onClick={() => query.refetch()} className="btn btn-red">
-                Try again
+                {t.luck.retry}
               </button>
             }
           >

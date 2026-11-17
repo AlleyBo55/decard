@@ -19,15 +19,29 @@ DexScreener, Magic Eden, GMGN and Arkham for card traders, wrapped in a Game Boy
 
 **[Open decard.fun](https://www.decard.fun)** · [$CARDS token](https://www.decard.fun/cards-token) · [Franchise hubs](https://www.decard.fun/cards/pokemon) · [Live gacha](https://www.decard.fun/luck#live) · [Listing scanner](https://www.decard.fun/scanner) · [Trade tape](https://www.decard.fun/tape) · [Trainer's guide](https://www.decard.fun/guide)
 
-🔥 **New:** the [$CARDS token tracker](#cards-token), [18 franchise hubs](#franchise-hubs), a slang-savvy glossary, and a [faster, leaner Decard](#faster-lighter).
+🔥 **New:** [rip graded Pokémon packs](#rip-packs), the [$CARDS token tracker](#cards-token), [18 franchise hubs](#franchise-hubs), a slang-savvy glossary, and a [faster, leaner Decard](#faster-lighter).
 
 </div>
 
 ---
 
-Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on Solana. Its marketplace shows what's for sale. **Decard shows what's worth buying**: every live listing on Collector Crypt and Magic Eden ranked by discount to insured value, every on-chain sale and bid as it lands, and any wallet's collection. Now it watches the gacha too: every pack as it rips, the odds of your next pull, and a verified luck score for every pull. Read-only and keyless: no login, no wallet connection, no API key.
+Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on Solana. Its marketplace shows what's for sale. **Decard shows what's worth buying**: every live listing on Collector Crypt and Magic Eden ranked by discount to insured value, every on-chain sale and bid as it lands, and any wallet's collection. Now it watches the gacha too: every pack as it rips, the odds of your next pull, and a verified luck score for every pull. Browsing is read-only and keyless: no login, no wallet connection, no API key. A wallet is only needed to rip packs.
 
 <a href="https://www.decard.fun"><img src=".github/assets/home.jpg" alt="Decard home page with live listing stats, card and wallet search, and a 3D Poké Ball" width="100%"></a>
+
+<a id="rip-packs"></a>
+
+## 🔥 New: rip graded Pokémon packs
+
+**Throw a ball. Catch a slab.** [decard.fun/rip](https://www.decard.fun/rip) rips mystery packs of real graded cards through the [Slabz](https://slabz.com) Partner API.
+
+- 🎯 **Odds before you pay**: each pack's price, average pull and tier odds, drawn as Poké, Great, Ultra and Master Balls, plus a Pokédex of every card in the pool.
+- 🔴 **The catch**: approve the USDC payment in your wallet, the ball lands and shakes while the card is dealt, then pops into a holo reveal with a tier glow.
+- 💱 **Sell back**: keep the slab, or sell it back in one tap within 72 hours.
+- 🖥 **Trainer's PC**: every pull, with paid packs waiting to open if a rip gets interrupted.
+- 📣 **Live hits bar**: what other trainers just pulled.
+
+Wallets connect through the Wallet Standard (Phantom, Solflare, Backpack) and sign in with a free message, no transaction. Decard's optional fee per pack (set in decardbe) is a separate USDC transfer in the same wallet prompt, sent only once the pack is paid; the button shows the total. Decard never holds funds or keys: Slabz builds each transaction and your wallet signs it. The partner key lives in [decardbe](https://github.com/AlleyBo55/decard-backend), a private Go backend this app reaches over an internal network with signed requests; browsers never talk to it.
 
 <a id="cards-token"></a>
 
@@ -180,6 +194,7 @@ Copy `.env.example` to `.env`. Every variable is optional.
 |---|---|---|
 | `HELIUS_API_KEY` | server only | Makes Helius the primary Solana RPC, with the public RPC as fallback when Helius is throttled or down. Free key at [helius.dev](https://dashboard.helius.dev). |
 | `CC_API_KEY` | server only | Raises Collector Crypt rate limits 10x. Ask support@collectorcrypt.com. |
+| `DECARDBE_URL`, `DECARDBE_SECRET` | server only | Turns on [/rip](#rip-packs): where [decardbe](https://github.com/AlleyBo55/decard-backend) listens, and its `INTERNAL_API_SECRET`. Unset, the page shows packs as offline. |
 | `NEXT_PUBLIC_SITE_URL` | public | Canonical origin for SEO tags, `robots.txt`, `sitemap.xml` and `llms.txt`, e.g. `https://www.decard.fun`. On Vercel it falls back to the production domain. |
 | `NEXT_PUBLIC_GA_ID` | public | Google Analytics 4 measurement ID (`G-…`). Unset loads no analytics. |
 
@@ -190,7 +205,7 @@ Never put a key in a `NEXT_PUBLIC_` variable: those values are baked into the Ja
 decard.fun runs on one small VPS (Tencent Cloud Lighthouse, 2 vCPU / 2 GB) as a Docker container behind [Caddy](https://caddyserver.com), which handles HTTPS and renews its own Let's Encrypt certificates.
 
 1. **Server:** any Linux box with Docker and the Compose plugin, ports 80 and 443 open, and your domain's A records pointing at it.
-2. **GitHub secrets:** create a `production` environment that only `master` may deploy to, holding `LIGHTHOUSE_HOST`, `LIGHTHOUSE_USER`, `LIGHTHOUSE_SSH_KEY` (a key with no passphrase) and `LIGHTHOUSE_KNOWN_HOSTS` (from `ssh-keyscan -t ed25519 <host>`). The optional keys (`HELIUS_API_KEY`, `CC_API_KEY`, `NEXT_PUBLIC_GA_ID`) go there too.
+2. **GitHub secrets:** create a `production` environment that only `master` may deploy to, holding `LIGHTHOUSE_HOST`, `LIGHTHOUSE_USER`, `LIGHTHOUSE_SSH_KEY` (a key with no passphrase) and `LIGHTHOUSE_KNOWN_HOSTS` (from `ssh-keyscan -t ed25519 <host>`). The optional keys (`HELIUS_API_KEY`, `CC_API_KEY`, `NEXT_PUBLIC_GA_ID`, `DECARDBE_SECRET`) go there too. For /rip, deploy [decardbe](https://github.com/AlleyBo55/decard-backend) to the same instance: both join the private `decard-internal` Docker network, and the backend publishes no port.
 3. **Push to `master`.** [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the image, streams it to the server over SSH (no registry), and swaps the app container with [`deploy/compose.yaml`](deploy/compose.yaml). Edit [`deploy/Caddyfile`](deploy/Caddyfile) for your own domain.
 
 The Dockerfile works on any container host. Vercel works too: import the repo and set `NEXT_PUBLIC_SITE_URL`. Expect the share images and the sitemap to use most of a free plan's CPU.

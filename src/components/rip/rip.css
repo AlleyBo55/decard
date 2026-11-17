@@ -1,0 +1,1599 @@
+/* Rip (components/rip): a dedicated dark world for /rip. Every universe dresses the arena,
+   loops animate transform or opacity only, and everything pauses off screen, behind the
+   cutscene, under prefers-reduced-motion, and on low-end devices ([data-rip-lite]). Money is
+   always Lilita One or Nunito: never the pixel faces. */
+
+/* ------------------------------------------------------------ the world */
+html:has(.rw),
+body:has(.rw) {
+  background: #07060f;
+  color-scheme: dark;
+}
+body:has(.rw) {
+  background:
+    radial-gradient(70vw 50vh at 85% 0%, color-mix(in srgb, var(--u-ink, #e3350d) 22%, transparent), transparent 70%),
+    radial-gradient(60vw 60vh at 0% 100%, color-mix(in srgb, var(--u-glow, #ffcb05) 10%, transparent), transparent 70%),
+    #07060f;
+}
+body:has(.rw) > footer {
+  background: #07060f;
+  border-color: rgb(255 255 255 / 0.1);
+}
+body:has(.rw) > footer :is(.text-ink, .text-ink-soft) {
+  color: rgb(236 233 255 / 0.78);
+}
+body:has(.rw) > footer .text-ink-mute {
+  color: rgb(236 233 255 / 0.5);
+}
+body:has(.rw) > footer .border-sand {
+  border-color: rgb(255 255 255 / 0.08);
+}
+/* The repo card is a light key on the cream site. Here its text turns light, so the card turns
+   dark with it; reds and blues brighten to stay readable on black. */
+body:has(.rw) > footer .repo-card {
+  background: rgb(255 255 255 / 0.05);
+  border-color: rgb(255 255 255 / 0.18);
+  box-shadow: 0 4px 0 rgb(0 0 0 / 0.6);
+}
+body:has(.rw) > footer .repo-card:hover {
+  border-color: rgb(255 255 255 / 0.34);
+}
+body:has(.rw) > footer .repo-card .text-ink {
+  color: #fff;
+}
+body:has(.rw) > footer .repo-card:hover .text-ink {
+  color: #ffcb05;
+}
+body:has(.rw) > footer :is(.repo-card .text-poke-deep, .kicker) {
+  color: #ff7a59;
+}
+body:has(.rw) > footer .text-azure-deep {
+  color: #8ec5ff;
+}
+.rw {
+  --ff-rip: var(--font-lilita), var(--ff-sans);
+  --rw-panel: rgb(14 13 32 / 0.8);
+  --rw-panel-solid: #121129;
+  --rw-line: rgb(255 255 255 / 0.11);
+  --rw-text: #f4f2ff;
+  --rw-mute: rgb(226 222 255 / 0.64);
+  color: var(--rw-text);
+}
+.rw-display {
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.rw-label {
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rw-mute);
+}
+.rw-money {
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.rw-intro {
+  position: relative;
+  padding: 16px 0 12px;
+}
+.rw-powered {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 14px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  border: 1.5px solid var(--rw-line);
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rw-mute);
+}
+.rw-powered img {
+  height: 32px;
+  width: auto;
+}
+.rw-h1 {
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  font-size: clamp(1.65rem, 3.8vw, 3.1rem);
+  line-height: 1;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+}
+.rw-h1 span {
+  background: linear-gradient(100deg, var(--u-glow, #ffcb05), var(--u-ink, #e3350d));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.rw-card {
+  border-radius: 22px;
+  background: var(--rw-panel);
+  border: 1.5px solid var(--rw-line);
+}
+.rw-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rw-head h2 {
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  line-height: 1;
+}
+.rw-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--u-glow, #ffcb05);
+}
+.rw-kicker::before {
+  content: "";
+  width: 18px;
+  height: 3px;
+  border-radius: 3px;
+  background: currentColor;
+}
+.rw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font-weight: 900;
+  transition: transform 0.12s, filter 0.2s, background-color 0.2s;
+}
+.rw-btn:active {
+  transform: translateY(2px);
+}
+.rw-btn-primary {
+  background: var(--u-ink, #e3350d);
+  color: #fff;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--u-ink, #e3350d) 55%, #000);
+}
+.rw-btn-gold {
+  background: #ffcb05;
+  color: #29263d;
+  box-shadow: 0 4px 0 #b88a00;
+}
+.rw-btn-ghost {
+  background: rgb(255 255 255 / 0.06);
+  border: 1.5px solid var(--rw-line);
+  color: var(--rw-text);
+}
+.rw-btn-ghost:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+.rw-say {
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+/* The wallet pill in the arena's top row. */
+.rwb {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: rgb(10 9 24 / 0.7);
+  border: 1.5px solid rgb(255 255 255 / 0.16);
+  color: var(--rw-text);
+  transition: border-color 0.2s;
+}
+.rwb:hover {
+  border-color: var(--u-glow);
+}
+.ra-mode {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1.5px dashed rgb(142 197 255 / 0.6);
+  background: rgb(79 163 255 / 0.12);
+  color: #b9dcff;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- balls */
+.rp-ball {
+  --s: 28px;
+  --edge: max(2px, calc(var(--s) * 0.07));
+  --top: var(--color-poke);
+  --hl: radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.6) 0 9%, transparent 10%);
+  --body: linear-gradient(
+    to bottom,
+    var(--top) 0 calc(50% - var(--edge) / 2),
+    var(--color-ink) calc(50% - var(--edge) / 2) calc(50% + var(--edge) / 2),
+    #fbf8f2 calc(50% + var(--edge) / 2)
+  );
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  border: var(--edge) solid var(--color-ink);
+  background-image: var(--hl), var(--body);
+  background-repeat: no-repeat;
+  box-shadow: inset calc(var(--s) * -0.05) calc(var(--s) * -0.07) 0 rgb(41 38 61 / 0.16);
+}
+.rp-ball::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34%;
+  height: 34%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: #fbf8f2;
+  border: var(--edge) solid var(--color-ink);
+  box-shadow: inset 0 0 0 calc(var(--edge) * 0.6) #fff;
+}
+.rp-ball[data-ball="great"] {
+  --top: #2f6fd8;
+  background-image:
+    var(--hl),
+    radial-gradient(ellipse 17% 42% at 14% 70%, var(--color-poke) 0 94%, transparent 100%),
+    radial-gradient(ellipse 17% 42% at 86% 70%, var(--color-poke) 0 94%, transparent 100%),
+    var(--body);
+  background-size: 100% 100%, 100% 50%, 100% 50%, 100% 100%;
+  background-position: center, top, top, center;
+}
+.rp-ball[data-ball="ultra"] {
+  --top: #2b2a33;
+  background-image:
+    var(--hl),
+    linear-gradient(90deg, transparent 0 15%, var(--color-pika) 15% 31%, transparent 31% 69%, var(--color-pika) 69% 85%, transparent 85%),
+    var(--body);
+  background-size: 100% 100%, 100% 47%, 100% 100%;
+  background-position: center, top, center;
+}
+.rp-ball[data-ball="master"] {
+  --top: #7a3fbf;
+  background-image:
+    var(--hl),
+    radial-gradient(circle at 22% 64%, #f063a4 0 13%, transparent 14%),
+    radial-gradient(circle at 78% 64%, #f063a4 0 13%, transparent 14%),
+    var(--body);
+  background-size: 100% 100%, 100% 50%, 100% 50%, 100% 100%;
+  background-position: center, top, top, center;
+}
+.rp-ball[data-ball="master"]::before {
+  content: "M";
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: calc(var(--s) * 0.22);
+  line-height: 1;
+  color: #fff;
+}
+.rp-ball[data-motion="float"] {
+  animation: rp-float 2.4s ease-in-out infinite;
+}
+.rp-ball[data-motion="shake"] {
+  transform-origin: 50% 90%;
+  animation: rp-shake 1.8s ease-in-out infinite;
+}
+.rp-ball[data-motion="shake"]::after {
+  animation: rp-blink 1.8s steps(1) infinite;
+}
+
+/* --------------------------------------------------------- small pieces */
+.rp-stage {
+  width: min(460px, calc(100vw - 20px));
+  max-width: none;
+  max-height: calc(100dvh - 20px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--rw-text, #fff);
+  overflow: visible;
+}
+.rp-stage::backdrop {
+  background: rgb(5 5 14 / 0.78);
+}
+.rp-stage[open] {
+  animation: pop-in 0.25s var(--ease-pop);
+}
+.rp-dots::after {
+  content: "";
+  animation: rp-dots 1.8s steps(1) infinite;
+}
+/* The live dot pings with a growing ring drawn on the compositor (transform and opacity) instead
+   of the global box-shadow ping, which repaints every frame. Same green as the dot. */
+.rw .live-dot {
+  position: relative;
+  animation: none;
+}
+.rw .live-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(61 190 110 / 0.6);
+  animation: rw-ping 1.8s var(--ease-out) infinite;
+}
+.rp-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+  border-radius: 8px;
+  border: 1.5px solid;
+  padding: 3px 8px 3px 4px;
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.rp-tier[data-tier="common"] {
+  background: rgb(223 230 240 / 0.12);
+  color: #e6ebf3;
+  border-color: rgb(223 230 240 / 0.35);
+}
+.rp-tier[data-tier="rare"] {
+  background: rgb(79 163 255 / 0.15);
+  color: #8ec5ff;
+  border-color: rgb(79 163 255 / 0.5);
+}
+.rp-tier[data-tier="epic"] {
+  background: rgb(255 203 5 / 0.14);
+  color: #ffd84d;
+  border-color: rgb(255 203 5 / 0.55);
+}
+.rp-tier[data-tier="legendary"] {
+  background: linear-gradient(100deg, #5b2aa8 0%, #a64bf4 30%, #ffcb05 50%, #a64bf4 70%, #5b2aa8 100%) 0 0 / 260% 100%;
+  color: #fff;
+  border-color: #c79bff;
+  text-shadow: 0 1px 0 #3f1890;
+  animation: rp-shimmer 2.6s linear infinite;
+}
+/* Home banner (components/home/RipHighlight). */
+.rp-banner {
+  background:
+    radial-gradient(1.5px 1.5px at 12% 24%, #fff 50%, transparent 52%),
+    radial-gradient(2px 2px at 46% 12%, #ffe58a 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 64% 70%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 92% 18%, #fff 50%, transparent 52%),
+    radial-gradient(60% 90% at 85% 50%, rgb(122 63 191 / 0.55), transparent 70%),
+    radial-gradient(130% 120% at 20% 0%, #3d4275 0%, #23213a 60%, #17162a 100%);
+}
+
+/* --------------------------------------------------------------- arenas */
+/* One world per universe. --u-ink and --u-glow come from universes.ts. */
+.rp-arena {
+  --stars:
+    radial-gradient(1.5px 1.5px at 14% 22%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 33% 9%, #fff 50%, transparent 52%),
+    radial-gradient(2px 2px at 71% 17%, #ffe58a 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 88% 34%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 7% 52%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 59% 6%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 44% 38%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 94% 64%, #fff 50%, transparent 52%);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--stars), radial-gradient(120% 80% at 50% 0%, #3d4275, #23213a 60%, #151428);
+}
+.rp-arena::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform;
+}
+.rp-arena::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(900px, 90%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--u-glow) 50%, transparent) 0, transparent 62%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.rp-arena[data-u="pokemon"] {
+  background:
+    radial-gradient(ellipse 30% 5% at 50% 86%, #8bac0f 0 86%, #306230 88% 100%, transparent 101%),
+    radial-gradient(ellipse 36% 8% at 50% 88%, rgb(0 0 0 / 0.45), transparent 72%),
+    var(--stars),
+    radial-gradient(90% 60% at 50% 100%, rgb(227 53 13 / 0.28), transparent 70%),
+    radial-gradient(120% 80% at 50% 0%, #3b3f78, #201d3c 60%, #120f24);
+}
+.rp-arena[data-u="pokemon"]::before {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.05' stroke-width='2.4'%3E%3Ccircle cx='60' cy='60' r='24'/%3E%3Cpath d='M36 60h16m16 0h16'/%3E%3Ccircle cx='60' cy='60' r='8'/%3E%3C/g%3E%3C/svg%3E");
+  animation: rp-drift 46s linear infinite;
+}
+.rp-arena[data-u="onepiece"] {
+  background:
+    linear-gradient(transparent 70%, #0d4a86 70%, #052448),
+    radial-gradient(circle at 50% 70%, #ffe27a 0 5%, rgb(255 150 70 / 0.75) 6% 14%, transparent 38%),
+    linear-gradient(#141f4f, #6d3a73 36%, #dc6c58 58%, #f6a35a 70%);
+}
+.rp-arena[data-u="onepiece"]::before {
+  inset: auto -20% 0;
+  height: 32%;
+  background:
+    repeating-linear-gradient(172deg, transparent 0 22px, rgb(255 255 255 / 0.1) 22px 25px),
+    radial-gradient(ellipse 60% 30% at 50% 0%, rgb(255 210 120 / 0.35), transparent 70%);
+  animation: rp-waves 8s linear infinite;
+}
+.rp-arena[data-u="dragonball"] {
+  background:
+    radial-gradient(ellipse 70% 14% at 50% 97%, #5c3317, transparent 72%),
+    radial-gradient(circle at 50% 48%, rgb(255 225 77 / 0.4), transparent 42%),
+    linear-gradient(#1c0d3e, #7d2a4b 42%, #d9632b 74%, #f5a640);
+}
+.rp-arena[data-u="dragonball"]::before {
+  background: repeating-conic-gradient(from 0deg at 50% 48%, rgb(255 236 140 / 0.13) 0 3deg, transparent 3deg 11deg);
+  animation: spin 34s linear infinite;
+}
+.rp-arena[data-u="riftbound"] {
+  background:
+    radial-gradient(circle at 50% 46%, rgb(80 220 235 / 0.45), transparent 26%),
+    radial-gradient(circle at 50% 46%, transparent 33%, rgb(212 170 79 / 0.35) 34% 34.6%, transparent 35.2%),
+    radial-gradient(120% 90% at 50% 46%, #0f3a44, #061418 70%);
+}
+.rp-arena[data-u="riftbound"]::before {
+  inset: auto;
+  left: 50%;
+  top: 46%;
+  width: max(110%, 900px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent, rgb(33 166 184 / 0.34), transparent 30%, rgb(212 170 79 / 0.24), transparent 55%, rgb(33 166 184 / 0.3), transparent 80%);
+  border-radius: 50%;
+  mask-image: radial-gradient(circle, transparent 14%, #000 26%, transparent 64%);
+  -webkit-mask-image: radial-gradient(circle, transparent 14%, #000 26%, transparent 64%);
+  animation: spin 20s linear infinite;
+}
+.rp-arena[data-u="lorcana"] {
+  background:
+    radial-gradient(56% 46% at 50% 46%, rgb(114 71 209 / 0.62), transparent 72%),
+    radial-gradient(circle at 50% 100%, rgb(242 193 78 / 0.25), transparent 50%),
+    linear-gradient(#0d0826, #1f1048 60%, #090619);
+}
+.rp-arena[data-u="lorcana"]::before {
+  background:
+    radial-gradient(circle, rgb(242 193 78 / 0.6) 0 1.5px, transparent 2.5px) 0 0 / 60px 60px,
+    radial-gradient(circle, rgb(255 255 255 / 0.35) 0 1px, transparent 2px) 30px 30px / 60px 60px;
+  animation: rp-rise 28s linear infinite;
+}
+.rp-arena:is([data-u="basketball"], [data-u="football"], [data-u="baseball"], [data-u="soccer"], [data-u="sports"]) {
+  --field: linear-gradient(#1c2740, #111a2e);
+  background:
+    var(--field) bottom / 100% 22% no-repeat,
+    radial-gradient(circle at 16% 7%, rgb(255 255 255 / 0.55) 0 0.9%, transparent 1.8%),
+    radial-gradient(circle at 84% 7%, rgb(255 255 255 / 0.55) 0 0.9%, transparent 1.8%),
+    radial-gradient(circle at 34% 4%, rgb(255 255 255 / 0.4) 0 0.6%, transparent 1.3%),
+    radial-gradient(circle at 66% 4%, rgb(255 255 255 / 0.4) 0 0.6%, transparent 1.3%),
+    linear-gradient(transparent 62%, rgb(0 0 0 / 0.35) 78%),
+    radial-gradient(120% 70% at 50% 0%, #253457, #0a0f1d 72%);
+}
+.rp-arena[data-u="basketball"] {
+  --field: radial-gradient(ellipse 16% 46% at 50% 100%, transparent 0 88%, rgb(255 255 255 / 0.5) 90% 95%, transparent 97%), repeating-linear-gradient(90deg, #c9843f 0 24px, #b77538 24px 48px);
+}
+.rp-arena[data-u="football"] {
+  --field: repeating-linear-gradient(90deg, transparent 0 58px, rgb(255 255 255 / 0.55) 58px 60px), repeating-linear-gradient(90deg, #2f7d33 0 60px, #2a702e 60px 120px);
+}
+.rp-arena[data-u="baseball"] {
+  --field: radial-gradient(ellipse 28% 70% at 50% 100%, #b97b4d 0 60%, transparent 62%), linear-gradient(#2f7d33, #2a702e);
+}
+.rp-arena[data-u="soccer"] {
+  --field: linear-gradient(90deg, transparent 49.7%, rgb(255 255 255 / 0.55) 49.7% 50.3%, transparent 50.3%), radial-gradient(ellipse 9% 40% at 50% 0%, transparent 0 86%, rgb(255 255 255 / 0.5) 88% 94%, transparent 96%), repeating-linear-gradient(90deg, #2e8b3e 0 64px, #287a36 64px 128px);
+}
+.rp-arena:is([data-u="basketball"], [data-u="football"], [data-u="baseball"], [data-u="soccer"], [data-u="sports"])::before {
+  inset: -10% -30% 18%;
+  background:
+    linear-gradient(100deg, transparent 38%, rgb(255 255 240 / 0.12) 46%, transparent 54%),
+    linear-gradient(80deg, transparent 38%, rgb(255 255 240 / 0.12) 46%, transparent 54%);
+  transform-origin: 50% 0;
+  animation: rp-sweep 9s ease-in-out infinite alternate;
+}
+
+/* ----------------------------------------------------------- the arena */
+.ra {
+  --stage-h: clamp(440px, 62svh, 660px);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-block: 1.5px solid var(--rw-line);
+}
+.ra-world {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+/* The full-width world holds still: its drifting layer kept the page busy every frame for a
+   backdrop. Gym cards (gym.css) still drift theirs on hover. */
+.rp-arena.ra-world::before {
+  animation: none;
+  will-change: auto;
+}
+/* Fades the world into the page above and below, so the arena has no hard box edges. */
+.ra::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(#07060f 0, transparent 14%, transparent 80%, #07060f 100%);
+}
+/* A colour sweep that masks the world changing when the universe does. */
+.ra-wipe {
+  position: absolute;
+  inset: 0 -40%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 0 35%, color-mix(in srgb, var(--u-ink) 85%, transparent) 45%, color-mix(in srgb, var(--u-glow) 80%, transparent) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: ra-wipe 0.6s var(--ease-out) forwards;
+}
+.ra-shell {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 14px clamp(12px, 3vw, 28px) 26px;
+}
+.ra-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ra-top-end {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+.ra-rail {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  padding: 4px 2px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  mask-image: linear-gradient(90deg, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent);
+}
+.ra-rail::-webkit-scrollbar {
+  display: none;
+}
+.ra-uni {
+  --c: #fff;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 5px 14px 5px 6px;
+  border-radius: 16px;
+  border: 1.5px solid rgb(255 255 255 / 0.14);
+  background: rgb(10 9 24 / 0.6);
+  color: rgb(236 233 255 / 0.82);
+  font-weight: 900;
+  font-size: 0.9rem;
+  scroll-snap-align: start;
+  transition: transform 0.2s var(--ease-pop), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+.ra-uni-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--c) 22%, rgb(10 9 24));
+  color: var(--c);
+}
+.ra-uni[aria-pressed="true"] {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ci) 70%, #fff 0%), color-mix(in srgb, var(--ci) 80%, #000));
+  border-color: var(--c);
+  color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent), 0 8px 22px -8px var(--c);
+}
+.ra-uni[aria-pressed="true"] .ra-uni-icon {
+  background: rgb(255 255 255 / 0.2);
+  color: #fff;
+}
+.ra-uni-count {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  font-size: 0.72rem;
+  text-align: center;
+}
+@media (hover: hover) {
+  .ra-uni:hover {
+    transform: translateY(-2px);
+    color: #fff;
+    border-color: color-mix(in srgb, var(--c) 60%, transparent);
+  }
+}
+.ra-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "stage" "buy" "odds";
+}
+@media (min-width: 900px) {
+  .ra-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+    grid-template-areas: "stage buy" "odds buy";
+    align-items: start;
+  }
+}
+@media (min-width: 1200px) {
+  .ra-grid {
+    grid-template-columns: minmax(270px, 300px) minmax(0, 1fr) minmax(330px, 370px);
+    grid-template-areas: "odds stage buy";
+    align-items: center;
+  }
+}
+.ra-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgb(20 18 42 / 0.86), rgb(10 9 24 / 0.9));
+  border: 1.5px solid var(--rw-line);
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+.ra-buy {
+  grid-area: buy;
+  border-color: color-mix(in srgb, var(--u-glow) 35%, transparent);
+}
+.ra-odds {
+  grid-area: odds;
+}
+.ra-name {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  margin-top: -4px;
+}
+.ra-flag {
+  margin-left: auto;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #ffcb05;
+  color: #29263d;
+  font-weight: 900;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.ra-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.ra-stats > div {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.05);
+  border: 1px solid rgb(255 255 255 / 0.07);
+}
+.ra-stats dd {
+  margin-top: 6px;
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  line-height: 1;
+  white-space: nowrap;
+}
+.ra-ev {
+  position: relative;
+  height: 26px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.06);
+  font-size: 12px;
+}
+.ra-ev span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--u-glow) 35%, transparent), color-mix(in srgb, var(--u-glow) 70%, transparent));
+}
+.ra-ev b {
+  position: relative;
+  display: block;
+  padding: 0 10px;
+  line-height: 26px;
+  font-weight: 900;
+}
+.ra-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.ra-switch b {
+  display: block;
+  font-weight: 900;
+}
+.ra-switch small {
+  display: block;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--rw-mute);
+}
+.ra-switch input {
+  appearance: none;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.15);
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.ra-switch input::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: translate 0.22s var(--ease-pop);
+}
+.ra-switch input:checked {
+  background: var(--u-ink);
+}
+.ra-switch input:checked::after {
+  translate: 20px 0;
+}
+.ra-rip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  width: 100%;
+  padding: 0 18px;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--u-ink) 82%, #fff), var(--u-ink) 55%, color-mix(in srgb, var(--u-ink) 82%, #000));
+  border: 2px solid rgb(255 255 255 / 0.85);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--u-ink) 50%, #000), 0 0 36px -6px var(--u-glow);
+  overflow: hidden;
+  transition: transform 0.12s var(--ease-out), box-shadow 0.12s, filter 0.2s;
+}
+.ra-rip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.38) 50%, transparent 65%);
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+/* The glint sweeps while the button is aimed at, so it costs nothing at rest. */
+@media (hover: hover) {
+  .ra-rip:not(:disabled):hover::before {
+    animation: rp-cta 1.8s ease-in-out -0.95s infinite;
+  }
+}
+.ra-rip:hover {
+  filter: brightness(1.08);
+}
+.ra-rip:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--u-ink) 50%, #000), 0 0 26px -6px var(--u-glow);
+}
+.ra-rip:disabled {
+  filter: grayscale(0.75) brightness(0.65);
+}
+.ra-rip-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ra-rip-text {
+  font-family: var(--ff-rip);
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.25);
+}
+.ra-rip-price {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.28);
+  font-family: var(--ff-rip);
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+.ra-fine {
+  margin-top: -4px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--rw-mute);
+}
+.ra-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.06);
+  border: 1.5px solid var(--rw-line);
+  font-weight: 900;
+  font-size: 0.85rem;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.ra-chip:hover {
+  border-color: var(--u-glow);
+  background: rgb(255 255 255 / 0.1);
+}
+.ra-bar {
+  display: flex;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  gap: 2px;
+}
+.ra-bar span {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+}
+.ra-odds-list {
+  display: grid;
+  gap: 10px;
+}
+.ra-odds-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.ra-odds-main,
+.ra-odds-num {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.15;
+}
+.ra-odds-main b {
+  font-weight: 900;
+  font-size: 15px;
+}
+.ra-odds-main small {
+  font-size: 13px;
+  color: var(--rw-mute);
+}
+.ra-odds-num {
+  align-items: flex-end;
+}
+.ra-odds-num b {
+  font-size: 1.2rem;
+}
+.ra-odds-num small {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--rw-mute);
+  white-space: nowrap;
+}
+.ra-chase {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1px dashed rgb(255 255 255 / 0.16);
+  text-align: left;
+  transition: border-color 0.2s;
+}
+.ra-chase:hover {
+  border-color: var(--u-glow);
+}
+.ra-chase-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.ra-chase-card {
+  position: relative;
+  display: block;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.3);
+  border: 1.5px solid color-mix(in srgb, var(--c) 60%, transparent);
+}
+.ra-chase-card img {
+  width: 100%;
+  aspect-ratio: 5 / 8;
+  object-fit: contain;
+}
+.ra-chase-card b {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  translate: -50% 0;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgb(7 6 15 / 0.85);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* The stage: packs on a carousel over the world. */
+.ra-stage {
+  grid-area: stage;
+  position: relative;
+  height: var(--stage-h);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline-offset: -4px;
+}
+.ra-tagline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 2.5%;
+  padding: 0 56px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: clamp(1.15rem, 3.6vw, 3.2rem);
+  text-transform: uppercase;
+  line-height: 1;
+  color: rgb(255 255 255 / 0.16);
+  -webkit-text-stroke: 1px rgb(255 255 255 / 0.28);
+  pointer-events: none;
+  animation: ra-rise 0.7s var(--ease-out) both;
+}
+.ra-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  width: min(420px, 70%);
+  height: 34px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0.55), transparent 70%);
+  pointer-events: none;
+}
+.rp-slot {
+  position: absolute;
+  left: 50%;
+  top: 49%;
+  height: calc(var(--stage-h) * 0.62);
+  translate: -50% -50%;
+  transform: translateX(calc(var(--off) * 68%)) scale(var(--sc)) rotate(calc(var(--off) * 6deg));
+  opacity: var(--op);
+  transition: transform 0.55s var(--ease-out), opacity 0.45s;
+  z-index: var(--z);
+}
+.rp-slot:not([data-off="0"]) {
+  cursor: pointer;
+}
+.rp-slot:not([data-off="0"]) .rp-pack img {
+  filter: saturate(0.6) brightness(0.62);
+  transition: filter 0.4s;
+}
+.rp-pack-float {
+  height: 100%;
+  animation: rp-pack-float 3.6s ease-in-out infinite;
+}
+/* Only the centre pack floats: the one loop the arena keeps. */
+.rp-slot:not([data-off="0"]) .rp-pack-float {
+  animation: none;
+}
+.rp-pack {
+  position: relative;
+  height: 100%;
+  aspect-ratio: var(--ar, 0.58);
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.4s var(--ease-out);
+  filter: drop-shadow(0 28px 24px rgb(0 0 0 / 0.5));
+}
+.rp-pack[data-live="true"] {
+  transition: transform 0.08s linear;
+}
+.rp-pack img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.rp-pack-glare {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--mx, 30%) var(--my, 20%), rgb(255 255 255 / 0.5), transparent 38%);
+  mix-blend-mode: soft-light;
+  mask-image: var(--mask);
+  mask-size: 100% 100%;
+  -webkit-mask-image: var(--mask);
+  -webkit-mask-size: 100% 100%;
+}
+.rp-hold {
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 8px;
+  border-radius: 999px;
+  background: rgb(7 6 15 / 0.62);
+  border: 1.5px solid rgb(255 255 255 / 0.18);
+  font-family: var(--ff-sans);
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+}
+.rp-hold svg {
+  width: 22px;
+  height: 22px;
+  rotate: -90deg;
+}
+.rp-hold circle:last-child {
+  stroke-dasharray: 63;
+  stroke-dashoffset: calc(63 - 63 * var(--charge, 0));
+}
+.rp-nav {
+  position: absolute;
+  top: 46%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgb(7 6 15 / 0.55);
+  border: 1.5px solid rgb(255 255 255 / 0.2);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  z-index: 12;
+  transition: transform 0.15s, background-color 0.2s;
+}
+.rp-nav-l {
+  left: 4px;
+}
+.rp-nav-r {
+  right: 4px;
+}
+.rp-nav:hover {
+  background: rgb(7 6 15 / 0.85);
+  transform: scale(1.06);
+}
+.rp-tiers {
+  position: absolute;
+  inset: auto 0 6px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  z-index: 12;
+}
+.rp-tiers::-webkit-scrollbar {
+  display: none;
+}
+.rp-tiers button {
+  flex: none;
+  min-width: 52px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgb(7 6 15 / 0.6);
+  border: 1.5px solid rgb(255 255 255 / 0.18);
+  color: #f0eeff;
+  font-family: var(--ff-rip);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.2s var(--ease-pop);
+}
+.rp-tiers button[aria-pressed="true"] {
+  background: var(--u-ink);
+  border-color: #fff;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--u-glow) 60%, transparent);
+}
+
+/* The mobile dock: one thumb from a rip once the main button scrolls off. */
+.ra-dock {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 20px;
+  background: rgb(10 9 24 / 0.94);
+  border: 1.5px solid color-mix(in srgb, var(--u-glow) 45%, transparent);
+  box-shadow: 0 16px 40px -10px rgb(0 0 0 / 0.7);
+  transform: translateY(calc(100% + 90px));
+  transition: transform 0.35s var(--ease-out);
+}
+.ra-dock[data-show="true"] {
+  transform: none;
+}
+.ra-dock-art {
+  width: 34px;
+  height: auto;
+  flex: none;
+}
+.ra-rip-sm {
+  width: auto;
+  min-height: 50px;
+  padding: 0 8px 0 14px;
+  border-radius: 15px;
+  gap: 10px;
+}
+.ra-rip-sm .ra-rip-text {
+  font-size: 1.2rem;
+}
+.ra-rip-sm .ra-rip-price {
+  font-size: 1.05rem;
+  padding: 5px 9px;
+}
+@media (min-width: 900px) {
+  .ra-dock {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------- live hits strip */
+.rh {
+  border-block: 1.5px solid var(--rw-line);
+  background: rgb(255 255 255 / 0.03);
+}
+.rh-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #7cf29a;
+}
+.rp-hits {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+}
+.rp-hit {
+  --c: #e3350d;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  width: 212px;
+  padding: 7px 10px 7px 7px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.05);
+  border: 1.5px solid color-mix(in srgb, var(--c) 55%, transparent);
+}
+.rp-hit img {
+  width: 34px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.3);
+}
+
+/* ------------------------------------------------------------- grails */
+.rp-grail {
+  --c: #e3350d;
+  position: relative;
+  flex: none;
+  width: 152px;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1.5px solid color-mix(in srgb, var(--c) 50%, transparent);
+  scroll-snap-align: start;
+  transition: transform 0.2s var(--ease-pop), border-color 0.2s;
+}
+.rp-grail img {
+  width: 100%;
+  aspect-ratio: 5 / 8;
+  object-fit: contain;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.3);
+}
+.rp-rank {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 1;
+  padding: 3px 9px;
+  border-radius: 9px;
+  background: #ffcb05;
+  color: #29263d;
+  font-family: var(--ff-rip);
+  font-size: 15px;
+  line-height: 1.1;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.45);
+}
+@media (hover: hover) {
+  .rp-grail:hover {
+    transform: translateY(-4px) rotate(-1deg);
+    border-color: var(--c);
+  }
+}
+
+/* ------------------------------------------------------------- trainer */
+.rp-xp {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  overflow: hidden;
+}
+.rp-xp span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3dbe6e, #9be15d);
+  transition: width 0.9s var(--ease-out);
+}
+.rp-badge {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 0.85);
+  background: radial-gradient(circle at 35% 30%, #fff8, transparent 40%), var(--b, #cfc8b6);
+  box-shadow: 0 0 18px -4px var(--b);
+  font-weight: 900;
+  font-size: 18px;
+  color: #1b1a2e;
+  transition: transform 0.2s var(--ease-pop), filter 0.3s;
+}
+.rp-badge[data-locked="true"] {
+  filter: grayscale(1) opacity(0.3);
+  box-shadow: none;
+}
+.rp-badge:not([data-locked="true"]):hover {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+/* --------------------------------------------------------------- PC box */
+.rp-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 44vw), 1fr));
+  gap: 12px;
+}
+.rp-tile {
+  --c: #e3350d;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1.5px solid color-mix(in srgb, var(--c) 50%, transparent);
+  transition: transform 0.2s var(--ease-pop);
+}
+.rp-tile img {
+  width: 100%;
+  aspect-ratio: 5 / 8;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.3);
+}
+@media (hover: hover) {
+  .rp-tile:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* --------------------------------------------------- devices and sizes */
+@media (max-width: 899px) {
+  .ra {
+    --stage-h: clamp(300px, 50svh, 540px);
+  }
+  .ra-mode {
+    display: none;
+  }
+  /* On a phone the rip button comes straight after the pack name, inside the first screen. */
+  .ra-buy-head,
+  .ra-name {
+    order: 0;
+  }
+  .ra-buy .ra-rip {
+    order: 1;
+  }
+  .ra-buy .ra-fine {
+    order: 2;
+  }
+  .ra-stats {
+    order: 3;
+  }
+  .ra-ev {
+    order: 4;
+  }
+  .ra-switch {
+    order: 5;
+  }
+  .ra-buy-links {
+    order: 6;
+  }
+}
+@media (max-width: 480px) {
+  .ra {
+    --stage-h: clamp(270px, 46svh, 460px);
+  }
+  .ra-name {
+    font-size: 1.8rem;
+  }
+  .rwb-text {
+    display: none !important;
+  }
+  .rwb {
+    padding-right: 6px;
+  }
+  .ra-uni {
+    min-height: 42px;
+    padding-right: 11px;
+    font-size: 0.84rem;
+  }
+  .ra-uni-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .ra-panel {
+    padding: 14px;
+    border-radius: 20px;
+  }
+  .ra-rip-text {
+    font-size: 1.35rem;
+  }
+  .ra-rip-price {
+    font-size: 1.15rem;
+  }
+  .rp-nav {
+    width: 40px;
+    height: 40px;
+  }
+}
+/* Folded phones and the narrowest screens. */
+@media (max-width: 360px) {
+  .ra-stats dd {
+    font-size: 1.1rem;
+  }
+  .ra-stats > div {
+    padding: 8px;
+  }
+  .rp-tiers button {
+    min-width: 44px;
+    padding: 0 10px;
+  }
+}
+/* Phones on their side: the stage and the buy panel share the row. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .ra {
+    --stage-h: max(260px, calc(100svh - 120px));
+  }
+  .ra-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    grid-template-areas: "stage buy" "odds odds";
+    align-items: start;
+  }
+  .ra-top {
+    flex-direction: row;
+  }
+  .ra-dock {
+    display: none;
+  }
+}
+
+/* -------------------------------------------- lighter on low-end phones */
+[data-rip-lite="1"] .rp-arena::before,
+[data-rip-lite="1"] .ra-rip::before {
+  animation: none;
+}
+[data-rip-lite="1"] .rp-pack {
+  filter: none;
+}
+.ra:is([data-offscreen="true"], [data-paused="true"]) .rp-arena::before,
+.ra:is([data-offscreen="true"], [data-paused="true"]) .rp-pack-float,
+.ra:is([data-offscreen="true"], [data-paused="true"]) .ra-rip::before {
+  animation-play-state: paused;
+}
+
+/* ------------------------------------------------------------ keyframes */
+@keyframes rp-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -12px;
+  }
+}
+@keyframes rp-pack-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.2deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(1.2deg);
+  }
+}
+@keyframes rp-shake {
+  0%,
+  42%,
+  100% {
+    rotate: 0deg;
+  }
+  6% {
+    rotate: -24deg;
+  }
+  14% {
+    rotate: 20deg;
+  }
+  22% {
+    rotate: -12deg;
+  }
+  30% {
+    rotate: 6deg;
+  }
+  36% {
+    rotate: -2deg;
+  }
+}
+@keyframes rp-blink {
+  0%,
+  45% {
+    background: #fbf8f2;
+  }
+  46%,
+  70% {
+    background: #ff5a47;
+  }
+  71% {
+    background: #fbf8f2;
+  }
+}
+@keyframes rp-shimmer {
+  to {
+    background-position: -260% 0;
+  }
+}
+@keyframes rp-dots {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+}
+@keyframes rp-drift {
+  to {
+    transform: translate3d(120px, 120px, 0);
+  }
+}
+@keyframes rp-waves {
+  to {
+    transform: translate3d(-140px, 0, 0);
+  }
+}
+@keyframes rp-rise {
+  to {
+    transform: translate3d(0, -120px, 0);
+  }
+}
+@keyframes rp-sweep {
+  from {
+    transform: rotate(-7deg);
+  }
+  to {
+    transform: rotate(7deg);
+  }
+}
+@keyframes rw-ping {
+  70%,
+  100% {
+    transform: scale(2.75);
+    opacity: 0;
+  }
+}
+@keyframes rp-cta {
+  0%,
+  55% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes ra-wipe {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes ra-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rp-ball[data-motion],
+  .rp-ball[data-motion]::after,
+  .rp-arena::before,
+  .rp-pack-float,
+  .ra-rip::before,
+  .ra-tagline,
+  .rp-tier[data-tier="legendary"] {
+    animation: none !important;
+  }
+  .ra-wipe {
+    display: none;
+  }
+  .rp-slot {
+    transition: opacity 0.2s;
+  }
+}

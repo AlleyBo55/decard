@@ -1,12 +1,16 @@
 // Daily CARDS bought back and burned, as a server-rendered SVG bar chart.
 // Linear scale on purpose: buybacks are lumpy, and a log scale would flatter
 // the quiet days.
+import { plural } from "@/lib/i18n/format";
+import { getLocale, getStrings } from "@/lib/i18n/strings";
 import { fmtDay, fmtShare, fmtShortDay, fmtUsdShort } from "./format";
 import "./token.css";
 
 const W = 10; // viewBox units per day
 
-export function BuybackChart({ daily }: { daily: [number, number][] }) {
+export async function BuybackChart({ daily }: { daily: [number, number][] }) {
+  const [t, locale] = await Promise.all([getStrings(), getLocale()]);
+  const c = t.tokenPage.chart;
   const n = daily.length;
   const values = daily.map(([, v]) => v);
   const max = Math.max(...values, 1);
@@ -18,9 +22,16 @@ export function BuybackChart({ daily }: { daily: [number, number][] }) {
   const step = 10 ** Math.floor(Math.log10(max));
   const ceil = Math.ceil(max / step) * step;
   const grid = [ceil, ceil / 2];
-  const label = `Daily CARDS buybacks, ${fmtShortDay(day(0))} to ${fmtDay(day(n - 1))}: ${fmtUsdShort(sum)} in total, biggest day ${fmtUsdShort(
-    values[top],
-  )} on ${fmtDay(day(top))}, ${quiet} of ${n} days with none.`;
+  const vars = {
+    from: fmtShortDay(day(0), locale),
+    to: fmtDay(day(n - 1), locale),
+    total: fmtUsdShort(sum),
+    top: fmtUsdShort(values[top]),
+    topDay: fmtDay(day(top), locale),
+    quiet,
+    share: fmtShare(sum ? values[top] / sum : null),
+  };
+  const label = plural(locale, n, c.label, vars);
   const topLeft = ((top + 0.5) / n) * 100;
 
   return (
@@ -53,35 +64,31 @@ export function BuybackChart({ daily }: { daily: [number, number][] }) {
             data-side={topLeft > 70 ? "left" : "right"}
             style={{ left: `${topLeft}%`, bottom: `${(values[top] / ceil) * 100}%` }}
           >
-            <strong>{fmtUsdShort(values[top])}</strong> {fmtShortDay(day(top))}
+            <strong>{fmtUsdShort(values[top])}</strong> {fmtShortDay(day(top), locale)}
           </span>
         )}
       </div>
       <div className="tk-chart-axis" aria-hidden>
-        <span>{fmtShortDay(day(0))}</span>
-        <span>{fmtShortDay(day(Math.floor(n / 2)))}</span>
-        <span>{fmtShortDay(day(n - 1))}</span>
+        <span>{fmtShortDay(day(0), locale)}</span>
+        <span>{fmtShortDay(day(Math.floor(n / 2)), locale)}</span>
+        <span>{fmtShortDay(day(n - 1), locale)}</span>
       </div>
-      <figcaption className="tk-chart-cap">
-        {fmtUsdShort(sum)} bought back over these {n} days. {quiet} of the {n} days show no buyback, and the biggest day,{" "}
-        {fmtDay(day(top))}, was {fmtShare(sum ? values[top] / sum : null)} of the total. Days are dated as DefiLlama dates
-        them (UTC).
-      </figcaption>
+      <figcaption className="tk-chart-cap">{plural(locale, n, c.caption, vars)}</figcaption>
       <details className="tk-chart-table">
-        <summary>Daily numbers</summary>
+        <summary>{c.table}</summary>
         <table>
           <thead>
             <tr>
-              <th scope="col">Day (UTC)</th>
-              <th scope="col">Bought back and burned</th>
+              <th scope="col">{c.day}</th>
+              <th scope="col">{c.amount}</th>
             </tr>
           </thead>
           <tbody>
             {daily
-              .map(([t, v]) => (
-                <tr key={t}>
-                  <td>{fmtDay(t * 1000)}</td>
-                  <td>{v > 0 ? `$${Math.round(v).toLocaleString("en")}` : "none"}</td>
+              .map(([ts, v]) => (
+                <tr key={ts}>
+                  <td>{fmtDay(ts * 1000, locale)}</td>
+                  <td>{v > 0 ? `$${Math.round(v).toLocaleString("en")}` : c.none}</td>
                 </tr>
               ))
               .reverse()}

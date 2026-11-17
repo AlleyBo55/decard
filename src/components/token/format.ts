@@ -1,5 +1,6 @@
 // Number and date formatting for the $CARDS page, shared by the server
 // sections and the client islands so both render the same text.
+import { localeMeta, type Locale } from "@/lib/i18n";
 
 export const NONE = "·";
 
@@ -60,15 +61,30 @@ export function fmtCents(f: number | null | undefined): string {
   return `${c.toFixed(c >= 10 ? 0 : c >= 1 ? 1 : 2)}¢`;
 }
 
-const DAY = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
-const SHORT_DAY = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" });
-const CLOCK = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
+// Dates follow the page's language (11月4日, 4. Nov.); times stay 24-hour UTC. English is the default.
+const DATES = {
+  day: { dateStyle: "medium", timeZone: "UTC" },
+  shortDay: { month: "short", day: "numeric", timeZone: "UTC" },
+  clock: { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "UTC" },
+  stamp: { dateStyle: "medium", timeStyle: "short", hourCycle: "h23", timeZone: "UTC" },
+} satisfies Record<string, Intl.DateTimeFormatOptions>;
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+function date(kind: keyof typeof DATES, locale: Locale): Intl.DateTimeFormat {
+  const key = `${kind}:${locale}`;
+  let f = formatters.get(key);
+  if (!f) {
+    f = new Intl.DateTimeFormat(localeMeta(locale).html, DATES[kind]);
+    formatters.set(key, f);
+  }
+  return f;
+}
 
 /** "Nov 4, 2026" (UTC). */
-export const fmtDay = (ms: number) => DAY.format(ms);
+export const fmtDay = (ms: number, locale: Locale = "en") => date("day", locale).format(ms);
 /** "Nov 4" (UTC). */
-export const fmtShortDay = (ms: number) => SHORT_DAY.format(ms);
+export const fmtShortDay = (ms: number, locale: Locale = "en") => date("shortDay", locale).format(ms);
 /** "Nov 4, 2026, 04:41 UTC". */
-export const fmtStamp = (ms: number) => `${DAY.format(ms)}, ${CLOCK.format(ms)} UTC`;
+export const fmtStamp = (ms: number, locale: Locale = "en") => `${date("stamp", locale).format(ms)} UTC`;
 /** "04:41 UTC". */
-export const fmtClock = (ms: number) => `${CLOCK.format(ms)} UTC`;
+export const fmtClock = (ms: number, locale: Locale = "en") => `${date("clock", locale).format(ms)} UTC`;

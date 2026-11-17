@@ -1,6 +1,6 @@
 import "server-only";
 import fetcher, { createAPIError, isAPIError, type IFetchConfig } from "@/helpers/fetcher";
-import { CC_API } from "./constants";
+import { CC_API, CC_DEV_API } from "./constants";
 import { cached } from "./cache";
 import type { CardDetail, CardMarket, CardOffer, CardRow, MarketplacePage, MarketplaceQuery } from "./types";
 
@@ -12,17 +12,20 @@ const auth = { isPublic: !CC_KEY, userToken: CC_KEY };
 
 type ReadOptions = Pick<IFetchConfig, "timeoutMs" | "retries">;
 
-function ccFetch<T>(path: string, revalidate = 15, read: ReadOptions = {}): Promise<T> {
-  return fetcher<T>({ url: `${CC_API}${path}`, method: "GET", ...auth, next: { revalidate }, ...read });
+function ccFetch<T>(path: string, revalidate = 15, read: ReadOptions = {}, devnet = false): Promise<T> {
+  // The API key is for mainnet's rate limit: devnet reads go out without it.
+  const base = devnet ? { url: `${CC_DEV_API}${path}`, isPublic: true } : { url: `${CC_API}${path}`, ...auth };
+  return fetcher<T>({ ...base, method: "GET", next: { revalidate }, ...read });
 }
 
 /**
  * `opts.revalidate` overrides the 15s data-cache lifetime (the sitemap keeps pages for hours).
  * `timeoutMs` and `retries` let an optional section give up fast instead of queueing.
+ * `devnet` reads Collector Crypt's devnet API instead (redeem, while decardbe runs on devnet).
  */
 export async function getMarketplace(
   q: MarketplaceQuery,
-  opts: { revalidate?: number } & ReadOptions = {},
+  opts: { revalidate?: number; devnet?: boolean } & ReadOptions = {},
 ): Promise<MarketplacePage> {
   const params = new URLSearchParams();
   params.set("step", String(q.step ?? 50));
@@ -42,7 +45,7 @@ export async function getMarketplace(
     total: number;
     totalPages: number;
     cardsQtyByCategory: Record<string, number>;
-  }>(`/marketplace?${params}`, opts.revalidate, { timeoutMs: opts.timeoutMs, retries: opts.retries });
+  }>(`/marketplace?${params}`, opts.revalidate, { timeoutMs: opts.timeoutMs, retries: opts.retries }, opts.devnet);
 
   return {
     cards: raw.filterNFtCard ?? [],

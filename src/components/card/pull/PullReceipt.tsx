@@ -6,9 +6,11 @@ import { createPortal } from "react-dom";
 import { CountUp } from "@/components/motion";
 import { CountTo, Sparkles } from "@/components/gacha/parts";
 import { multipleLevel } from "@/components/gacha/shared";
+import { useT } from "@/components/LocaleProvider";
 import { Skeleton } from "@/components/ui";
 import { fmtUsd } from "@/lib/format";
 import { useMediaQuery, useReducedMotion } from "@/lib/hooks";
+import { fmt } from "@/lib/i18n/format";
 import {
   PACK_PRESETS,
   fmtMultiple,
@@ -65,6 +67,7 @@ const NEXT: Record<Exclude<Phase, "idle">, [Phase, number]> = {
 
 /** "Share pull" button and its dialog. The catch plays on the first open only. */
 export function PullReceipt({ card, live, initialPack }: { card: ReceiptCard; live: ReceiptLive; initialPack: number | null }) {
+  const t = useT().card.receipt;
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -88,7 +91,7 @@ export function PullReceipt({ card, live, initialPack }: { card: ReceiptCard; li
         onClick={() => setOpen(true)}
       >
         <span className="pokeball pokeball-spin" style={{ ["--s" as string]: "18px" }} aria-hidden />
-        Share pull
+        {t.button}
       </button>
       {mounted &&
         createPortal(
@@ -107,8 +110,9 @@ function BestBid({ bid }: { bid: Promise<number | null> }) {
 }
 
 function Listed({ listed }: { listed: Promise<{ price: string; venue: string } | null> }) {
+  const t = useT().card.receipt;
   const l = use(listed);
-  return <p className="pr-listed">{l ? `Listed at ${l.price} on ${l.venue}` : "Not listed right now"}</p>;
+  return <p className="pr-listed">{l ? fmt(t.listedAt, { price: l.price, venue: l.venue }) : t.notListed}</p>;
 }
 
 function ReceiptDialog({
@@ -124,6 +128,7 @@ function ReceiptDialog({
   intro: boolean;
   onClose: () => void;
 }) {
+  const { receipt: t, pop: popCopy } = useT().card;
   const reduced = useReducedMotion();
   const wide = useMediaQuery(WIDE);
   const titleId = useId();
@@ -198,7 +203,7 @@ function ReceiptDialog({
   const multiple = pullMultiple(card.insured, pack);
   const level = multipleLevel(multiple);
   const url = `${window.location.origin}${pullPath(card.mint, pack)}`;
-  const text = shareText({ title, insured: card.insured, pop: card.pop }, pack);
+  const text = shareText({ title, insured: card.insured, pop: card.pop }, pack, t.post);
   const links = intentLinks(url, text);
   const fileName = receiptFileName(title);
   const canShare = typeof navigator.share === "function";
@@ -209,11 +214,11 @@ function ReceiptDialog({
   const name = caps.length > 24 ? `${caps.slice(0, 23).trimEnd()}…` : caps;
   const line = !shown
     ? phase === "catch"
-      ? "Click!"
-      : "DECARD used POKé BALL!"
+      ? t.say.click
+      : t.say.throw
     : multiple != null && pack
-      ? `Insured value: ${fmtMultiple(multiple)} the ${fmtPack(pack)} pack!`
-      : `Gotcha! ${name} was caught!`;
+      ? fmt(t.say.multiple, { multiple: fmtMultiple(multiple), pack: fmtPack(pack) })
+      : fmt(t.say.caught, { name });
 
   const track = (method: ShareMethod) => trackShare(method, card.mint, pack);
 
@@ -235,9 +240,9 @@ function ReceiptDialog({
     try {
       await navigator.clipboard.writeText(url);
       track(method);
-      say(method === "discord" ? "Copied. Paste it in Discord and the receipt unfurls." : "Link copied.");
+      say(method === "discord" ? t.toast.discord : t.toast.copied);
     } catch {
-      say("Couldn't copy. Press and hold the link instead.");
+      say(t.toast.copyFailed);
     }
   }
 
@@ -252,7 +257,7 @@ function ReceiptDialog({
       await navigator.share(data);
       track("native");
     } catch (e) {
-      if ((e as DOMException)?.name !== "AbortError") say("Share sheet didn't open. Copy the link instead.");
+      if ((e as DOMException)?.name !== "AbortError") say(t.toast.shareFailed);
     }
   }
 
@@ -280,14 +285,14 @@ function ReceiptDialog({
     if (!wide && !reduced) drag.start(e);
   };
 
-  const popLabel = card.grade ? `Pop ${card.grade.split(" ").pop()}` : "Pop";
+  const popLabel = card.grade ? fmt(popCopy.grade, { grade: card.grade.split(" ").pop() }) : popCopy.plain;
   const fill = multiple != null ? Math.max(3, Math.min(100, (multiple / 5) * 100)) : 0;
   const note =
     multiple != null && pack
-      ? `Insured value is ${fmtMultiple(multiple)} the ${fmtPack(pack)} pack price.`
+      ? fmt(t.noteMultiple, { multiple: fmtMultiple(multiple), pack: fmtPack(pack) })
       : card.insured > 0
-        ? "Pick the pack price to get the multiple."
-        : "No insured value on file for this slab.";
+        ? t.notePick
+        : t.noteNoValue;
 
   return (
     <div className="pr-root">
@@ -322,11 +327,11 @@ function ReceiptDialog({
           transition={wide ? { type: "spring", stiffness: 260, damping: 24 } : { type: "spring", stiffness: 320, damping: 34 }}
         >
           <div className="pr-grab" onPointerDown={startDrag} aria-hidden />
-          <button type="button" className="pr-close" onClick={onClose} aria-label="Close">
+          <button type="button" className="pr-close" onClick={onClose} aria-label={t.close}>
             ×
           </button>
 
-          <section className="pr-panel pr-left" aria-label="Your slab">
+          <section className="pr-panel pr-left" aria-label={t.slabLabel}>
             <div className="pr-front">
               <div className="pr-top" onPointerDown={startDrag}>
                 <span className="gx-lens" aria-hidden />
@@ -335,7 +340,7 @@ function ReceiptDialog({
                   <i className="gx-led gx-led-y" />
                   <i className="gx-led gx-led-g" />
                 </span>
-                <span className="gx-dex-title min-w-0 truncate">Pull receipt</span>
+                <span className="gx-dex-title min-w-0 truncate">{t.title}</span>
               </div>
               <div className="gx-dex-seam" aria-hidden />
               <div className="gx-bezel">
@@ -371,21 +376,21 @@ function ReceiptDialog({
             <div className="pr-front">
               <div className="pr-top">
                 <h2 id={titleId} className="gx-dex-title">
-                  Share your pull
+                  {t.heading}
                 </h2>
               </div>
 
               <div>
-                <div className="gx-lcd pr-lcd" role="group" aria-label="Slab stats">
+                <div className="gx-lcd pr-lcd" role="group" aria-label={t.statsLabel}>
                   {/* "???" until the catch lands, like an unregistered dex entry. */}
                   <div>
-                    <span className="gx-lcd-label">Insured</span>
+                    <span className="gx-lcd-label">{t.insured}</span>
                     <span className="gx-lcd-value">
                       {!shown ? "???" : card.insured > 0 ? <CountUp value={card.insured} kind="usd" /> : "·"}
                     </span>
                   </div>
                   <div>
-                    <span className="gx-lcd-label">Best bid</span>
+                    <span className="gx-lcd-label">{t.bestBid}</span>
                     <span className="gx-lcd-value">
                       <Suspense fallback="…">
                         <BestBid bid={live.bestBid} />
@@ -397,14 +402,14 @@ function ReceiptDialog({
                     <span className="gx-lcd-value">{!shown ? "???" : card.pop != null ? <CountUp value={card.pop} /> : "·"}</span>
                   </div>
                 </div>
-                <Suspense fallback={<p className="pr-listed">Checking the listing…</p>}>
+                <Suspense fallback={<p className="pr-listed">{t.checking}</p>}>
                   <Listed listed={live.listed} />
                 </Suspense>
               </div>
 
               <div role="group" aria-labelledby={`${titleId}-pack`}>
                 <p id={`${titleId}-pack`} className="pr-label">
-                  What did the pack cost? <em>Optional</em>
+                  {t.packQuestion} <em>{t.optional}</em>
                 </p>
                 <div className="pr-keys">
                   {PACK_PRESETS.map((p) => (
@@ -426,32 +431,32 @@ function ReceiptDialog({
                       inputMode="decimal"
                       autoComplete="off"
                       enterKeyHint="done"
-                      placeholder="Other amount"
+                      placeholder={t.otherAmount}
                       value={custom}
                       onChange={(e) => typeCustom(e.target.value)}
-                      aria-label="Other pack price in dollars"
+                      aria-label={t.otherAmountLabel}
                       aria-invalid={invalid}
                     />
                   </label>
                   {pack != null && (
                     <button type="button" className="pr-ghost" onClick={clearPack}>
-                      No pack
+                      {t.noPack}
                     </button>
                   )}
                 </div>
-                {invalid && <p className="pr-hint">Enter $1 to $100,000.</p>}
+                {invalid && <p className="pr-hint">{t.invalidPack}</p>}
               </div>
 
               <div className="pr-meter" data-level={level}>
                 <div className="pr-meter-head">
-                  <span className="pr-meter-label">Insured ÷ pack</span>
+                  <span className="pr-meter-label">{t.meter}</span>
                   <span className="pr-mult">
                     {multiple != null ? <CountTo value={multiple} kind="mult" /> : "·"}
                     {multiple != null && level !== "muted" && !reduced && <Sparkles key={pack} />}
                   </span>
                 </div>
                 <div className="pr-exp" aria-hidden>
-                  <span className="pr-exp-label">EXP</span>
+                  <span className="pr-exp-label">{t.exp}</span>
                   <span className="pr-exp-track">
                     <motion.span
                       className="pr-exp-fill"
@@ -466,10 +471,10 @@ function ReceiptDialog({
               </div>
 
               <div>
-                <p className="pr-label">Share it</p>
+                <p className="pr-label">{t.shareIt}</p>
                 <div className="pr-share">
                   <a className="pr-skey" data-brand="x" href={links.x} target="_blank" rel="noopener noreferrer" onClick={() => track("x")}>
-                    <XLogo /> Post on X
+                    <XLogo /> {t.postOnX}
                   </a>
                   <a
                     className="pr-skey"
@@ -488,11 +493,11 @@ function ReceiptDialog({
                     <DiscordLogo /> Discord
                   </button>
                   <a className="pr-skey" href={imgPath} download={fileName} onClick={() => track("download")}>
-                    <DownloadIcon /> Save image
+                    <DownloadIcon /> {t.saveImage}
                   </a>
                   {canShare && (
                     <button type="button" className="pr-skey" data-brand="native" onClick={nativeShare}>
-                      <ShareIcon /> More
+                      <ShareIcon /> {t.more}
                     </button>
                   )}
                 </div>
@@ -501,24 +506,21 @@ function ReceiptDialog({
               <div className="pr-link">
                 <code>{url.replace(/^https?:\/\//, "")}</code>
                 <button type="button" onClick={() => copy("copy")}>
-                  Copy
+                  {t.copy}
                 </button>
               </div>
 
               <figure>
                 <figcaption className="pr-label">
-                  Link preview <em>What X and Discord show</em>
+                  {t.preview} <em>{t.previewNote}</em>
                 </figcaption>
                 <div className="pr-shot" data-busy={busy}>
-                  {shot ? <img src={shot.url} alt={`Share image for ${title}`} /> : <Skeleton className="absolute inset-0 rounded-none" />}
-                  {busy && <span className="pr-shot-tag">Rendering…</span>}
+                  {shot ? <img src={shot.url} alt={fmt(t.previewAlt, { name: title })} /> : <Skeleton className="absolute inset-0 rounded-none" />}
+                  {busy && <span className="pr-shot-tag">{t.rendering}</span>}
                 </div>
               </figure>
 
-              <p className="pr-fine">
-                You set the pack price; nothing checks it. Insured value is Collector Crypt&apos;s number, not a sale price.
-                The share image&apos;s figures refresh once a day.
-              </p>
+              <p className="pr-fine">{t.fine}</p>
             </div>
 
             <div className="pr-lid" aria-hidden>
@@ -526,22 +528,22 @@ function ReceiptDialog({
                 <span className="pokeball" />
               </span>
               <span className="logo-word pr-lid-word">DECARD</span>
-              <span className="pr-lid-tag">PULL RECEIPT</span>
+              <span className="pr-lid-tag">{t.lidTag}</span>
             </div>
           </motion.section>
 
           <div className="pr-dock">
             {canShare ? (
               <button type="button" className="btn btn-yellow" onClick={nativeShare}>
-                <ShareIcon className="h-5 w-5" /> Share
+                <ShareIcon className="h-5 w-5" /> {t.share}
               </button>
             ) : (
               <a className="btn btn-yellow" href={links.x} target="_blank" rel="noopener noreferrer" onClick={() => track("x")}>
-                <XLogo className="h-4 w-4" /> Post on X
+                <XLogo className="h-4 w-4" /> {t.postOnX}
               </a>
             )}
             <button type="button" className="btn btn-cream" onClick={() => copy("copy")}>
-              <LinkIcon className="h-5 w-5" /> Copy link
+              <LinkIcon className="h-5 w-5" /> {t.copyLink}
             </button>
           </div>
         </motion.div>

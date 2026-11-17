@@ -1,6 +1,8 @@
 // Presentational primitives. No hooks and no "use client", so they render on
-// the server and inside client components alike.
-import Link from "next/link";
+// the server and inside client components alike. Their words come from
+// ui-client.tsx, small client components that read the page's language.
+import Link from "@/components/LocaleLink";
+import { CategoryName, LoaderLabel } from "@/components/ui-client";
 import { clsx } from "@/lib/clsx";
 import { TYPES, typeFor, type PokeType } from "@/lib/poke-types";
 import type { ActivityTone } from "@/lib/types";
@@ -152,7 +154,7 @@ export function TypeChip({
       <span className="chip-icon">
         <TypeIcon type={type} />
       </span>
-      {label ?? (category || "Other")}
+      {label ?? <CategoryName category={category} />}
       {count != null && <span className="tabular-nums opacity-70 font-bold">{count}</span>}
     </>
   );
@@ -180,20 +182,8 @@ export function TypeChip({
 
 /* --------------------------------------------------- bars, tags, medals */
 
-/** Battle HP bar. Higher deal score = fuller, greener bar. */
-export function HPBar({ value, label = "DEAL", className }: { value: number; label?: string; className?: string }) {
-  const v = Math.max(0, Math.min(100, value));
-  const color = v >= 50 ? "var(--color-up-fill)" : v >= 20 ? "var(--color-warn-fill)" : "var(--color-poke)";
-  return (
-    <div className={clsx("hp", className)} title={`Deal score ${v}/100`}>
-      <span className="hp-label">{label}</span>
-      <span className="hp-track">
-        <span className="hp-fill" style={{ width: `${Math.max(v, 3)}%`, ["--hp-color" as string]: color }} />
-      </span>
-      <span className="font-num font-extrabold text-[12px] tabular-nums w-7 text-right text-ink-soft">{v}</span>
-    </div>
-  );
-}
+/** Battle HP bar (its label and tooltip are words, so it lives in ui-client.tsx). */
+export { HPBar } from "@/components/ui-client";
 
 /** Base-stats bar for population reports. */
 export function StatBar({
@@ -275,11 +265,11 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={clsx("skeleton", className)} />;
 }
 
-export function PokeLoader({ label = "Loading", className }: { label?: string; className?: string }) {
+export function PokeLoader({ label, className }: { label?: string; className?: string }) {
   return (
     <div className={clsx("flex flex-col items-center justify-center gap-4 py-12", className)} role="status">
       <span className="pokeball pokeball-wobble" style={{ ["--s" as string]: "44px" }} />
-      <span className="font-pixel text-[10px] text-ink-mute">{label}...</span>
+      <span className="font-pixel text-[10px] text-ink-mute">{label ?? <LoaderLabel />}...</span>
     </div>
   );
 }

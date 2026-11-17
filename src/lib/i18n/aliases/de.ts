@@ -1,0 +1,33 @@
+// German names for the subjects in ./entities.ts, keyed by entity key. Rules: the top of entities.ts.
+export const names: Record<string, string[]> = {
+  charizard: ["Glurak"],
+  eevee: ["Evoli"],
+  mewtwo: ["Mewtu"],
+  umbreon: ["Nachtara"],
+  venusaur: ["Bisaflor"],
+  blastoise: ["Turtok"],
+  charmander: ["Glumanda"],
+  moltres: ["Lavados"],
+  bulbasaur: ["Bisasam"],
+  zapdos: ["Zapdos"],
+  dragonite: ["Dragoran"],
+  gardevoir: ["Guardevoir"],
+  snorlax: ["Relaxo"],
+  squirtle: ["Schiggy"],
+  articuno: ["Arktos"],
+  greninja: ["Quajutsu"],
+  gyarados: ["Garados"],
+  espeon: ["Psiana"],
+  alakazam: ["Simsala"],
+  mimikyu: ["Mimigma"],
+  jolteon: ["Blitza"],
+  sylveon: ["Feelinara"],
+  vaporeon: ["Aquana"],
+  leafeon: ["Folipurba"],
+  tyranitar: ["Despotar"],
+  flareon: ["Flamara"],
+  glaceon: ["Glaziola"],
+  ninetales: ["Vulnona"],
+};
+
+export const fillers: string[] = ["karte", "karten"];

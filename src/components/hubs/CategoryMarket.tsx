@@ -1,11 +1,14 @@
 // A franchise hub's live market: stats, prices by grade and card grids. A copy of the
 // parts of pokemon/HubMarket a category needs, rendered on the server without the venue
 // switch, plus handling for categories too big to read whole.
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
 import { CardTile } from "@/components/CardTile";
 import type { HubGrade, Priced } from "@/components/pokemon/HubMarket";
 import { GradePill, Kicker, MoreLink } from "@/components/ui";
-import { fmtNum, fmtUsd, venueName } from "@/lib/format";
+import { fmtNum, fmtUsd } from "@/lib/format";
+import { fmt, plural } from "@/lib/i18n/format";
+import { getLocale, stringsFor, type Strings } from "@/lib/i18n/strings";
+import { venueLabel } from "@/lib/venue";
 
 /** A hub's numbers, built on the server from at most four marketplace reads. */
 export interface CategoryView {
@@ -55,18 +58,18 @@ function TileGrid({ cards }: { cards: Priced[] }) {
 }
 
 /** Counts and medians only when every listing was read; the lowest ask per grade is exact either way. */
-function GradeTable({ grades, complete }: { grades: HubGrade[]; complete: boolean }) {
+function GradeTable({ grades, complete, t }: { grades: HubGrade[]; complete: boolean; t: Strings["hubs"]["market"] }) {
   const th = "p-4 font-normal";
   return (
     <div className="paper overflow-x-auto">
       <table className={`w-full text-left text-sm ${complete ? "min-w-[640px]" : "min-w-[480px]"}`}>
         <thead className="border-b-2 border-sand font-pixel text-[9px] text-ink-mute">
           <tr>
-            <th scope="col" className={th}>GRADE</th>
-            {complete && <th scope="col" className={th}>LISTED</th>}
-            <th scope="col" className={th}>LOWEST ASK</th>
-            {complete && <th scope="col" className={th}>MEDIAN ASK</th>}
-            <th scope="col" className={th}>LOWEST-PRICED CARD</th>
+            <th scope="col" className={th}>{t.grade}</th>
+            {complete && <th scope="col" className={th}>{t.listed}</th>}
+            <th scope="col" className={th}>{t.lowestAsk}</th>
+            {complete && <th scope="col" className={th}>{t.medianAsk}</th>}
+            <th scope="col" className={th}>{t.lowestCard}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-sand">
@@ -82,7 +85,9 @@ function GradeTable({ grades, complete }: { grades: HubGrade[]; complete: boolea
                 <Link href={`/card/${g.lowest.nftAddress}`} prefetch={false} className={link}>
                   {g.lowest.itemName}
                 </Link>
-                <span className="mt-1 block text-xs text-ink-mute">on {venueName(g.lowest.listing.marketplace)}</span>
+                <span className="mt-1 block text-xs text-ink-mute">
+                  {fmt(t.onVenue, { venue: venueLabel(g.lowest.listing.marketplace) })}
+                </span>
               </td>
             </tr>
           ))}
@@ -92,13 +97,17 @@ function GradeTable({ grades, complete }: { grades: HubGrade[]; complete: boolea
   );
 }
 
-export function CategoryMarket({ noun, view, scanner }: { noun: string; view: CategoryView; scanner: string }) {
+/** Reads the page's language from next/root-params, so it renders in server components only. */
+export async function CategoryMarket({ noun, view, scanner }: { noun: string; view: CategoryView; scanner: string }) {
+  const locale = await getLocale();
+  const t = stringsFor(locale).hubs;
+  const s = t.categoryMarket;
   if (view.priced === 0) {
     return (
       <p className="paper mt-10 p-6 text-ink-soft">
-        No graded {noun} cards are listed in USDC right now. New slabs show up here as collectors tokenize and list them.{" "}
+        {fmt(s.empty, { noun })}{" "}
         <Link href={scanner} className={link}>
-          Search {noun} listings in the scanner.
+          {fmt(s.emptyLink, { noun })}
         </Link>
       </p>
     );
@@ -108,65 +117,48 @@ export function CategoryMarket({ noun, view, scanner }: { noun: string; view: Ca
   return (
     <>
       <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <Stat label="LISTED NOW" value={fmtNum(view.listed)} />
-        {view.complete && <Stat label="GRADED, IN USDC" value={fmtNum(view.priced)} />}
-        <Stat label="LOWEST ASK" value={fmtUsd(view.lowest)} />
-        {view.median != null && <Stat label="MEDIAN ASK" value={fmtUsd(view.median)} />}
-        {view.lowestPsa10 != null && <Stat label="LOWEST PSA 10" value={fmtUsd(view.lowestPsa10)} />}
+        <Stat label={s.listedNow} value={fmtNum(view.listed)} />
+        {view.complete && <Stat label={s.graded} value={fmtNum(view.priced)} />}
+        <Stat label={t.market.lowestAsk} value={fmtUsd(view.lowest)} />
+        {view.median != null && <Stat label={t.market.medianAsk} value={fmtUsd(view.median)} />}
+        {view.lowestPsa10 != null && <Stat label={t.market.lowestPsa10} value={fmtUsd(view.lowestPsa10)} />}
       </dl>
       <div className="mt-3 flex max-w-3xl flex-col gap-2 text-sm text-ink-mute">
         {!view.complete && (
-          <p>
-            This refresh read the {fmtNum(view.read)} lowest-priced of {fmtNum(view.listed)} {noun} listings. Every lowest
-            ask here is exact, but medians are left out rather than guessed, and a grade whose cheapest copy costs more
-            than those does not appear.
-          </p>
+          <p>{plural(locale, view.listed, s.partial, { n: fmtNum(view.listed), read: fmtNum(view.read), noun })}</p>
         )}
-        {view.complete && left > 0 && (
-          <p>
-            {left} more {left === 1 ? "listing is" : "listings are"} ungraded, priced in SOL or far above insured value,
-            so these prices leave {left === 1 ? "it" : "them"} out.
-          </p>
-        )}
-        {view.priced < FEW && (
-          <p>
-            Only {view.priced} graded {noun} {view.priced === 1 ? "card is" : "cards are"} listed in USDC right now, so a
-            single new listing can move these numbers.
-          </p>
-        )}
+        {view.complete && left > 0 && <p>{plural(locale, left, s.left, { n: fmtNum(left) })}</p>}
+        {view.priced < FEW && <p>{plural(locale, view.priced, s.thin, { n: fmtNum(view.priced), noun })}</p>}
       </div>
 
       <section className="mt-14 flex flex-col gap-5" aria-labelledby="by-grade">
         <div>
-          <Kicker>Prices by grade</Kicker>
+          <Kicker>{t.market.byGrade}</Kicker>
           <h2 id="by-grade" className={h2}>
-            What graded {noun} cards are listed for
+            {fmt(s.byGradeTitle, { noun })}
           </h2>
-          <p className="mt-3 max-w-3xl text-ink-soft">
-            Each grade groups every {noun} card at that grade, from common cards to chase cards, so open the lowest-priced
-            card to see exactly which one it is.
-          </p>
+          <p className="mt-3 max-w-3xl text-ink-soft">{fmt(s.byGradeNote, { noun })}</p>
         </div>
-        <GradeTable grades={view.grades} complete={view.complete} />
+        <GradeTable grades={view.grades} complete={view.complete} t={t.market} />
       </section>
 
       <section className="mt-14 flex flex-col gap-6" aria-labelledby="lowest">
         <div>
-          <Kicker>Cheapest first</Kicker>
+          <Kicker>{t.market.cheapest}</Kicker>
           <h2 id="lowest" className={h2}>
-            Lowest-priced graded {noun} cards
+            {fmt(s.cheapestTitle, { noun })}
           </h2>
         </div>
         <TileGrid cards={view.cheapest} />
-        <MoreLink href={scanner}>Sort and filter {noun} listings in the scanner</MoreLink>
+        <MoreLink href={scanner}>{fmt(s.cheapestMore, { noun })}</MoreLink>
       </section>
 
       {view.highest.length > 0 && (
         <section className="mt-14 flex flex-col gap-6" aria-labelledby="top">
           <div>
-            <Kicker>Top of the market</Kicker>
+            <Kicker>{t.market.top}</Kicker>
             <h2 id="top" className={h2}>
-              Highest asking prices for {noun} cards
+              {fmt(s.topTitle, { noun })}
             </h2>
           </div>
           <TileGrid cards={view.highest} />

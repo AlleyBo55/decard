@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/components/LocaleProvider";
+import { localizeHref } from "@/lib/i18n";
+import { ago, fmt, plural } from "@/lib/i18n/format";
 import type { Activity } from "@/lib/types";
-import { activityDisplay, gradeShort, isBotChurn, priceText, shortAddr, shortCardName, timeAgo } from "@/lib/format";
+import { activityDisplay, fmtNum, gradeShort, isBotChurn, priceText, shortAddr, shortCardName } from "@/lib/format";
 import { cardImage, solscanTx } from "@/lib/constants";
 import { useWalletLabel } from "@/lib/hooks";
 import { GradePill, Tag } from "@/components/ui";
@@ -28,8 +31,21 @@ export function WalletName({ address, title }: { address: string; title?: string
   );
 }
 
+/** "from {wallet}" with the wallet's link in place of {wallet}, so translators keep the phrase whole. */
+function withWallet(template: string, wallet: React.ReactNode) {
+  const [before, after = ""] = template.split("{wallet}");
+  return (
+    <>
+      {before.trim() && <span>{before.trim()}</span>}
+      {wallet}
+      {after.trim() && <span>{after.trim()}</span>}
+    </>
+  );
+}
+
 export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: boolean }) {
   const router = useRouter();
+  const { locale, t } = useLocale();
   const d = activityDisplay(a.kind);
   const price = priceText(a);
   const hasCard = Boolean(a.cardName && a.assetMint);
@@ -46,10 +62,10 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
           ? a.seller ?? a.actor
           : a.actor ?? a.seller ?? a.buyer;
   const to = d.tone === "sale" ? a.buyer : isBid ? a.owner ?? null : null;
-  const toTitle = isBid && to && a.ownerIsCurrent ? `current holder · ${to}` : undefined;
+  const toTitle = isBid && to && a.ownerIsCurrent ? fmt(t.ui.activity.currentHolder, { address: to }) : undefined;
 
   const navigate = () => {
-    if (hasCard && showCard) router.push(`/card/${a.assetMint}`);
+    if (hasCard && showCard) router.push(localizeHref(locale, `/card/${a.assetMint}`));
     else window.open(solscanTx(a.signature), "_blank", "noopener");
   };
   // Rows aren't <Link>s, so nothing prefetches them: warm the card route on
@@ -90,26 +106,25 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <Tag tone={d.tone}>{d.verb}</Tag>
+          <Tag tone={d.tone}>{t.ui.verbs[d.verb] ?? d.verb}</Tag>
           {showCard && (
             <>
-              <span className="font-extrabold truncate">{hasCard ? shortCardName(a.cardName) : "Unresolved card"}</span>
+              <span className="font-extrabold truncate">{hasCard ? shortCardName(a.cardName) : t.ui.activity.unresolvedCard}</span>
               <GradePill label={gradeShort(a.gradingCompany, a.grade)} />
             </>
           )}
           {isBotChurn(a) && (
-            <span className="font-pixel text-[8px] text-ink-mute" title={`${a.ixCount} offers in one transaction`}>
-              BOT ×{a.ixCount}
+            <span
+              className="font-pixel text-[8px] text-ink-mute"
+              title={plural(locale, a.ixCount, t.ui.activity.botOffers, { n: fmtNum(a.ixCount) })}
+            >
+              {fmt(t.ui.activity.bot, { n: a.ixCount })}
             </span>
           )}
         </div>
         <div className="mt-1 text-[13px] text-ink-mute flex items-center gap-1.5 flex-wrap">
-          {from && (
-            <>
-              <span>{d.tone === "sale" ? "from" : "by"}</span>
-              <WalletName address={from} />
-            </>
-          )}
+          {from &&
+            withWallet(d.tone === "sale" ? t.ui.activity.fromWallet : t.ui.activity.byWallet, <WalletName address={from} />)}
           {to && to !== from && (
             <>
               <span className="text-poke">→</span>
@@ -123,7 +138,7 @@ export function ActivityRow({ a, showCard = true }: { a: Activity; showCard?: bo
         <div className={clsx("font-num font-extrabold text-lg leading-none tabular-nums", d.tone === "sale" ? "text-up" : "text-ink")}>
           {price ?? ""}
         </div>
-        <div className="mt-1 text-[11px] text-ink-mute tabular-nums">{timeAgo(a.blockTime)} ago</div>
+        <div className="mt-1 text-[11px] text-ink-mute tabular-nums">{ago(locale, a.blockTime)}</div>
       </div>
     </div>
   );

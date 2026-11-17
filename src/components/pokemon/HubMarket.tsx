@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
 import { useState } from "react";
 import { CardTile } from "@/components/CardTile";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { GradePill, Kicker, MoreLink } from "@/components/ui";
-import { fmtUsd, venueName } from "@/lib/format";
+import { fmtNum, fmtUsd } from "@/lib/format";
+import { fmt, plural } from "@/lib/i18n/format";
+import { venueLabel } from "@/lib/venue";
 import type { CardRow, Listing } from "@/lib/types";
 
 /** Every venue, or one listing venue as Collector Crypt's API reports it. */
@@ -33,7 +36,8 @@ export interface HubView {
   highest: Priced[];
 }
 
-const LABEL: Record<Venue, string> = { all: "All venues", CC: "Collector Crypt", ME: "Magic Eden" };
+/** Marketplace names, as written everywhere. "All venues" comes from the strings. */
+const VENUE: Record<Exclude<Venue, "all">, string> = { CC: "Collector Crypt", ME: "Magic Eden" };
 const ORDER: Venue[] = ["all", "CC", "ME"];
 const h2 = "h-display mt-3 text-[clamp(1.8rem,4vw,2.6rem)]";
 
@@ -60,17 +64,18 @@ function TileGrid({ cards }: { cards: CardRow[] }) {
 }
 
 function GradeTable({ grades }: { grades: HubGrade[] }) {
+  const t = useT().hubs.market;
   const th = "p-4 font-normal";
   return (
     <div className="paper overflow-x-auto">
       <table className="w-full min-w-[640px] text-left text-sm">
         <thead className="border-b-2 border-sand font-pixel text-[9px] text-ink-mute">
           <tr>
-            <th scope="col" className={th}>GRADE</th>
-            <th scope="col" className={th}>LISTED</th>
-            <th scope="col" className={th}>LOWEST ASK</th>
-            <th scope="col" className={th}>MEDIAN ASK</th>
-            <th scope="col" className={th}>LOWEST-PRICED CARD</th>
+            <th scope="col" className={th}>{t.grade}</th>
+            <th scope="col" className={th}>{t.listed}</th>
+            <th scope="col" className={th}>{t.lowestAsk}</th>
+            <th scope="col" className={th}>{t.medianAsk}</th>
+            <th scope="col" className={th}>{t.lowestCard}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-sand">
@@ -86,7 +91,9 @@ function GradeTable({ grades }: { grades: HubGrade[] }) {
                 <Link href={`/card/${g.lowest.nftAddress}`} prefetch={false} className="font-bold text-azure-deep hover:text-poke-deep">
                   {g.lowest.itemName}
                 </Link>
-                <span className="mt-1 block text-xs text-ink-mute">on {venueName(g.lowest.listing.marketplace)}</span>
+                <span className="mt-1 block text-xs text-ink-mute">
+                  {fmt(t.onVenue, { venue: venueLabel(g.lowest.listing.marketplace) })}
+                </span>
               </td>
             </tr>
           ))}
@@ -98,20 +105,24 @@ function GradeTable({ grades }: { grades: HubGrade[] }) {
 
 /** A price guide's numbers, grade table and card grids, with a venue switch. "All venues" renders on the server. */
 export function HubMarket({ name, search, views }: { name: string; search: string; views: Record<Venue, HubView> }) {
+  const t = useT().hubs;
+  const s = t.guideMarket;
+  const { locale } = useLocale();
   const [venue, setVenue] = useState<Venue>("all");
   const view = views[venue];
-  const where = venue === "all" ? "" : ` on ${LABEL[venue]}`;
+  /** A line for every venue, or its "on {venue}" twin once one venue is picked. */
+  const on = (all: string, one: string) => (venue === "all" ? fmt(all, { name }) : fmt(one, { name, venue: VENUE[venue] }));
   const scanner = `/scanner?search=${encodeURIComponent(search)}${venue === "all" ? "" : `&source=${venue}`}`;
   const left = view.listed - view.priced;
 
   return (
     <>
       <div className="mt-10 flex flex-wrap items-center gap-3">
-        <span className="font-pixel text-[9px] text-ink-mute">VENUE</span>
-        <div className="seg flex-wrap" role="group" aria-label="Listing venue">
+        <span className="font-pixel text-[9px] text-ink-mute">{s.venue}</span>
+        <div className="seg flex-wrap" role="group" aria-label={s.venueGroup}>
           {ORDER.map((v) => (
             <button key={v} type="button" aria-pressed={venue === v} onClick={() => setVenue(v)}>
-              {LABEL[v]} <span className="tabular-nums opacity-70">{views[v].listed}</span>
+              {v === "all" ? s.allVenues : VENUE[v]} <span className="tabular-nums opacity-70">{views[v].listed}</span>
             </button>
           ))}
         </div>
@@ -119,66 +130,59 @@ export function HubMarket({ name, search, views }: { name: string; search: strin
 
       {view.priced === 0 ? (
         <p className="paper mt-6 p-6 text-ink-soft">
-          No graded {name} slabs{where} are listed in USDC right now.{" "}
+          {on(s.none, s.noneOn)}{" "}
           {view.listed > 0 && (
             <Link href={scanner} className="font-bold text-azure-deep hover:text-poke-deep">
-              See all {view.listed} in the scanner.
+              {plural(locale, view.listed, s.seeAll, { n: fmtNum(view.listed) })}
             </Link>
           )}
         </p>
       ) : (
         <>
           <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            <Stat label="GRADED SLABS" value={String(view.listed)} />
-            <Stat label="PRICED IN USDC" value={String(view.priced)} />
-            <Stat label="LOWEST ASK" value={fmtUsd(view.lowest)} />
-            <Stat label="MEDIAN ASK" value={fmtUsd(view.median)} />
-            <Stat label="LOWEST PSA 10" value={fmtUsd(view.lowestPsa10)} />
+            <Stat label={s.gradedSlabs} value={String(view.listed)} />
+            <Stat label={s.priced} value={String(view.priced)} />
+            <Stat label={t.market.lowestAsk} value={fmtUsd(view.lowest)} />
+            <Stat label={t.market.medianAsk} value={fmtUsd(view.median)} />
+            <Stat label={t.market.lowestPsa10} value={fmtUsd(view.lowestPsa10)} />
           </dl>
           {left > 0 && (
             <p className="mt-3 text-sm text-ink-mute">
-              {left} more {left === 1 ? "listing is" : "listings are"} priced in SOL or far above insured value, so these
-              prices leave {left === 1 ? "it" : "them"} out.{" "}
+              {plural(locale, left, s.left, { n: fmtNum(left) })}{" "}
               <Link href={scanner} className="font-bold text-azure-deep hover:text-poke-deep">
-                The scanner shows every listing.
+                {s.everyListing}
               </Link>
             </p>
           )}
 
           <section className="mt-14 flex flex-col gap-5" aria-labelledby="by-grade">
             <div>
-              <Kicker>Prices by grade</Kicker>
+              <Kicker>{t.market.byGrade}</Kicker>
               <h2 id="by-grade" className={h2}>
-                What each {name} grade is listed for{where}
+                {on(s.byGradeTitle, s.byGradeTitleOn)}
               </h2>
-              <p className="mt-3 max-w-3xl text-ink-soft">
-                Each grade groups every printing of {name}, so one grade can span very different cards. Open the
-                lowest-priced card to see exactly which one it is.
-              </p>
+              <p className="mt-3 max-w-3xl text-ink-soft">{fmt(s.byGradeNote, { name })}</p>
             </div>
             <GradeTable grades={view.grades} />
           </section>
 
           <section className="mt-14 flex flex-col gap-6" aria-labelledby="lowest">
             <div>
-              <Kicker>Cheapest first</Kicker>
+              <Kicker>{t.market.cheapest}</Kicker>
               <h2 id="lowest" className={h2}>
-                Lowest-priced graded {name} cards{where}
+                {on(s.cheapestTitle, s.cheapestTitleOn)}
               </h2>
             </div>
             <TileGrid cards={view.cheapest} />
-            <MoreLink href={scanner}>
-              Sort and filter every {name} listing{where} in the scanner
-            </MoreLink>
+            <MoreLink href={scanner}>{on(s.cheapestMore, s.cheapestMoreOn)}</MoreLink>
           </section>
 
           {view.highest.length > 0 && (
             <section className="mt-14 flex flex-col gap-6" aria-labelledby="top">
               <div>
-                <Kicker>Top of the market</Kicker>
+                <Kicker>{t.market.top}</Kicker>
                 <h2 id="top" className={h2}>
-                  Highest asking prices for {name}
-                  {where}
+                  {on(s.topTitle, s.topTitleOn)}
                 </h2>
               </div>
               <TileGrid cards={view.highest} />

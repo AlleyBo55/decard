@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
+import { useT } from "@/components/LocaleProvider";
+import { fmt } from "@/lib/i18n/format";
 import type { CardRow } from "@/lib/types";
 import { cardImage } from "@/lib/constants";
-import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName, venueName } from "@/lib/format";
+import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { listingUsd } from "@/lib/hooks";
+import { venueLabel } from "@/lib/venue";
 import { HoloCard } from "@/components/motion";
 import { GradePill, HPBar, TypeIcon } from "@/components/ui";
 import { TYPES, typeFor } from "@/lib/poke-types";
@@ -22,6 +25,7 @@ export function CardTile({
   solUsd: number | null;
   className?: string;
 }) {
+  const t = useT();
   const usd = listingUsd(c.listing?.price, c.listing?.currency, solUsd);
   const score = c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) : null;
   const type = typeFor(c.category);
@@ -78,12 +82,12 @@ export function CardTile({
           <span
             className="grid place-items-center h-4 w-4 shrink-0 rounded-full"
             style={{ background: TYPES[type].color, color: TYPES[type].fg }}
-            title={c.category}
+            title={t.common.categories[c.category] ?? c.category}
           >
             <TypeIcon type={type} className="h-2.5 w-2.5" />
           </span>
           <span className="font-extrabold text-[0.95rem] leading-tight truncate group-hover:text-poke-deep transition-colors">
-            {shortCardName(c.itemName)}
+            {c.itemName ? shortCardName(c.itemName) : t.ui.unknownCard}
           </span>
         </div>
         {/* Wraps instead of overflowing when a grid cell is narrower than the rail tile. */}
@@ -94,15 +98,15 @@ export function CardTile({
               {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : fmtSol(c.listing.price)}
             </span>
           ) : (
-            <span className="text-xs text-ink-mute">Unlisted</span>
+            <span className="text-xs text-ink-mute">{t.ui.cardTile.unlisted}</span>
           )}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-x-2 text-[11px] text-ink-mute">
-          <span>ins {insured ? fmtUsd(insured, { compact: true }) : "·"}</span>
-          {/* Where this listing lives: the same card can be listed on Collector Crypt or Magic Eden. */}
+          <span>{fmt(t.ui.cardTile.insured, { value: insured ? fmtUsd(insured, { compact: true }) : "·" })}</span>
+          {/* Where this listing lives: Magic Eden, or Collector Crypt's venue, whose listings Slabz also sells (lib/venue.ts). */}
           {c.listing && (
             <span>
-              {venueName(c.listing.marketplace)}
+              {venueLabel(c.listing.marketplace)}
               {c.listing.currency === "SOL" && usd != null && ` · ≈${fmtUsd(usd, { compact: true })}`}
             </span>
           )}

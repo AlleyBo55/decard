@@ -7,7 +7,9 @@ import { CATEGORY_HUBS } from "@/lib/category-hubs";
 import { SITE_URL } from "@/lib/constants";
 import { PRIMARY_CATEGORIES } from "@/lib/poke-types";
 import { POKEMON_HUBS } from "@/lib/pokemon-hubs";
+import { languageAlternates } from "@/lib/i18n";
 import { categoryPath } from "@/lib/seo";
+import { TOPICS, TOPICS_UPDATED } from "@/lib/topics";
 import type { Catalog } from "@/lib/types";
 
 // Rendered per request (connection() below), so a deploy never serves a
@@ -36,6 +38,10 @@ const STATIC_PAGES: { path: string; lastModified?: string; changeFrequency: Chan
   { path: "/sales", changeFrequency: "hourly", priority: 0.8 },
   { path: "/tokenized-trading-cards", lastModified: "2026-10-23", changeFrequency: "monthly", priority: 0.9 },
   { path: "/cards-token", changeFrequency: "hourly", priority: 0.9 },
+  { path: "/rip", changeFrequency: "daily", priority: 0.9 },
+  { path: "/gym", changeFrequency: "daily", priority: 0.8 },
+  { path: "/redeem", changeFrequency: "daily", priority: 0.8 },
+  { path: "/topics", lastModified: TOPICS_UPDATED, changeFrequency: "monthly", priority: 0.8 },
 ];
 
 /** Next writes sitemap URLs into the XML unescaped, so one stray "&" would break the whole file. */
@@ -64,6 +70,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: "daily",
     priority: 0.8,
+  }));
+
+  const topics: MetadataRoute.Sitemap = TOPICS.map((topic) => ({
+    url: `${SITE_URL}/topics/${topic.slug}`,
+    lastModified: TOPICS_UPDATED,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
   }));
 
   const guides: MetadataRoute.Sitemap = POKEMON_HUBS.map((hub) => ({
@@ -97,5 +110,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     images: c.image && xmlSafe(c.image) ? [c.image] : undefined,
   }));
 
-  return [...pages, ...hubs, ...guides, ...directoryPages, ...categories, ...cards];
+  // Card URLs stay English-only in the sitemap (one file, under the URL cap).
+  // Each card page still advertises its language versions in its own head.
+  const withLanguages = (items: MetadataRoute.Sitemap): MetadataRoute.Sitemap =>
+    items.map((item) => {
+      const path = item.url.startsWith(SITE_URL) ? item.url.slice(SITE_URL.length) || "/" : "/";
+      return { ...item, alternates: { languages: languageAlternates(path) } };
+    });
+
+  return [
+    ...withLanguages(pages),
+    ...withLanguages(hubs),
+    ...withLanguages(topics),
+    ...withLanguages(guides),
+    ...withLanguages(directoryPages),
+    ...withLanguages(categories),
+    ...cards,
+  ];
 }

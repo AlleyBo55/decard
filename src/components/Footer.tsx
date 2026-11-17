@@ -1,40 +1,11 @@
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
 import { Logo } from "@/components/Nav";
 import { CATEGORY_HUBS } from "@/lib/category-hubs";
+import { isHiddenPage } from "@/lib/hidden-pages";
+import { LOCALES, localePath, type Locale } from "@/lib/i18n";
+import { messagesFor } from "@/lib/i18n/messages";
+import { localFranchiseName } from "@/lib/i18n/copy";
 import { REPO_URL } from "@/lib/constants";
-
-const COLUMNS = [
-  {
-    title: "Explore",
-    links: [
-      { href: "/scanner", label: "Listing scanner" },
-      { href: "/cards", label: "Card directory" },
-      { href: "/scanner?orderBy=deal", label: "Best deals" },
-      { href: "/tape", label: "Live tape" },
-      { href: "/luck#live", label: "Live gacha" },
-      { href: "/luck", label: "Pull luck analyzer" },
-      { href: "/cards-token", label: "$CARDS token" },
-      { href: "/sales", label: "Recent sales" },
-      { href: "/pokemon", label: "Pokémon prices" },
-    ],
-  },
-  {
-    title: "Franchises",
-    links: [
-      ...CATEGORY_HUBS.slice(0, 9).map((hub) => ({ href: `/cards/${hub.slug}`, label: `${hub.name} cards` })),
-      { href: "/cards", label: "Every listed card" },
-    ],
-  },
-  {
-    title: "Learn",
-    links: [
-      { href: "/tokenized-trading-cards", label: "Tokenized cards explained" },
-      { href: "/guide", label: "Trainer's Guide" },
-      { href: "/guide#grading", label: "What is grading?" },
-      { href: "/guide#buying-and-selling", label: "Deal score" },
-    ],
-  },
-];
 
 /** GitHub's mark (Octicons, MIT), to link the repository. */
 function GitHubMark({ className }: { className?: string }) {
@@ -48,48 +19,83 @@ function GitHubMark({ className }: { className?: string }) {
   );
 }
 
-export function Footer() {
+export function Footer({ locale }: { locale: Locale }) {
+  const m = messagesFor(locale);
+  const columns = [
+    {
+      title: m.footer.explore,
+      links: [
+        { href: "/scanner", label: m.footer.links["/scanner"] },
+        { href: "/cards", label: m.footer.links["/cards"] },
+        { href: "/scanner?orderBy=deal", label: m.footer.links["/scanner?orderBy=deal"] },
+        { href: "/tape", label: m.footer.links["/tape"] },
+        { href: "/rip", label: m.footer.links["/rip"] },
+        { href: "/gym", label: m.footer.links["/gym"] },
+        { href: "/redeem", label: m.footer.links["/redeem"] },
+        { href: "/luck#live", label: m.footer.links["/luck#live"] },
+        { href: "/luck", label: m.footer.links["/luck"] },
+        { href: "/cards-token", label: m.footer.links["/cards-token"] },
+        { href: "/sales", label: m.footer.links["/sales"] },
+        { href: "/pokemon", label: m.footer.links["/pokemon"] },
+      ],
+    },
+    {
+      title: m.footer.franchises,
+      links: [
+        ...CATEGORY_HUBS.slice(0, 9).map((hub) => ({ href: `/cards/${hub.slug}`, label: localFranchiseName(locale, hub.slug, hub.name) })),
+        { href: "/cards", label: m.footer.links["/cards#all"] },
+      ],
+    },
+    {
+      title: m.footer.learn,
+      links: [
+        { href: "/tokenized-trading-cards", label: m.footer.links["/tokenized-trading-cards"] },
+        { href: "/topics", label: m.footer.links["/topics"] },
+        { href: "/guide", label: m.footer.links["/guide"] },
+        { href: "/guide#grading", label: m.footer.links["/guide#grading"] },
+        { href: "/guide#buying-and-selling", label: m.footer.links["/guide#buying-and-selling"] },
+      ],
+    },
+  ];
   return (
     <footer className="mt-10 border-t-2 border-dashed border-sand bg-cream-lo/60">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 py-12 grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div className="flex flex-col gap-4 max-w-sm">
           <Logo />
-          <p className="text-ink-soft">
-            Gotta scan &apos;em all. A free, open-source Pokédex for tokenized graded cards, read straight from
-            Collector Crypt and the Solana chain.
-          </p>
+          <p className="text-ink-soft">{m.footer.blurb}</p>
           {/* The repo, as a key-style card: the one outbound link we want every visitor to see. */}
           <a
             href={REPO_URL}
             target="_blank"
             rel="noopener"
-            className="group flex items-center gap-3 rounded-xl border-2 border-ink bg-cream-hi px-4 py-3 shadow-[0_4px_0_var(--color-ink)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_var(--color-ink)]"
+            className="repo-card group flex items-center gap-3 rounded-xl border-2 border-ink bg-cream-hi px-4 py-3 shadow-[0_4px_0_var(--color-ink)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_var(--color-ink)]"
           >
             <GitHubMark className="h-8 w-8 shrink-0 text-ink transition-transform group-hover:rotate-[-8deg]" />
             <span className="flex min-w-0 flex-col gap-1">
-              <span className="font-pixel text-[9px] leading-none text-poke-deep">OPEN SOURCE · MIT</span>
+              <span className="font-pixel text-[9px] leading-none text-poke-deep">{m.footer.openSource}</span>
               <span className="truncate font-extrabold text-ink group-hover:text-poke-deep">
                 {REPO_URL.replace(/^https:\/\//, "")}
               </span>
-              <span className="text-sm text-ink-soft">Star it, fork it, ship a PR ★</span>
+              <span className="text-sm text-ink-soft">{m.footer.repoCta}</span>
             </span>
           </a>
           <div className="flex items-center gap-2 font-pixel text-[8px] text-ink-mute">
             <span className="h-[3px] w-10 rounded bg-berry" />
             <span className="h-[3px] w-10 rounded bg-azure" />
-            BUILT IN PUBLIC
+            {m.footer.builtInPublic}
           </div>
         </div>
-        {COLUMNS.map((col) => (
+        {columns.map((col) => (
           <div key={col.title} className="flex flex-col gap-3">
             <span className="kicker">{col.title}</span>
-            <ul className="flex flex-col gap-2 pl-0.5">
-              {col.links.map((l) => (
+            {/* Phones: two columns of 44px rows, so every link is a full-size tap target. */}
+            <ul className="grid grid-cols-2 gap-x-4 sm:flex sm:flex-col sm:gap-2 pl-0.5">
+              {col.links.filter((l) => !isHiddenPage(l.href)).map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
                     prefetch={false}
-                    className="font-bold text-ink-soft hover:text-poke-deep transition-colors"
+                    className="flex min-h-11 items-center sm:inline sm:min-h-0 font-bold text-ink-soft hover:text-poke-deep transition-colors"
                   >
                     {l.label}
                   </Link>
@@ -99,14 +105,33 @@ export function Footer() {
           </div>
         ))}
       </div>
+      <nav aria-label={m.language} className="border-t border-sand">
+        <ul className="foot-langs mx-auto max-w-[1360px] px-4 py-4 sm:px-6">
+          {LOCALES.map((item) => (
+            <li key={item.code}>
+              <a
+                href={item.code === "en" ? "/?lang=en" : localePath(item.code, "/")}
+                hrefLang={item.hreflang}
+                lang={item.html}
+                aria-current={item.code === locale ? "true" : undefined}
+                className="foot-lang"
+              >
+                <span className="foot-lang-code" aria-hidden>
+                  {item.short}
+                </span>
+                {item.native}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
       <div className="border-t border-sand">
         <p className="mx-auto max-w-[1360px] px-4 sm:px-6 py-5 text-xs text-ink-mute leading-relaxed">
-          Fan-made and not affiliated with Nintendo, Creatures, GAME FREAK, The Pokémon Company or Collector Crypt.
-          Data: Collector Crypt public API and Solana RPC. Not financial advice. Source:{" "}
+          {m.footer.disclaimer}{" "}
           <a href={REPO_URL} target="_blank" rel="noopener" className="font-bold text-azure-deep hover:text-poke-deep">
             {REPO_URL.replace(/^https:\/\//, "")}
           </a>
-          . Psst: try ↑ ↑ ↓ ↓ ← → ← → B A.
+          . {m.footer.konami}
         </p>
       </div>
     </footer>

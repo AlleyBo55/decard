@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useT } from "@/components/LocaleProvider";
 import { cardImage } from "@/lib/constants";
+import { fmt } from "@/lib/i18n/format";
 
 /**
  * The slab on a display stand: pointer tilt, holo glare, tap to flip.
@@ -19,6 +21,7 @@ export function CardFlip({
   images?: Record<string, string> | null;
 }) {
   const src = { images };
+  const s = useT().card.slab;
   const [flipped, setFlipped] = useState(false);
   const tiltRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
@@ -58,7 +61,7 @@ export function CardFlip({
           <button
             type="button"
             onClick={() => setFlipped((f) => !f)}
-            aria-label={flipped ? "Show front of slab" : "Show back of slab"}
+            aria-label={flipped ? s.showFront : s.showBack}
             className="relative block h-full w-full transition-transform duration-700"
             style={{
               transformStyle: "preserve-3d",
@@ -80,7 +83,7 @@ export function CardFlip({
             <span className={face} style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
               <img
                 src={cardImage(mint, "back", 768, src)}
-                alt={`${name}, back of slab`}
+                alt={fmt(s.backAlt, { name })}
                 loading="lazy"
                 className={img}
                 draggable={false}
@@ -97,7 +100,7 @@ export function CardFlip({
         />
       </div>
       <button type="button" onClick={() => setFlipped((f) => !f)} className="btn btn-cream !py-2 text-sm">
-        ↻ Flip slab
+        {s.flip}
       </button>
     </div>
   );

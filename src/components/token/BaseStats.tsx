@@ -3,6 +3,8 @@
 // being decoration. Plus the 30-day price line.
 import { StatBar } from "@/components/ui";
 import type { CardsMarket } from "@/lib/cards-token";
+import { fmt, plural } from "@/lib/i18n/format";
+import { getLocale, getStrings } from "@/lib/i18n/strings";
 import { fmtChange, fmtCount, fmtDay, fmtPrice, fmtShare, fmtShort, fmtUsdShort, NONE } from "./format";
 import "./token.css";
 
@@ -17,64 +19,69 @@ interface Row {
 
 const share = (a: number | null, b: number | null) => (a != null && b ? fmtShare(a / b) : NONE);
 
-export function BaseStats({ market, maxSupply, ath }: { market: CardsMarket | null; maxSupply: number; ath: number | null }) {
+export async function BaseStats({ market, maxSupply, ath }: { market: CardsMarket | null; maxSupply: number; ath: number | null }) {
+  const [t, locale] = await Promise.all([getStrings(), getLocale()]);
+  const s = t.tokenPage.stats.rows;
   const m = market;
   const athFdv = ath ? ath * maxSupply : null;
   const rows: Row[] = [
     {
-      label: "Mkt cap",
+      label: s.marketCap.label,
       display: fmtUsdShort(m?.marketCap),
       value: m?.marketCap ?? null,
       max: m?.fdv ?? null,
-      note: `${share(m?.marketCap ?? null, m?.fdv ?? null)} of FDV`,
+      note: fmt(s.marketCap.note, { share: share(m?.marketCap ?? null, m?.fdv ?? null) }),
       color: "var(--color-azure)",
     },
     {
-      label: "FDV",
+      label: s.fdv.label,
       display: fmtUsdShort(m?.fdv),
       value: m?.fdv ?? null,
       max: athFdv,
-      note: `${share(m?.fdv ?? null, athFdv)} of FDV at the all-time high`,
+      note: fmt(s.fdv.note, { share: share(m?.fdv ?? null, athFdv) }),
       color: "var(--color-berry)",
     },
     {
-      label: "Circ",
+      label: s.circ.label,
       display: share(m?.circSupply ?? null, maxSupply),
       value: m?.circSupply ?? null,
       max: maxSupply,
-      note: `${fmtShort(m?.circSupply)} of ${fmtShort(maxSupply)} max supply`,
+      note: fmt(s.circ.note, { circ: fmtShort(m?.circSupply), max: fmtShort(maxSupply) }),
       color: "var(--color-up-fill)",
     },
     {
-      label: "Holders",
+      label: s.holders.label,
       display: fmtShort(m?.holders),
       value: m?.holders ?? null,
       max: 100_000,
-      note: `${fmtCount(m?.holders)} wallets, ${fmtChange(m?.holderChange24h)} in 24h · bar to 100K`,
+      note: plural(locale, m?.holders ?? 0, s.holders.note, { n: fmtCount(m?.holders), change: fmtChange(m?.holderChange24h) }),
       color: "var(--color-pika-deep)",
     },
     {
-      label: "Liquidity",
+      label: s.liquidity.label,
       display: fmtUsdShort(m?.liquidity),
       value: m?.liquidity ?? null,
       max: m?.marketCap ?? null,
-      note: `${share(m?.liquidity ?? null, m?.marketCap ?? null)} of market cap, in DEX pools`,
+      note: fmt(s.liquidity.note, { share: share(m?.liquidity ?? null, m?.marketCap ?? null) }),
       color: "var(--color-azure-deep)",
     },
     {
-      label: "24h vol",
+      label: s.volume.label,
       display: fmtUsdShort(m?.volume24h),
       value: m?.volume24h ?? null,
       max: m?.marketCap ?? null,
-      note: `${share(m?.volume24h ?? null, m?.marketCap ?? null)} of market cap traded, ${share(m?.buyVolume24h ?? null, m?.volume24h ?? null)} buys`,
+      note: fmt(s.volume.note, {
+        share: share(m?.volume24h ?? null, m?.marketCap ?? null),
+        buys: share(m?.buyVolume24h ?? null, m?.volume24h ?? null),
+      }),
       color: "var(--color-poke)",
     },
     {
-      label: "Traders",
+      label: s.traders.label,
       display: fmtShort(m?.traders24h),
       value: m?.traders24h ?? null,
       max: m?.holders ?? null,
-      note: `${share(m?.traders24h ?? null, m?.holders ?? null)} of holders traded in 24h`,
+      note: fmt(s.traders.note, { share: share(m?.traders24h ?? null, m?.holders ?? null) }),
       color: "var(--color-gb-1)",
     },
   ];
@@ -98,7 +105,7 @@ export function BaseStats({ market, maxSupply, ath }: { market: CardsMarket | nu
 }
 
 /** 30 days of daily prices as a line, with the low, high and all-time high. */
-export function PriceLine({
+export async function PriceLine({
   history,
   ath,
   athDate,
@@ -107,8 +114,10 @@ export function PriceLine({
   ath: number | null;
   athDate: string | null;
 }) {
+  const [t, locale] = await Promise.all([getStrings(), getLocale()]);
+  const c = t.tokenPage.priceLine;
   if (!history || history.length < 2) {
-    return <p className="tk-line-empty">The 30-day price history is unavailable right now.</p>;
+    return <p className="tk-line-empty">{c.empty}</p>;
   }
   const prices = history.map((p) => p.usd);
   const lo = Math.min(...prices);
@@ -119,14 +128,20 @@ export function PriceLine({
   const last = prices[prices.length - 1];
   const change = first ? last / first - 1 : null;
   const athMs = athDate ? Date.parse(athDate) : NaN;
-  const label = `CARDS price over 30 days, ${fmtDay(history[0].t)} to ${fmtDay(history[history.length - 1].t)}: from ${fmtPrice(
-    first,
-  )} to ${fmtPrice(last)} (${fmtChange(change, 1)}), low ${fmtPrice(lo)}, high ${fmtPrice(hi)}.`;
+  const label = fmt(c.label, {
+    from: fmtDay(history[0].t, locale),
+    to: fmtDay(history[history.length - 1].t, locale),
+    first: fmtPrice(first),
+    last: fmtPrice(last),
+    change: fmtChange(change, 1),
+    low: fmtPrice(lo),
+    high: fmtPrice(hi),
+  });
 
   return (
     <div className="tk-line" data-tk-anim>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="font-pixel text-[9px] text-ink-mute">PRICE · 30 DAYS</p>
+        <p className="font-pixel text-[9px] text-ink-mute">{c.title}</p>
         <p className="font-extrabold tabular-nums" data-tone={change == null ? "flat" : change >= 0 ? "up" : "down"}>
           <span className="tk-tone">{fmtChange(change, 1)}</span>
         </p>
@@ -145,22 +160,22 @@ export function PriceLine({
       </svg>
       <dl className="tk-line-facts">
         <div>
-          <dt>30d low</dt>
+          <dt>{c.low}</dt>
           <dd>{fmtPrice(lo)}</dd>
         </div>
         <div>
-          <dt>30d high</dt>
+          <dt>{c.high}</dt>
           <dd>{fmtPrice(hi)}</dd>
         </div>
         <div>
-          <dt>All-time high</dt>
+          <dt>{c.ath}</dt>
           <dd>
             {fmtPrice(ath)}
-            {Number.isFinite(athMs) && <span className="tk-line-date"> {fmtDay(athMs)}</span>}
+            {Number.isFinite(athMs) && <span className="tk-line-date"> {fmtDay(athMs, locale)}</span>}
           </dd>
         </div>
         <div>
-          <dt>From ATH</dt>
+          <dt>{c.fromAth}</dt>
           <dd>{ath ? fmtChange(last / ath - 1, 1) : NONE}</dd>
         </div>
       </dl>

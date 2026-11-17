@@ -2,7 +2,7 @@
 # .github/workflows/deploy.yml (deploy/compose.yaml is how it runs there).
 #
 # NEXT_PUBLIC_* values are inlined into the bundle at build time, so they are build args.
-# Server-only keys (HELIUS_API_KEY, CC_API_KEY) never enter the image: the container reads them
+# Server-only keys (HELIUS_API_KEY, CC_API_KEY, DECARDBE_SECRET) never enter the image: the container reads them
 # from the env file the workflow writes on the instance. The build works without them.
 FROM node:22-alpine AS base
 

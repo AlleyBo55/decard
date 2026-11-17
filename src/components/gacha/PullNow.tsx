@@ -2,15 +2,18 @@
 
 import { animate, motion, useInView } from "motion/react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { useGachaMachines } from "@/hooks/pages/Gacha/useGachaFeeds";
 import { useGachaOdds } from "@/hooks/pages/Gacha/useGachaOdds";
 import { Skeleton } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
 import { cardImage } from "@/lib/constants";
 import { fmtUsd, shortCardName } from "@/lib/format";
+import { fmt } from "@/lib/i18n/format";
 import { useReducedMotion } from "@/lib/hooks";
 import type { ChaseCard, GachaMachine } from "@/lib/types";
 import { CountTo, DexPanel, hpColor, LIFT, MotionLink, PackArt, SpringBar, TAP, usePulse } from "./parts";
+import { rich } from "./rich";
 import {
   cashBackRange,
   centsPerDollar,
@@ -20,7 +23,6 @@ import {
   oneInPulls,
   pct,
   poolAgeText,
-  TIER_LABEL,
   TIERS,
 } from "./shared";
 
@@ -44,6 +46,7 @@ export function CashGauge({ value, className }: { value: number; className?: str
   const inView = useInView(svg, { once: true, margin: "-20px" });
   const from = useRef(-90);
   const gradient = useId();
+  const t = useT();
 
   useEffect(() => {
     const el = needle.current;
@@ -66,7 +69,7 @@ export function CashGauge({ value, className }: { value: number; className?: str
       viewBox="0 -18 200 140"
       className={clsx("block w-full", className)}
       role="img"
-      aria-label={`${centsPerDollar(value)} back per $1 on average. Break-even is $1.00.`}
+      aria-label={fmt(t.luck.odds.pullNow.gauge, { cents: centsPerDollar(value) })}
     >
       <defs>
         <linearGradient id={gradient} x1="0" x2="1" y1="0" y2="0">
@@ -116,7 +119,9 @@ export function ChanceBar({
   reason?: string;
   compact?: boolean;
 }) {
-  const hint = value != null ? oneInPulls(value) : null;
+  const { locale } = useLocale();
+  const o = useT().luck.odds;
+  const hint = value != null ? oneInPulls(value, locale, o.oneInPulls) : null;
   return (
     <li>
       <div className="flex items-baseline justify-between gap-3">
@@ -125,14 +130,14 @@ export function ChanceBar({
           {value === undefined ? (
             <Skeleton className="h-5 w-14" />
           ) : value === null ? (
-            <span className="text-ink-mute">n/a</span>
+            <span className="text-ink-mute">{o.na}</span>
           ) : (
             <CountTo value={value} kind="pct" />
           )}
         </span>
       </div>
       <div className="hp mt-1.5">
-        <span className="hp-label">HP</span>
+        <span className="hp-label">{o.hp}</span>
         {value === undefined ? (
           <Skeleton className="h-3 flex-1 rounded-full" />
         ) : (
@@ -147,14 +152,17 @@ export function ChanceBar({
 
 function TierOdds({ m }: { m: GachaMachine }) {
   const reduced = useReducedMotion();
+  const s = useT();
+  const copy = s.luck.odds.pullNow;
+  const names = s.ui.gachaTiers;
   const tiers = TIERS.filter((t) => m.odds[t] > 0);
   return (
     <div className="min-w-0">
-      <h5 className="font-pixel text-[9px] uppercase text-ink-mute">Tier odds</h5>
+      <h5 className="font-pixel text-[9px] uppercase text-ink-mute">{copy.tierOdds}</h5>
       <div
         className="gx-stack mt-3"
         role="img"
-        aria-label={`Tier odds: ${tiers.map((t) => `${TIER_LABEL[t]} ${pct(m.odds[t])}`).join(", ")}`}
+        aria-label={fmt(copy.tierOddsLabel, { list: tiers.map((t) => `${names[t]} ${pct(m.odds[t])}`).join(", ") })}
       >
         {tiers.map((t) => (
           <motion.span
@@ -172,7 +180,7 @@ function TierOdds({ m }: { m: GachaMachine }) {
         {tiers.map((t) => (
           <li key={t} className="flex items-center gap-2 text-sm">
             <span className="gx-swatch gx-fill" data-tier={t} aria-hidden />
-            <span className="font-extrabold">{TIER_LABEL[t]}</span>
+            <span className="font-extrabold">{names[t]}</span>
             <span className="ml-auto font-extrabold tabular-nums">{pct(m.odds[t])}</span>
             <span className="w-[7.5rem] shrink-0 text-right tabular-nums text-ink-mute">
               {fmtUsd(m.bands[t].start)}–{fmtUsd(m.bands[t].end)}
@@ -185,6 +193,7 @@ function TierOdds({ m }: { m: GachaMachine }) {
 }
 
 function ChaseList({ chase }: { chase: ChaseCard[] }) {
+  const words = useT().luck.odds.oneIn;
   return (
     <ul className="mt-3 grid grid-cols-3 gap-2.5 sm:grid-cols-6 md:grid-cols-3 xl:grid-cols-6">
       {chase.map((c) => (
@@ -207,7 +216,7 @@ function ChaseList({ chase }: { chase: ChaseCard[] }) {
             />
             <span className="mt-2 w-full truncate text-xs font-extrabold group-hover:text-poke-deep">{shortCardName(c.name)}</span>
             <span className="gx-num text-lg leading-tight">{fmtUsd(c.value)}</span>
-            <span className="mt-0.5 font-pixel text-[7px] leading-snug text-ink-mute">{oneIn(c.chance)}</span>
+            <span className="mt-0.5 font-pixel text-[7px] leading-snug text-ink-mute">{oneIn(c.chance, words)}</span>
           </MotionLink>
         </li>
       ))}
@@ -235,6 +244,11 @@ function DetailSkeleton() {
 /** Section C: pick a machine, see what one pull can return right now. */
 export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; className?: string }) {
   const { data, isLoading, isError } = useGachaMachines();
+  const t = useT();
+  const { locale } = useLocale();
+  const o = t.luck.odds;
+  const copy = o.pullNow;
+  const label = (c: string) => t.common.categories[c] ?? c;
   const machines = data?.machines;
   const categories = useMemo(() => [...new Set((machines ?? []).map((m) => m.category))], [machines]);
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
@@ -308,40 +322,38 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
   const notes = live?.notes ?? [];
   const chaseNotes = notes.filter((n) => /chase/i.test(n));
   const fieldNotes = notes.filter((n) => !/chase/i.test(n));
-  const naReason = failed
-    ? "This needs the live card pool, which didn't load."
-    : fieldNotes.join(" ") || "Collector Crypt hasn't published the pool data this needs.";
+  const naReason = failed ? copy.naFailed : fieldNotes.join(" ") || copy.naMissing;
   const bars: { label: string; value: number | null | undefined }[] = m
     ? [
         {
-          label: "Card worth ≥ what you pay",
+          label: o.cardBeats,
           value: live ? live.cardBeatsPrice : (m.cardBeatsPriceEdge ?? (failed ? null : undefined)),
         },
-        { label: "Sell-back returns ≥ what you pay", value: live ? live.sellBackBeatsPrice : failed ? null : undefined },
-        { label: "Card worth 2× or more", value: live ? live.doubleUp : failed ? null : undefined },
+        { label: o.sellBack, value: live ? live.sellBackBeatsPrice : failed ? null : undefined },
+        { label: o.double, value: live ? live.doubleUp : failed ? null : undefined },
       ]
     : [];
+  const poolAge = live?.poolAgeMinutes != null ? poolAgeText(live.poolAgeMinutes, locale, o.poolAge) : null;
+  const footLead = poolAge != null ? fmt(copy.footPool, { age: poolAge }) : live ? copy.footPublished : null;
 
   return (
     <DexPanel
       id="odds"
-      title="If you pull now"
+      title={copy.title}
       titleId={titleId}
       pulse={pulse}
       className={clsx("scroll-mt-6", className)}
       status={
         <span className="font-pixel text-[8px] leading-none text-white/90">
-          {live?.poolAgeMinutes != null ? `POOL ${poolAgeText(live.poolAgeMinutes).toUpperCase()}` : "TIER ODDS"}
+          {poolAge != null ? fmt(copy.pool, { age: poolAge.toUpperCase() }) : copy.tierOddsStatus}
         </span>
       }
-      foot={<span>ODDS REFRESH EVERY 5 MIN</span>}
+      foot={<span>{copy.refresh}</span>}
     >
       <div className="flex flex-col gap-5 p-3 sm:p-5">
         {isLoading || (isError && !data) ? (
           isError ? (
-            <p className="py-10 text-center text-sm text-ink-mute">
-              The machine list didn&apos;t load. It tries again every minute.
-            </p>
+            <p className="py-10 text-center text-sm text-ink-mute">{copy.error}</p>
           ) : (
             <>
               <div className="flex gap-3 overflow-hidden" aria-hidden>
@@ -353,11 +365,11 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
             </>
           )
         ) : !machine || !m ? (
-          <p className="py-10 text-center text-sm text-ink-mute">No machines are open right now.</p>
+          <p className="py-10 text-center text-sm text-ink-mute">{copy.empty}</p>
         ) : (
           <>
             {categories.length > 1 && (
-              <div className="seg no-scrollbar max-w-full self-start overflow-x-auto" role="group" aria-label="Machine category">
+              <div className="seg no-scrollbar max-w-full self-start overflow-x-auto" role="group" aria-label={copy.categories}>
                 {categories.map((c) => (
                   <motion.button
                     key={c}
@@ -367,7 +379,7 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
                     onClick={() => pickCategory(c)}
                     className="min-h-11 shrink-0 whitespace-nowrap"
                   >
-                    {categoryLabel(c)}{" "}
+                    {label(c)}{" "}
                     <span className="tabular-nums opacity-60">{(machines ?? []).filter((x) => x.category === c).length}</span>
                   </motion.button>
                 ))}
@@ -378,7 +390,7 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
               <div
                 ref={railRef}
                 role="tablist"
-                aria-label={`${categoryLabel(active)} machines`}
+                aria-label={fmt(copy.machines, { category: label(active) })}
                 aria-orientation="horizontal"
                 onKeyDown={onRailKey}
                 className="no-scrollbar flex snap-x snap-mandatory scroll-px-3 gap-3 overflow-x-auto px-3 pb-3 pt-2 sm:scroll-px-5 sm:px-5"
@@ -402,7 +414,7 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
                       <PackArt machine={x} />
                       <span className="mt-2 line-clamp-2 min-h-[2.5em] text-[13px] font-extrabold leading-tight">{x.name}</span>
                       <span className="mt-1.5 inline-flex rounded-md bg-ink px-1.5 py-1 font-pixel text-[7px] leading-none text-pika">
-                        {centsPerDollar(x.cashOutPerDollar)} per $1
+                        {fmt(o.perDollar, { cents: centsPerDollar(x.cashOutPerDollar) })}
                       </span>
                     </motion.button>
                   );
@@ -410,14 +422,14 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
               </div>
               {(
                 [
-                  [-1, "left-1", "‹", "Scroll machines left"],
-                  [1, "right-1", "›", "Scroll machines right"],
+                  [-1, "left-1", "‹", copy.scrollLeft],
+                  [1, "right-1", "›", copy.scrollRight],
                 ] as const
-              ).map(([dir, pos, glyph, label]) => (
+              ).map(([dir, pos, glyph, name]) => (
                 <button
                   key={dir}
                   type="button"
-                  aria-label={label}
+                  aria-label={name}
                   onClick={() => scrollRail(dir)}
                   className={clsx(
                     "btn-cream absolute top-[42%] z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-xl font-black md:grid",
@@ -440,12 +452,12 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
             >
               <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
                 <div className="min-w-0">
-                  <p className="font-pixel text-[9px] uppercase text-ink-mute">One pull of</p>
+                  <p className="font-pixel text-[9px] uppercase text-ink-mute">{copy.onePullOf}</p>
                   <h4 className="mt-2 text-[clamp(1.4rem,3vw,2rem)] font-black leading-tight tracking-tight">{m.name}</h4>
                 </div>
                 <p className="text-sm text-ink-soft">
-                  <span className="gx-num text-2xl text-ink">{fmtUsd(m.price)}</span> a pull ·{" "}
-                  {categoryLabel(m.category)}
+                  {rich(o.perPull, { price: <span className="gx-num text-2xl text-ink">{fmtUsd(m.price)}</span> })} ·{" "}
+                  {label(m.category)}
                 </p>
               </div>
 
@@ -454,11 +466,7 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
                   role="status"
                   className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-warn/30 bg-warn-fill/15 px-4 py-2.5 text-sm text-warn"
                 >
-                  <span className="min-w-0 flex-1">
-                    {unknownPack
-                      ? "That pack isn't open right now, so these are its last published numbers."
-                      : "Live pool odds didn't load, so these are the machine's published numbers."}
-                  </span>
+                  <span className="min-w-0 flex-1">{unknownPack ? copy.unknownPack : copy.failed}</span>
                   {!unknownPack && (
                     <motion.button
                       type="button"
@@ -466,7 +474,7 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
                       onClick={() => odds.refetch()}
                       className="btn btn-cream min-h-11 shrink-0 text-sm"
                     >
-                      Try again
+                      {t.luck.retry}
                     </motion.button>
                   )}
                 </div>
@@ -474,7 +482,7 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
 
               <div className="grid gap-x-10 gap-y-8 md:grid-cols-2 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)_minmax(0,1fr)]">
                 <div className="min-w-0">
-                  <h5 className="font-pixel text-[9px] uppercase text-ink-mute">Your chances on one pull</h5>
+                  <h5 className="font-pixel text-[9px] uppercase text-ink-mute">{copy.chances}</h5>
                   <ul className="mt-3 flex flex-col gap-4">
                     {bars.map((b) => (
                       <ChanceBar key={b.label} label={b.label} value={b.value} reason={naReason} />
@@ -484,21 +492,20 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
 
                 <div className="flex min-w-0 flex-col items-center gap-4 text-center">
                   <div className="w-full">
-                    <h5 className="font-pixel text-[9px] uppercase text-ink-mute">If you sell it back</h5>
+                    <h5 className="font-pixel text-[9px] uppercase text-ink-mute">{copy.sellBack}</h5>
                     <CashGauge value={m.cashOutPerDollar} className="mx-auto mt-2 max-w-[230px]" />
                     <p className="gx-num -mt-1 text-[2.1rem] leading-none">
                       <CountTo value={m.cashOutPerDollar} kind="cents" />
                     </p>
-                    <p className="mt-1.5 text-sm text-ink-soft">average cash back per $1 you spend</p>
+                    <p className="mt-1.5 text-sm text-ink-soft">{copy.cashBack}</p>
                   </div>
                   <div className="w-full rounded-xl border-2 border-ink bg-pika/20 px-4 py-3 text-left shadow-[3px_3px_0_var(--color-ink)]">
-                    <p className="font-pixel text-[8px] uppercase text-ink-mute">Card EV per $1</p>
+                    <p className="font-pixel text-[8px] uppercase text-ink-mute">{copy.ev}</p>
                     <p className="gx-num mt-1 text-2xl leading-none">
                       <CountTo value={m.evPerDollar} kind="dollars" />
                     </p>
                     <p className="mt-1.5 text-xs leading-5 text-ink-soft">
-                      Average insured value of the card per $1. Insured value isn&apos;t cash: selling back pays{" "}
-                      {Math.round(m.buybackRate * 100)}% of it.
+                      {fmt(copy.evNote, { pct: `${Math.round(m.buybackRate * 100)}%` })}
                     </p>
                   </div>
                 </div>
@@ -506,17 +513,15 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
                 <TierOdds m={m} />
 
                 <div className="min-w-0 md:col-span-1 xl:col-span-3">
-                  <h5 className="font-pixel text-[9px] uppercase text-ink-mute">Chase cards right now</h5>
+                  <h5 className="font-pixel text-[9px] uppercase text-ink-mute">{copy.chase}</h5>
                   {live ? (
                     live.chase.length ? (
                       <ChaseList chase={live.chase} />
                     ) : (
-                      <p className="mt-3 text-sm text-ink-mute">
-                        {chaseNotes.join(" ") || "No chase cards are published for this pack."}
-                      </p>
+                      <p className="mt-3 text-sm text-ink-mute">{chaseNotes.join(" ") || copy.noChase}</p>
                     )
                   ) : failed ? (
-                    <p className="mt-3 text-sm text-ink-mute">Chase cards need the live pool, which didn&apos;t load.</p>
+                    <p className="mt-3 text-sm text-ink-mute">{copy.chaseFailed}</p>
                   ) : (
                     <div className="mt-3 grid grid-cols-3 gap-2.5 sm:grid-cols-6 md:grid-cols-3 xl:grid-cols-6" aria-hidden>
                       {Array.from({ length: 6 }).map((_, i) => (
@@ -528,13 +533,8 @@ export function PullNow({ idPrefix = "odds", className }: { idPrefix?: string; c
               </div>
 
               <p className="border-t-[1.5px] border-dashed border-sand pt-4 text-xs leading-5 text-ink-mute">
-                {live?.poolAgeMinutes != null
-                  ? `Pool read ${poolAgeText(live.poolAgeMinutes)} ago. `
-                  : live
-                    ? "Straight from the published tier odds. "
-                    : ""}
-                Tier odds don&apos;t change between pulls; selling back returns about {range} per $1 on average. Each
-                pull is independent.
+                {footLead && `${footLead} `}
+                {fmt(copy.footNote, { range })}
               </p>
             </div>
           </>

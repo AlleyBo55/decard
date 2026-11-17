@@ -116,10 +116,11 @@ body {
     text-transform: uppercase;
     color: var(--color-poke-deep);
   }
+  /* Nudges twice when it appears, then rests: a page holds a dozen kickers. */
   .kicker::before {
     content: "▶";
     font-size: 9px;
-    animation: nudge 1.6s var(--ease-out) infinite;
+    animation: nudge 1.6s var(--ease-out) 2;
   }
 
   .h-display {
@@ -213,6 +214,17 @@ body {
   }
   .btn-cream:active {
     box-shadow: 0 1px 0 var(--color-ink);
+  }
+  .btn-blue {
+    background: var(--color-azure-deep);
+    color: #fff;
+    box-shadow: 0 4px 0 #123a63;
+  }
+  .btn-blue:hover {
+    background: #22619f;
+  }
+  .btn-blue:active {
+    box-shadow: 0 1px 0 #123a63;
   }
 
   /* Segmented control styled like START / SELECT pills. */
@@ -520,12 +532,21 @@ body {
   }
 
   .live-dot {
+    position: relative;
+    flex: none;
     width: 8px;
     height: 8px;
     border-radius: 999px;
     background: var(--color-up-fill);
-    box-shadow: 0 0 0 0 rgb(61 190 110 / 0.6);
-    animation: ping 1.8s var(--ease-out) infinite;
+  }
+  /* The ping is a ring that grows and fades: transform and opacity only, so it never repaints. */
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--color-up-fill);
+    animation: live-ping 1.8s var(--ease-out) infinite;
   }
 
   .thin-scroll {
@@ -617,6 +638,17 @@ body {
     box-shadow: 0 0 0 0 rgb(61 190 110 / 0);
   }
 }
+@keyframes live-ping {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(2.75);
+  }
+}
 @keyframes float {
   0%,
   100% {
@@ -651,6 +683,17 @@ body {
 }
 .animate-pop {
   animation: pop-in 0.45s var(--ease-pop) both;
+}
+/* Route transition (components/PageTransition.tsx). No fill: once it ends the wrapper keeps no
+   transform, so position: fixed inside a page stays fixed to the viewport. */
+.page-enter {
+  animation: page-enter 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
 @media (hover: none) {
@@ -751,4 +794,979 @@ body {
   text-shadow: 0 0 0 var(--color-ink), 1px 1px 0 var(--color-ink);
   animation: star 0.9s var(--ease-out) forwards;
   pointer-events: none;
+}
+
+/* --------------------------------------------------------------- site nav */
+/* Header, dropdown panels, mobile tab bar and More sheet (components/Nav.tsx). Light on cream
+   pages; .is-dark in the Rip world (/rip, /gym, /redeem, nav/links.ts isDarkPath). */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgb(244 239 228 / 0.86);
+  border-bottom: 1px solid rgb(221 211 190 / 0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+}
+.site-header.is-dark {
+  color: #fff;
+  background: rgb(9 8 18 / 0.86);
+  border-bottom-color: rgb(255 255 255 / 0.08);
+}
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  color: var(--color-ink-mute);
+  transition: color 0.15s;
+}
+.nav-link:hover,
+.nav-link[aria-expanded="true"],
+.nav-link[aria-current="page"],
+.nav-link[data-current] {
+  color: var(--color-ink);
+}
+.nav-link[data-current]::before,
+.nav-link[aria-expanded="true"]::before {
+  opacity: 1;
+  translate: 0 -50%;
+}
+.is-dark .nav-link {
+  color: rgb(236 232 255 / 0.62);
+}
+.is-dark .nav-link:hover,
+.is-dark .nav-link[aria-expanded="true"],
+.is-dark .nav-link[aria-current="page"],
+.is-dark .nav-link[data-current] {
+  color: #fff;
+}
+.is-dark .nav-link::before {
+  color: var(--color-pika);
+}
+.nav-caret {
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+  transition: rotate 0.2s var(--ease-out);
+}
+.nav-link[aria-expanded="true"] .nav-caret {
+  rotate: 180deg;
+}
+/* "Something new in here": a superscript dot on the Play trigger. */
+.nav-dot {
+  align-self: flex-start;
+  width: 6px;
+  height: 6px;
+  margin: 10px 1px 0 -2px;
+  border-radius: 50%;
+  background: var(--color-poke);
+}
+.nav-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-cream-hi);
+  border: 1px solid var(--color-sand);
+  color: var(--color-ink);
+}
+.is-dark .nav-icon-btn {
+  background: rgb(255 255 255 / 0.08);
+  border-color: rgb(255 255 255 / 0.14);
+  color: #fff;
+}
+
+/* Dropdown panel. The wrapper's top padding bridges the gap, so the pointer can cross into it. */
+.nav-pop {
+  position: absolute;
+  top: 100%;
+  left: -18px;
+  z-index: 50;
+  padding-top: 6px;
+}
+.nav-pop[hidden] {
+  display: none;
+}
+.nav-panel {
+  padding: 8px;
+  border-radius: 20px;
+  background: var(--color-cream-hi);
+  border: 1px solid rgb(221 211 190 / 0.85);
+  box-shadow:
+    0 30px 60px -30px rgb(41 38 61 / 0.42),
+    0 8px 20px -12px rgb(41 38 61 / 0.18);
+  transform-origin: 32px 0;
+  animation: nav-in 0.18s var(--ease-out);
+}
+.is-dark .nav-panel {
+  background: #17152b;
+  border-color: rgb(255 255 255 / 0.1);
+  box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.75);
+}
+@keyframes nav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px 9px 9px;
+  border-radius: 14px;
+  color: var(--color-ink);
+  transition: background-color 0.15s;
+}
+.nav-item:hover {
+  background: var(--color-cream-lo);
+}
+.nav-item-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--color-cream);
+  color: var(--color-ink-soft);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.nav-item:hover .nav-item-icon {
+  background: var(--color-cream-hi);
+  color: var(--color-poke-deep);
+}
+.nav-item[aria-current="page"] .nav-item-icon {
+  background: var(--color-poke-deep);
+  color: #fff;
+}
+.nav-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+.nav-item-desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--color-ink-mute);
+}
+.is-dark .nav-item {
+  color: #fff;
+}
+.is-dark .nav-item:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+.is-dark .nav-item-icon {
+  background: rgb(255 255 255 / 0.07);
+  color: rgb(236 232 255 / 0.8);
+}
+.is-dark .nav-item:hover .nav-item-icon {
+  background: rgb(255 255 255 / 0.12);
+  color: var(--color-pika);
+}
+.is-dark .nav-item[aria-current="page"] .nav-item-icon {
+  background: var(--color-pika);
+  color: var(--color-ink);
+}
+.is-dark .nav-item-desc {
+  color: rgb(236 232 255 / 0.58);
+}
+.nav-new {
+  display: inline-block;
+  width: fit-content;
+  padding: 3px 4px 2px;
+  border-radius: 4px;
+  background: var(--color-poke-deep);
+  color: #fff;
+  font-family: var(--ff-pixel);
+  font-size: 7px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Play's featured item: a small window into the dark Rip world, three real packs fanned in it. */
+.nav-featured {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 256px;
+  padding: 16px;
+  border-radius: 14px;
+  color: #fff;
+  background:
+    radial-gradient(70% 50% at 50% 28%, rgb(255 203 5 / 0.3), transparent 70%),
+    radial-gradient(70% 55% at 0% 100%, rgb(227 53 13 / 0.32), transparent 70%),
+    linear-gradient(165deg, #2b2358, #15122e);
+}
+.nav-featured .nav-item-desc {
+  color: rgb(236 232 255 / 0.72);
+}
+.nav-featured-title {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+.nav-featured-cta {
+  margin-top: 4px;
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: var(--color-pika);
+}
+.nav-fan {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  z-index: -1;
+  width: 0;
+  height: 100px;
+}
+.nav-fan img {
+  position: absolute;
+  bottom: 0;
+  width: 56px;
+  max-width: none;
+  height: auto;
+  margin-left: -28px;
+  transform-origin: 50% 160%;
+  transform: rotate(calc(var(--o) * 15deg)) translateY(calc(var(--a) * 6px));
+  filter: drop-shadow(0 8px 10px rgb(0 0 0 / 0.45));
+  transition: transform 0.35s var(--ease-pop);
+}
+.nav-featured:hover .nav-fan img {
+  transform: rotate(calc(var(--o) * 19deg)) translateY(calc(var(--a) * 6px - 5px));
+}
+/* In the sheet: a row, packs on the right. */
+.nav-featured.is-row {
+  min-height: 0;
+  padding: 16px 132px 16px 16px;
+}
+.nav-featured.is-row .nav-fan {
+  left: auto;
+  right: 66px;
+  top: 14px;
+  height: 92px;
+}
+.nav-featured.is-row .nav-fan img {
+  width: 50px;
+  margin-left: -25px;
+}
+
+/* Mobile tab bar. */
+.tabbar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgb(251 248 242 / 0.94);
+  border-top: 1px solid rgb(221 211 190 / 0.8);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.tabbar.is-dark {
+  background: rgb(9 8 18 / 0.94);
+  border-top-color: rgb(255 255 255 / 0.08);
+}
+.tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 58px;
+  padding: 6px 2px 5px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-ink-mute);
+}
+.tab svg {
+  width: 22px;
+  height: 22px;
+}
+.tab[aria-current="page"],
+.tab[data-current] {
+  color: var(--color-poke-deep);
+}
+.tab[aria-current="page"]::before,
+.tab[data-current]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 28px;
+  height: 3px;
+  margin-left: -14px;
+  border-radius: 0 0 4px 4px;
+  background: var(--color-poke);
+}
+.tabbar.is-dark .tab {
+  color: rgb(236 232 255 / 0.6);
+}
+.tabbar.is-dark .tab[aria-current="page"],
+.tabbar.is-dark .tab[data-current] {
+  color: #fff;
+}
+.tabbar.is-dark .tab[aria-current="page"]::before,
+.tabbar.is-dark .tab[data-current]::before {
+  background: var(--color-pika);
+}
+/* Rip, the featured tab: a Poké Ball raised out of the bar. */
+.tab-ball {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  margin-top: -24px;
+  border-radius: 50%;
+  background: var(--color-cream-hi);
+  box-shadow:
+    0 0 0 1px rgb(221 211 190 / 0.9),
+    0 10px 20px -10px rgb(41 38 61 / 0.55);
+}
+.tab-rip[aria-current="page"]::before {
+  display: none;
+}
+.tab-rip[aria-current="page"] .tab-ball {
+  box-shadow:
+    0 0 0 2px var(--color-poke),
+    0 10px 20px -10px rgb(41 38 61 / 0.55);
+}
+.tabbar.is-dark .tab-ball {
+  background: #1b1834;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.14),
+    0 0 24px -4px rgb(255 203 5 / 0.55);
+}
+.tabbar.is-dark .tab-rip[aria-current="page"] .tab-ball {
+  box-shadow:
+    0 0 0 2px var(--color-pika),
+    0 0 24px -2px rgb(255 203 5 / 0.65);
+}
+
+/* More sheet: a native modal <dialog> pinned to the bottom. */
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 88dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  box-shadow: 0 -24px 60px -24px rgb(41 38 61 / 0.5);
+}
+.sheet[open] {
+  animation: sheet-up 0.32s var(--ease-out);
+}
+.sheet::backdrop {
+  background: rgb(26 24 40 / 0.45);
+}
+.sheet[open]::backdrop {
+  animation: sheet-fade 0.32s var(--ease-out);
+}
+html:has(.sheet[open]) {
+  overflow: hidden;
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+.sheet-body {
+  padding: 10px 16px max(24px, env(safe-area-inset-bottom));
+}
+.sheet-grab {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: 4px;
+  background: var(--color-sand);
+}
+.sheet-title {
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.sheet-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-cream-lo);
+}
+.sheet-label {
+  margin: 22px 2px 10px;
+  font-family: var(--ff-pixel);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-poke-deep);
+}
+.sheet-label span {
+  font-family: var(--ff-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-mute);
+}
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.sheet-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  background: var(--color-cream);
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.sheet-tile[aria-current="page"] .nav-item-icon {
+  background: var(--color-poke-deep);
+  color: #fff;
+}
+.sheet-tile .nav-item-icon {
+  background: var(--color-cream-hi);
+}
+.sheet.is-dark {
+  background: #15132a;
+  color: #fff;
+}
+.sheet.is-dark .sheet-grab {
+  background: rgb(255 255 255 / 0.2);
+}
+.sheet.is-dark .sheet-close,
+.sheet.is-dark .sheet-tile {
+  background: rgb(255 255 255 / 0.06);
+}
+.sheet.is-dark .sheet-tile .nav-item-icon {
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(236 232 255 / 0.85);
+}
+.sheet.is-dark .sheet-tile[aria-current="page"] .nav-item-icon {
+  background: var(--color-pika);
+  color: var(--color-ink);
+}
+.sheet.is-dark .sheet-label {
+  color: var(--color-pika);
+}
+.sheet.is-dark .sheet-label span {
+  color: rgb(236 232 255 / 0.55);
+}
+
+/* The search box and SOL pill are cream components; in the dark world they go glassy. */
+:is(.site-header, .sheet).is-dark [role="search"] input {
+  background: rgb(255 255 255 / 0.07);
+  border-color: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+:is(.site-header, .sheet).is-dark [role="search"] input::placeholder {
+  color: rgb(236 232 255 / 0.5);
+}
+:is(.site-header, .sheet).is-dark [role="search"] input:focus {
+  border-color: rgb(255 255 255 / 0.45);
+}
+:is(.site-header, .sheet).is-dark [role="search"] :is(svg, kbd) {
+  color: rgb(236 232 255 / 0.55);
+  border-color: rgb(255 255 255 / 0.18);
+}
+/* The suggestions stay a cream panel, so they keep ink text instead of the dark bar's white. */
+:is(.site-header, .sheet).is-dark .paper {
+  color: var(--color-ink);
+}
+.site-header.is-dark .sol-pill {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+.site-header.is-dark .sol-pill .text-ink-mute {
+  color: rgb(236 232 255 / 0.55);
+}
+
+/* ------------------------------------------------------- language switcher */
+/* components/LanguageSwitcher.tsx: a pill in the header and one native <dialog>, a bottom sheet on
+   phones and a card under the header from 768px. Each tile brings its stamp colour (--c, --cf). */
+.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 11px 0 10px;
+  border-radius: 999px;
+  background: var(--color-cream-hi);
+  border: 1px solid var(--color-sand);
+  color: var(--color-ink);
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s,
+    transform 0.15s var(--ease-pop);
+}
+.lang-pill:hover {
+  border-color: var(--color-ink-mute);
+}
+.lang-pill:active {
+  transform: translateY(1px);
+}
+.lang-pill[aria-expanded="true"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-cream-hi);
+}
+.lang-pill-globe {
+  width: 18px;
+  height: 18px;
+  transition: rotate 0.7s var(--ease-out);
+}
+.lang-pill:hover .lang-pill-globe {
+  rotate: 360deg;
+}
+.lang-pill-code {
+  padding-top: 1px;
+  font-family: var(--ff-pixel);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.lang-pill-caret {
+  width: 14px;
+  height: 14px;
+  margin-left: -2px;
+  opacity: 0.7;
+}
+.lang-pill.is-dark {
+  background: rgb(255 255 255 / 0.08);
+  border-color: rgb(255 255 255 / 0.14);
+  color: #fff;
+}
+.lang-pill.is-dark:hover {
+  border-color: rgb(255 255 255 / 0.4);
+}
+.lang-pill.is-dark[aria-expanded="true"] {
+  background: var(--color-pika);
+  border-color: var(--color-pika);
+  color: var(--color-ink);
+}
+@media (max-width: 639px) {
+  .lang-pill {
+    padding: 0 12px;
+  }
+  .lang-pill-caret {
+    display: none;
+  }
+}
+
+/* Phones: a sheet pinned to the bottom, like the More sheet. */
+.lang-sheet {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 88dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-cream-hi);
+  color: var(--color-ink);
+  box-shadow: 0 -24px 60px -24px rgb(41 38 61 / 0.5);
+}
+.lang-sheet[open] {
+  animation: sheet-up 0.32s var(--ease-out);
+}
+.lang-sheet::backdrop {
+  background: rgb(26 24 40 / 0.45);
+}
+.lang-sheet[open]::backdrop {
+  animation: sheet-fade 0.32s var(--ease-out);
+}
+.lang-body {
+  position: relative;
+  padding: 10px 16px max(20px, env(safe-area-inset-bottom));
+}
+.lang-grab {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: 4px;
+  background: var(--color-sand);
+}
+.lang-head {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 2px 16px;
+}
+/* A big faint Poké Ball tucked behind the title. */
+.lang-head-ball {
+  position: absolute;
+  right: 52px;
+  top: -58px;
+  opacity: 0.09;
+  rotate: -20deg;
+  pointer-events: none;
+}
+.lang-kicker {
+  font-family: var(--ff-pixel);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-poke-deep);
+}
+.lang-title {
+  margin-top: 8px;
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1.05;
+}
+.lang-close {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-cream-lo);
+  transition: background-color 0.15s;
+}
+.lang-close:hover {
+  background: var(--color-sand);
+}
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.lang-sheet[open] .lang-grid > li {
+  animation: lang-in 0.36s var(--ease-pop) both;
+  animation-delay: calc(var(--i) * 16ms + 50ms);
+}
+@keyframes lang-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+.lang-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  min-height: 62px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  transition:
+    transform 0.18s var(--ease-pop),
+    border-color 0.15s,
+    box-shadow 0.18s,
+    background-color 0.15s;
+}
+.lang-tile:hover,
+.lang-tile:focus-visible {
+  border-color: var(--color-ink);
+  border-radius: 16px;
+  background: var(--color-cream-hi);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--color-ink);
+}
+.lang-tile:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 var(--color-ink);
+}
+.lang-tile[aria-current="true"] {
+  border-color: var(--color-ink);
+  background: color-mix(in srgb, var(--c) 24%, var(--color-cream-hi));
+  box-shadow: 0 3px 0 var(--color-ink);
+}
+/* The language's badge: a type-coloured stamp with its two-letter code. */
+.lang-stamp {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding-top: 1px;
+  border-radius: 12px;
+  background: var(--c);
+  color: var(--cf);
+  font-family: var(--ff-pixel);
+  font-size: 9px;
+  line-height: 1;
+  box-shadow:
+    inset 0 -4px 0 rgb(0 0 0 / 0.16),
+    inset 0 0 0 2px rgb(255 255 255 / 0.3);
+  transition:
+    rotate 0.25s var(--ease-pop),
+    scale 0.25s var(--ease-pop);
+}
+.lang-tile:hover .lang-stamp,
+.lang-tile:focus-visible .lang-stamp {
+  rotate: -8deg;
+  scale: 1.08;
+}
+.lang-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lang-native {
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.lang-sub {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-ink-mute);
+}
+/* "Hello" in the tile's own language, as a watermark that slides in on hover. */
+.lang-hello {
+  position: absolute;
+  z-index: -1;
+  right: -2px;
+  bottom: -9px;
+  font-family: var(--ff-display);
+  font-weight: 700;
+  font-size: 2.1rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--c);
+  opacity: 0.26;
+  rotate: -8deg;
+  pointer-events: none;
+  transition:
+    translate 0.3s var(--ease-pop),
+    opacity 0.2s;
+}
+.lang-tile:hover .lang-hello,
+.lang-tile:focus-visible .lang-hello {
+  opacity: 0.5;
+  translate: -6px -2px;
+}
+.lang-here {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 3px 5px 2px;
+  border-radius: 6px;
+  background: var(--color-ink);
+  color: var(--color-pika);
+  font-family: var(--ff-pixel);
+  font-size: 7px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.lang-hint {
+  margin: 14px 2px 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--color-ink-mute);
+}
+@media (max-width: 767px) {
+  html:has(.lang-sheet[open]) {
+    overflow: hidden;
+  }
+}
+
+/* Tablets, iPads and desktops: a card under the header, lined up with the page's right edge. */
+@media (min-width: 768px) {
+  .lang-sheet {
+    inset: 76px max(24px, calc((100vw - 1360px) / 2 + 24px)) auto auto;
+    width: min(680px, calc(100vw - 48px));
+    max-height: calc(100dvh - 96px);
+    border: 2px solid var(--color-ink);
+    border-radius: 24px;
+    box-shadow:
+      0 8px 0 var(--color-ink),
+      0 40px 80px -30px rgb(41 38 61 / 0.55);
+    transform-origin: calc(100% - 44px) 0;
+  }
+  .lang-sheet[open] {
+    animation: lang-pop 0.26s var(--ease-pop);
+  }
+  .lang-sheet::backdrop {
+    background: rgb(26 24 40 / 0.22);
+  }
+  .lang-body {
+    padding: 20px 20px 18px;
+  }
+  .lang-grab {
+    display: none;
+  }
+  .lang-title {
+    font-size: 1.9rem;
+  }
+  .lang-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+@keyframes lang-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+}
+
+/* The Rip world (/rip, /gym, /redeem). */
+.lang-sheet.is-dark {
+  background: #15132a;
+  color: #fff;
+}
+.lang-sheet.is-dark .lang-grab {
+  background: rgb(255 255 255 / 0.2);
+}
+.lang-sheet.is-dark .lang-kicker {
+  color: var(--color-pika);
+}
+.lang-sheet.is-dark .lang-head-ball {
+  opacity: 0.12;
+}
+.lang-sheet.is-dark .lang-close {
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+}
+.lang-sheet.is-dark .lang-close:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+.lang-sheet.is-dark .lang-tile {
+  background: rgb(255 255 255 / 0.05);
+  color: #fff;
+}
+.lang-sheet.is-dark .lang-tile:hover,
+.lang-sheet.is-dark .lang-tile:focus-visible {
+  border-color: var(--color-pika);
+  background: rgb(255 255 255 / 0.09);
+  box-shadow: 0 4px 0 var(--color-pika);
+}
+.lang-sheet.is-dark .lang-tile[aria-current="true"] {
+  border-color: var(--color-pika);
+  background: color-mix(in srgb, var(--c) 26%, #15132a);
+  box-shadow: 0 3px 0 var(--color-pika);
+}
+.lang-sheet.is-dark :is(.lang-sub, .lang-hint) {
+  color: rgb(236 232 255 / 0.6);
+}
+.lang-sheet.is-dark .lang-here {
+  background: var(--color-pika);
+  color: var(--color-ink);
+}
+@media (min-width: 768px) {
+  .lang-sheet.is-dark {
+    border-color: rgb(255 255 255 / 0.16);
+    box-shadow:
+      0 8px 0 rgb(0 0 0 / 0.55),
+      0 40px 80px -30px rgb(0 0 0 / 0.8);
+  }
+}
+
+/* Footer language row (components/Footer.tsx): the switcher's stamps, small. */
+.foot-langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+.foot-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 4px 11px 4px 5px;
+  border-radius: 999px;
+  border: 1px solid var(--color-sand);
+  background: var(--color-cream-hi);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-ink-soft);
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.15s var(--ease-pop);
+}
+.foot-lang:hover {
+  border-color: var(--color-ink);
+  color: var(--color-poke-deep);
+  transform: translateY(-1px);
+}
+.foot-lang[aria-current="true"] {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.foot-lang-code {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding-top: 1px;
+  border-radius: 999px;
+  background: var(--color-cream-lo);
+  font-family: var(--ff-pixel);
+  font-size: 7px;
+  line-height: 1;
+  color: var(--color-ink-mute);
+}
+.foot-lang[aria-current="true"] .foot-lang-code {
+  background: var(--color-ink);
+  color: var(--color-pika);
+}
+@media (max-width: 639px) {
+  .foot-lang {
+    min-height: 44px;
+  }
 }

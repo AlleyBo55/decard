@@ -58,7 +58,7 @@ export const CATEGORY_HUBS: CategoryHub[] = [
     description:
       "Live prices for tokenized graded Pokémon cards on Solana: lowest asks by grade for PSA, CGC and BGS slabs listed on Collector Crypt and Magic Eden.",
     intro: [
-      "Pokémon is the biggest category on Collector Crypt by a wide margin. The cards are real graded slabs from PSA, CGC, Beckett and other graders, stored in a vault and owned through a token on Solana, so each can change hands in seconds and still be redeemed for the physical card.",
+      "Pokémon is the biggest category of tokenized graded cards on Solana by a wide margin. The cards are real graded slabs from PSA, CGC, Beckett and other graders, stored in a vault and owned through a token on Solana, so each can change hands in seconds and still be redeemed for the physical card.",
       "Collectors split the hobby into eras. The English sets Wizards of the Coast published from 1999 to 2003, starting with Base Set and its 1st Edition and shadowless prints, are the classic vintage. Modern sets are chased for illustration rares and special illustration rares (SIR), and for their Japanese counterparts, the art rares and special art rares (SAR). Japanese exclusives and promos form a market of their own.",
       "Value starts with the exact card: set, number, language and print. Then come the grade, the population report (how many copies the grader has recorded at that grade), centering and eye appeal, and demand for the Pokémon itself. Charizard, Pikachu, Umbreon and the other Eeveelutions, Gengar and Mewtwo are perennial favourites.",
     ],

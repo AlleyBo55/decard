@@ -1,6 +1,8 @@
 // The hero's holographic trading card for CARDS. Server-rendered inside
 // HoloCard (pointer tilt); only the price line is a client island.
 import { HoloCard } from "@/components/motion";
+import { fmt } from "@/lib/i18n/format";
+import { getLocale, getStrings } from "@/lib/i18n/strings";
 import { BurningCoin, FireChip, FireEnergy, Spark } from "./art";
 import { fmtDay, fmtPrice, fmtShare, fmtShort, fmtUsdShort, NONE } from "./format";
 import { PriceTicker, type Quote } from "./PriceTicker";
@@ -15,7 +17,7 @@ const SPARKS = [
   { left: "20%", top: "68%", delay: "1.9s", size: 9 },
 ];
 
-export function DexCard({
+export async function DexCard({
   quote,
   ath,
   athDate,
@@ -34,27 +36,27 @@ export function DexCard({
   unlockShare: number | null;
   unlockLabel: string;
 }) {
+  const [t, locale] = await Promise.all([getStrings(), getLocale()]);
+  const c = t.tokenPage.card;
   const hp = quote && ath ? Math.max(1, Math.min(100, Math.round((quote.price / ath) * 100))) : null;
-  const athDay = athDate && Number.isFinite(Date.parse(athDate)) ? fmtDay(Date.parse(athDate)) : null;
+  const athDay = athDate && Number.isFinite(Date.parse(athDate)) ? fmtDay(Date.parse(athDate), locale) : null;
   const hpTitle =
-    hp != null && ath
-      ? `HP ${hp}/100: the price is ${hp}% of the all-time high of ${fmtPrice(ath)}${athDay ? ` (${athDay})` : ""}`
-      : "HP needs the price and the all-time high, which are unavailable right now";
+    hp != null && ath ? fmt(athDay ? c.hpTitle : c.hpTitleNoDay, { hp, ath: fmtPrice(ath), day: athDay }) : c.hpUnavailable;
 
   return (
     <HoloCard className="tk-card-holo">
-      <article className="tk-card" aria-label="CARDS as a trading card">
+      <article className="tk-card" aria-label={c.label}>
         <header className="tk-card-head">
-          <p className="tk-card-stage">BASIC · SOLANA SPL TOKEN</p>
+          <p className="tk-card-stage">{c.stage}</p>
           <div className="tk-card-title">
             <p className="tk-card-name">CARDS</p>
             <p className="tk-card-hpnum" title={hpTitle}>
-              <span className="tk-card-hpword">HP</span>
+              <span className="tk-card-hpword">{c.hp}</span>
               {hp ?? NONE}
             </p>
           </div>
           <div className="hp tk-card-hp" title={hpTitle} aria-hidden>
-            <span className="hp-label">HP</span>
+            <span className="hp-label">{c.hp}</span>
             <span className="hp-track">
               <span className="hp-fill" style={{ width: `${hp ?? 0}%`, ["--hp-color" as string]: hpColor(hp ?? 0) }} />
             </span>
@@ -62,7 +64,7 @@ export function DexCard({
         </header>
 
         <div className="tk-art">
-          <FireChip label="Fire · Burn" className="tk-art-chip" />
+          <FireChip label={c.type} className="tk-art-chip" />
           {SPARKS.map((s) => (
             <Spark
               key={s.left}
@@ -74,8 +76,8 @@ export function DexCard({
         </div>
 
         <p className="tk-card-dex">
-          Burning Coin Token · Ht: 6 decimals · Wt: 2B max supply
-          {hp != null && ath ? ` · ATH ${fmtPrice(ath)}` : ""}
+          {c.dex}
+          {hp != null && ath ? ` · ${fmt(c.dexAth, { price: fmtPrice(ath) })}` : ""}
         </p>
 
         <PriceTicker initial={quote} />
@@ -87,8 +89,8 @@ export function DexCard({
               <FireEnergy />
             </span>
             <span className="tk-move-body">
-              <span className="tk-move-name">Buyback</span>
-              <span className="tk-move-text">Pack revenue buys CARDS, last 30 days</span>
+              <span className="tk-move-name">{c.buyback}</span>
+              <span className="tk-move-text">{c.buybackText}</span>
             </span>
             <span className="tk-move-dmg">{fmtUsdShort(buyback30d)}</span>
           </li>
@@ -99,8 +101,8 @@ export function DexCard({
               <FireEnergy />
             </span>
             <span className="tk-move-body">
-              <span className="tk-move-name">Burn</span>
-              <span className="tk-move-text">CARDS gone for good{burnedShare != null ? `, ${fmtShare(burnedShare)} of max` : ""}</span>
+              <span className="tk-move-name">{c.burn}</span>
+              <span className="tk-move-text">{burnedShare != null ? fmt(c.burnTextShare, { share: fmtShare(burnedShare) }) : c.burnText}</span>
             </span>
             <span className="tk-move-dmg">{fmtShort(burned)}</span>
           </li>
@@ -108,18 +110,15 @@ export function DexCard({
 
         <dl className="tk-card-foot">
           <div>
-            <dt>weakness</dt>
-            <dd>
-              Unlock {unlockLabel}
-              {unlockShare != null ? ` +${fmtShare(unlockShare)}` : ""}
-            </dd>
+            <dt>{c.weakness}</dt>
+            <dd>{fmt(unlockShare != null ? c.unlockShare : c.unlock, { day: unlockLabel, share: fmtShare(unlockShare) })}</dd>
           </div>
           <div>
-            <dt>resistance</dt>
-            <dd>Buyback &amp; burn</dd>
+            <dt>{c.resistance}</dt>
+            <dd>{c.resistanceValue}</dd>
           </div>
         </dl>
-        <p className="tk-card-credit">Fan-made card by Decard · not affiliated with Collector Crypt</p>
+        <p className="tk-card-credit">{c.credit}</p>
       </article>
     </HoloCard>
   );

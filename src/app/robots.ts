@@ -6,8 +6,12 @@ import { SITE_URL } from "@/lib/constants";
 // so this way each one also reads the API rules below.
 const SEARCH_AND_ANSWER_ENGINES = [
   "Googlebot",
+  "Googlebot-Image",
+  "Google-Extended",
+  "GoogleOther",
   "Bingbot",
   "Applebot",
+  "Applebot-Extended",
   "DuckDuckBot",
   "YandexBot",
   "GPTBot",
@@ -18,6 +22,12 @@ const SEARCH_AND_ANSWER_ENGINES = [
   "Claude-User",
   "PerplexityBot",
   "Perplexity-User",
+  "GrokBot",
+  "xAI-SearchBot",
+  "Amazonbot",
+  "YouBot",
+  "Meta-ExternalAgent",
+  "CCBot",
 ];
 
 // SEO-tool and bulk scrapers: heavy crawls that bring no visitors.

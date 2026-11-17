@@ -1,0 +1,1330 @@
+/* Gym (components/gym): the Rip League on /gym, built on the /rip world (rip.css: .rw, .rw-*,
+   .rp-arena). A stadium stage for the ladders, a gym card per pack, and the Hall of Fame. Loops
+   animate transform or opacity only and stop under prefers-reduced-motion. Money is Lilita One
+   (.rw-money) or Nunito: never the pixel faces. */
+
+/* ------------------------------------------------------------ the stage */
+.gy-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-top: 1.5px solid var(--rw-line);
+  background:
+    radial-gradient(46% 34% at 50% 0%, color-mix(in srgb, var(--u-glow, #ffcb05) 18%, transparent), transparent 72%),
+    radial-gradient(80% 44% at 50% 62%, color-mix(in srgb, var(--u-ink, #e3350d) 16%, transparent), transparent 72%),
+    radial-gradient(120% 70% at 50% 0%, #2b2960, #161434 52%, #0a0918);
+}
+/* Fades the stage into the page below, so it has no hard bottom edge. The layer covers the whole
+   stage and fades in its last 200px: anchored to the top, it never moves when the stage's height
+   changes as the league loads (a bottom-anchored one counted as a layout shift). */
+.gy-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(transparent calc(100% - 200px), #07060f);
+}
+.gy-sky {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 820px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 27% 8%, #fff 50%, transparent 52%),
+    radial-gradient(2px 2px at 41% 22%, #ffe58a 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 63% 7%, #fff 50%, transparent 52%),
+    radial-gradient(2px 2px at 78% 16%, #ffe58a 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 91% 30%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 6% 40%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 96% 52%, #fff 50%, transparent 52%);
+  mask-image: linear-gradient(#000 60%, transparent);
+  -webkit-mask-image: linear-gradient(#000 60%, transparent);
+}
+/* Two stadium spotlights over the podium. They hold still and blend normally: swinging two
+   screen-blended beams this size repainted the stage every frame. */
+.gy-beam {
+  position: absolute;
+  top: -30px;
+  width: clamp(200px, 30vw, 440px);
+  height: 760px;
+  background: linear-gradient(180deg, rgb(255 246 210 / 0.3), rgb(255 246 210 / 0.08) 52%, transparent 86%);
+  clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%);
+  transform-origin: 50% 0;
+}
+.gy-beam[data-side="l"] {
+  left: max(-60px, calc(50% - 700px));
+  rotate: -30deg;
+}
+.gy-beam[data-side="r"] {
+  right: max(-60px, calc(50% - 700px));
+  rotate: 30deg;
+}
+.gy-shell {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px clamp(12px, 3vw, 28px) 40px;
+}
+.gy-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+.gy-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 18px;
+  background: rgb(10 9 24 / 0.7);
+  border: 1.5px solid var(--rw-line);
+}
+.gy-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 14px;
+  color: rgb(236 233 255 / 0.78);
+  font-weight: 900;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.gy-tab:hover {
+  color: #fff;
+}
+.gy-tab[aria-selected="true"] {
+  background: linear-gradient(180deg, var(--u-glow, #ffcb05), color-mix(in srgb, var(--u-glow, #ffcb05) 82%, #a86a00));
+  color: #29263d;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--u-glow, #ffcb05) 50%, #000), 0 12px 26px -12px var(--u-glow, #ffcb05);
+}
+.gy-tab-count {
+  min-width: 24px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  font-family: var(--ff-rip);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+.gy-tab[aria-selected="true"] .gy-tab-count {
+  background: rgb(41 38 61 / 0.16);
+}
+.gy-stats {
+  display: flex;
+  gap: 8px;
+}
+.gy-stat {
+  min-width: 86px;
+  padding: 6px 12px 7px;
+  border-radius: 14px;
+  background: rgb(10 9 24 / 0.6);
+  border: 1.5px solid var(--rw-line);
+}
+.gy-stat dt {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rw-mute);
+}
+.gy-stat dd {
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+.gy-blurb {
+  margin: 16px auto 0;
+  max-width: 640px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--rw-mute);
+  text-align: center;
+  text-wrap: balance;
+}
+.gy-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+  color: #7cf29a;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+/* --------------------------------------------------------------- podium */
+.gy-podium {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "p2 p1 p3";
+  align-items: end;
+  gap: clamp(8px, 1.6vw, 20px);
+  max-width: 1000px;
+  margin: 40px auto 0;
+}
+/* The battle floor the plinths stand on: a glowing ring in the league's colours. */
+.gy-podium::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -46px;
+  width: 116%;
+  height: 130px;
+  translate: -50% 0;
+  z-index: -1;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, transparent 0 68%, color-mix(in srgb, var(--u-glow, #ffcb05) 50%, transparent) 69.5% 71%, transparent 72.5%),
+    radial-gradient(closest-side, transparent 0 88%, rgb(255 255 255 / 0.14) 89% 90%, transparent 91%),
+    radial-gradient(closest-side, color-mix(in srgb, var(--u-glow, #ffcb05) 26%, transparent), color-mix(in srgb, var(--u-ink, #e3350d) 16%, transparent) 55%, transparent 100%);
+}
+.gy-spot {
+  --m: #ffcb05;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+.gy-spot[data-place="1"] {
+  grid-area: p1;
+}
+.gy-spot[data-place="2"] {
+  grid-area: p2;
+}
+.gy-spot[data-place="3"] {
+  grid-area: p3;
+}
+.gy-spot-who {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 14px;
+  text-align: center;
+}
+.gy-ava-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.gy-ava {
+  --a: 92px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--a);
+  height: var(--a);
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 32%, #fffdf6, #e6dfcd 72%);
+  border: 4px solid var(--m, rgb(255 255 255 / 0.3));
+  box-shadow: 0 0 0 4px rgb(7 6 15 / 0.7), 0 14px 34px -10px var(--m, transparent);
+}
+.gy-spot[data-place="1"] .gy-ava {
+  --a: 120px;
+}
+.gy-ava svg {
+  width: 76%;
+  height: 76%;
+  border-radius: 0;
+  background: transparent;
+}
+.gy-ava-open {
+  border-style: dashed;
+  background: rgb(255 255 255 / 0.05);
+  color: var(--rw-mute);
+  font-family: var(--ff-rip);
+  font-size: 2.2rem;
+  box-shadow: none;
+}
+.gy-crown {
+  position: absolute;
+  left: 50%;
+  top: -34px;
+  z-index: 2;
+  width: 58px;
+  translate: -50% 0;
+  rotate: -7deg;
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.5));
+  animation: gy-bob 3.4s ease-in-out infinite;
+}
+.gy-spot-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.8vw, 1.5rem);
+  line-height: 1.1;
+}
+.gy-spot[data-place="1"] .gy-spot-name {
+  font-size: clamp(1.2rem, 2.3vw, 1.9rem);
+}
+.gy-mute {
+  color: var(--rw-mute);
+}
+.gy-title {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(236 233 255 / 0.8);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.gy-title[data-t="champion"] {
+  background: linear-gradient(90deg, #ffcb05, #ffe680);
+  color: #3b2a00;
+  box-shadow: 0 0 18px -4px #ffcb05;
+}
+.gy-title[data-t="elite"] {
+  background: rgb(211 139 255 / 0.16);
+  color: #e7c2ff;
+  box-shadow: inset 0 0 0 1.5px rgb(211 139 255 / 0.45);
+}
+.gy-title[data-t="ace"] {
+  background: rgb(79 163 255 / 0.14);
+  color: #b9dcff;
+  box-shadow: inset 0 0 0 1.5px rgb(79 163 255 / 0.4);
+}
+.gy-plinth {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px clamp(8px, 1.4vw, 16px);
+  border-radius: 20px 20px 8px 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--m) 28%, #1c1a42) 0, #171535 38%, #0e0d23);
+  border: 1.5px solid color-mix(in srgb, var(--m) 46%, transparent);
+  border-bottom: 0;
+  box-shadow:
+    inset 0 4px 0 var(--m),
+    inset 0 -30px 40px -30px rgb(0 0 0 / 0.7),
+    0 -14px 50px -26px var(--m);
+}
+.gy-spot[data-place="1"] .gy-plinth {
+  min-height: 244px;
+}
+.gy-spot[data-place="2"] .gy-plinth {
+  min-height: 204px;
+}
+.gy-spot[data-place="3"] .gy-plinth {
+  min-height: 176px;
+}
+.gy-spot[data-open] .gy-plinth {
+  border-style: dashed;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--m) 12%, #14122e), #0e0d23);
+  box-shadow: inset 0 4px 0 color-mix(in srgb, var(--m) 50%, transparent);
+}
+.gy-plinth-num {
+  font-family: var(--ff-rip);
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  line-height: 0.85;
+  color: var(--m);
+  text-shadow:
+    0 4px 0 color-mix(in srgb, var(--m) 35%, #000),
+    0 0 34px color-mix(in srgb, var(--m) 55%, transparent);
+}
+.gy-plinth-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+.gy-plinth-stats > div {
+  min-width: 0;
+  padding: 6px 4px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.28);
+  text-align: center;
+}
+.gy-plinth-stats dt {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rw-mute);
+}
+.gy-plinth-stats dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(1.05rem, 1.7vw, 1.4rem);
+  line-height: 1.1;
+}
+.gy-spot-best {
+  width: 100%;
+}
+.gy-claim {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #ffcb05;
+  color: #29263d;
+  font-weight: 900;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 #b88a00;
+  transition: transform 0.12s, filter 0.2s;
+}
+.gy-claim:hover {
+  filter: brightness(1.08);
+}
+.gy-claim:active {
+  transform: translateY(2px);
+}
+.gy-plinth-note {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--rw-mute);
+  text-align: center;
+}
+
+/* --------------------------------------------------------- a best pull */
+.gy-best {
+  --c: #dfe6f0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 5px 10px 5px 5px;
+  border-radius: 14px;
+  background: rgb(0 0 0 / 0.26);
+  border: 1.5px solid color-mix(in srgb, var(--c) 40%, transparent);
+  text-align: left;
+}
+.gy-best img,
+.gy-best-blank {
+  width: 30px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.3);
+}
+.gy-best-blank {
+  display: grid;
+  place-items: center;
+}
+.gy-best-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+.gy-best-label {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.gy-best-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.gy-best-value {
+  font-size: 1.1rem;
+  color: var(--c);
+}
+
+/* ----------------------------------------------------------------- rows */
+.gy-rows {
+  display: grid;
+  gap: 8px;
+  max-width: 1000px;
+  margin: 46px auto 0;
+}
+.gy-row {
+  --t: rgb(255 255 255 / 0.16);
+  --tc: rgb(236 233 255 / 0.72);
+  display: grid;
+  grid-template-columns: 44px 46px minmax(0, 1fr) auto minmax(0, 250px);
+  align-items: center;
+  gap: 14px;
+  min-height: 70px;
+  padding: 10px 14px 10px 8px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--t) 16%, rgb(18 17 41 / 0.94)), rgb(14 13 32 / 0.9) 46%);
+  border: 1.5px solid var(--rw-line);
+  box-shadow: inset 4px 0 0 var(--t);
+  transition: border-color 0.2s;
+}
+.gy-row:hover {
+  border-color: color-mix(in srgb, var(--t) 60%, transparent);
+}
+.gy-row[data-t="elite"] {
+  --t: #d38bff;
+  --tc: #e7c2ff;
+}
+.gy-row[data-t="ace"] {
+  --t: #4fa3ff;
+  --tc: #b9dcff;
+}
+.gy-row-rank {
+  font-family: var(--ff-rip);
+  font-size: 1.6rem;
+  line-height: 1;
+  text-align: center;
+  color: var(--tc);
+}
+.gy-ava-sm {
+  --a: 46px;
+  --m: color-mix(in srgb, var(--t) 80%, transparent);
+  border-width: 2.5px;
+  box-shadow: none;
+}
+.gy-row-who {
+  min-width: 0;
+}
+.gy-row-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--ff-rip);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+.gy-row-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 8px;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--rw-mute);
+}
+.gy-row-stats {
+  display: flex;
+  gap: 18px;
+  text-align: right;
+}
+.gy-row-stats dt {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rw-mute);
+}
+.gy-row-stats dd {
+  font-size: 1.25rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.gy-row-best {
+  min-width: 0;
+}
+/* The next free place on a small ladder. */
+.gy-row-ghost {
+  grid-template-columns: 44px 46px minmax(0, 1fr) auto;
+  border: 1.5px dashed rgb(255 203 5 / 0.42);
+  background: rgb(255 203 5 / 0.05);
+  box-shadow: none;
+}
+.gy-row-ghost .gy-row-rank {
+  color: rgb(255 203 5 / 0.75);
+}
+.gy-row-ghost .gy-ava-open {
+  font-size: 1.3rem;
+}
+.gy-name-link {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s;
+}
+.gy-name-link:hover {
+  text-decoration-color: var(--u-glow, #ffcb05);
+}
+/* An empty league: the podium waits for its first trainer. */
+.gy-open-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 18px;
+  max-width: 1000px;
+  margin: 46px auto 0;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: linear-gradient(100deg, rgb(255 203 5 / 0.13), rgb(14 13 32 / 0.92) 55%);
+  border: 1.5px dashed rgb(255 203 5 / 0.45);
+}
+/* The same invitation, slim, over the Slabz ladder while the Decard League is still open. */
+.gy-invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  max-width: 1000px;
+  margin: 14px auto 0;
+  padding: 8px 8px 8px 16px;
+  border-radius: 16px;
+  background: rgb(255 203 5 / 0.08);
+  border: 1.5px dashed rgb(255 203 5 / 0.4);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+.gy-invite b {
+  color: #ffcb05;
+}
+.gy-invite-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.08);
+  font-weight: 900;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+.gy-invite-cta:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+/* ------------------------------------------------------------- loading */
+.gy-skel {
+  position: relative;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.06);
+}
+.gy-skel::after,
+.gy-spot[data-skeleton] .gy-plinth::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.08) 50%, transparent 70%);
+  background-size: 260% 100%;
+  animation: rp-shimmer 1.4s linear infinite;
+}
+.gy-spot[data-skeleton] .gy-plinth {
+  overflow: hidden;
+}
+.gy-spot[data-skeleton] .gy-ava {
+  border-color: rgb(255 255 255 / 0.12);
+  box-shadow: none;
+}
+li.gy-row.gy-skel {
+  min-height: 70px;
+  box-shadow: none;
+}
+/* As tall as a loaded gym card and Hall of Fame pull, so the page below keeps its place. */
+.gy-gyms > .gy-skel {
+  height: 469px;
+}
+.gy-hof > .gy-skel {
+  height: 336px;
+}
+@media (max-width: 640px) {
+  .gy-gyms > .gy-skel {
+    height: 443px;
+  }
+}
+
+/* ----------------------------------------------------------------- gyms */
+.gy-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.gy-seg {
+  display: inline-flex;
+  flex: none;
+  gap: 4px;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: 16px;
+  background: rgb(10 9 24 / 0.6);
+  border: 1.5px solid var(--rw-line);
+}
+.gy-seg button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  color: rgb(236 233 255 / 0.75);
+  font-weight: 900;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+.gy-seg button:hover {
+  color: #fff;
+}
+.gy-seg button[aria-pressed="true"] {
+  background: var(--u-glow, #ffcb05);
+  color: #29263d;
+}
+.gy-case {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  padding: 3px;
+  overflow-x: auto;
+  mask-image: linear-gradient(90deg, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, #000 94%, transparent);
+}
+.gy-case button {
+  --c: #ffcb05;
+  --ci: #3d3a6b;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 4px 12px 4px 7px;
+  border-radius: 14px;
+  border: 1.5px solid rgb(255 255 255 / 0.12);
+  background: rgb(10 9 24 / 0.6);
+  color: rgb(236 233 255 / 0.82);
+  font-weight: 900;
+  font-size: 0.86rem;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.gy-case button:first-child {
+  padding-left: 14px;
+}
+.gy-case button:hover {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--c) 55%, transparent);
+}
+.gy-case button[aria-pressed="true"] {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--ci) 45%, rgb(10 9 24));
+  color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 24%, transparent);
+}
+.gy-case-n {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  font-size: 0.7rem;
+  text-align: center;
+}
+.gy-note {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1.5px solid var(--rw-line);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rw-mute);
+}
+.gy-note b {
+  color: var(--rw-text);
+}
+.gy-gyms {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+.gy-gym {
+  --gi: #e3350d;
+  --gg: #ffcb05;
+  --mc: rgb(255 255 255 / 0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gi) 30%, #121129) 0, #121129 130px, #0d0c20);
+  border: 1.5px solid color-mix(in srgb, var(--gg) 22%, transparent);
+  box-shadow: 0 26px 50px -30px rgb(0 0 0 / 0.85), inset 0 1px 0 rgb(255 255 255 / 0.07);
+  transition: translate 0.25s var(--ease-pop), border-color 0.25s, box-shadow 0.25s;
+}
+.gy-gym[data-medal="1"] {
+  --mc: #ffcb05;
+}
+.gy-gym[data-medal="2"] {
+  --mc: #d7e1ee;
+}
+.gy-gym[data-medal="3"] {
+  --mc: #ee9a5c;
+}
+.gy-gym[data-medal] {
+  border-color: color-mix(in srgb, var(--mc) 45%, transparent);
+}
+.gy-gym[data-open="false"] {
+  filter: saturate(0.5);
+}
+@media (hover: hover) {
+  .gy-gym:hover {
+    translate: 0 -4px;
+    border-color: color-mix(in srgb, var(--gg) 65%, transparent);
+    box-shadow: 0 32px 60px -30px color-mix(in srgb, var(--gi) 70%, #000), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+}
+.gy-gym-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 12px;
+}
+/* The gym's place, struck on a hexagonal plate: metal for the top three. */
+.gy-gym-rank {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 46px;
+  clip-path: polygon(50% 0, 100% 22%, 100% 78%, 50% 100%, 0 78%, 0 22%);
+  background: rgb(255 255 255 / 0.12);
+  color: var(--rw-text);
+  font-family: var(--ff-rip);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.gy-gym[data-medal] .gy-gym-rank {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--mc) 70%, #fff), var(--mc) 45%, color-mix(in srgb, var(--mc) 60%, #000));
+  color: #231f10;
+}
+.gy-gym-kind {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gg);
+}
+.gy-gym-name {
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.7rem;
+}
+/* The pack and its leader on the universe's arena (rip.css .rp-arena). */
+.gy-gym-arena {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  height: 172px;
+  margin: 0 12px;
+  padding-bottom: 12px;
+  border-radius: 18px;
+  border: 1.5px solid rgb(255 255 255 / 0.08);
+}
+.gy-gym-arena.rp-arena::after {
+  opacity: 0.4;
+}
+/* Arena layers drift only on the gym being looked at: 28 of them at once would be busy. */
+.gy-gym .rp-arena::before {
+  animation-play-state: paused;
+}
+.gy-gym:is(:hover, :focus-within) .rp-arena::before {
+  animation-play-state: running;
+}
+.gy-gym-pack {
+  position: relative;
+  z-index: 1;
+  height: 140px;
+  width: auto;
+  rotate: -5deg;
+  filter: drop-shadow(0 14px 14px rgb(0 0 0 / 0.55));
+  transition: rotate 0.35s var(--ease-pop), translate 0.35s var(--ease-pop);
+}
+.gy-gym-pack-blank {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gi) 55%, #0d0c20);
+  color: #fff;
+}
+.gy-gym-boss {
+  position: relative;
+  height: 124px;
+  width: auto;
+  aspect-ratio: 5 / 8;
+  object-fit: contain;
+  margin-bottom: 6px;
+  rotate: 6deg;
+  filter: drop-shadow(0 0 14px rgb(211 139 255 / 0.6)) drop-shadow(0 10px 12px rgb(0 0 0 / 0.5));
+  transition: rotate 0.35s var(--ease-pop), translate 0.35s var(--ease-pop);
+}
+/* Struck across the gap between the pack and the leader, like a fight card. */
+.gy-gym-vs {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 2;
+  translate: -50% -50%;
+  rotate: -8deg;
+  padding: 3px 8px 2px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ffe680, #ffcb05);
+  color: #29263d;
+  font-family: var(--ff-rip);
+  font-size: 1.05rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 0 2px #29263d, 0 6px 14px rgb(0 0 0 / 0.5);
+}
+@media (hover: hover) {
+  .gy-gym:hover .gy-gym-pack {
+    rotate: -9deg;
+    translate: -6px -6px;
+  }
+  .gy-gym:hover .gy-gym-boss {
+    rotate: 9deg;
+    translate: 4px -4px;
+  }
+}
+.gy-gym-leader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 10px 12px 0;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgb(211 139 255 / 0.08);
+  border: 1.5px solid rgb(211 139 255 / 0.2);
+  font-size: 13.5px;
+}
+.gy-gym-leader-label {
+  flex: none;
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e7c2ff;
+}
+.gy-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 12px 0;
+}
+.gy-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 7px 10px 8px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.gy-metric dt {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rw-mute);
+}
+.gy-metric-value {
+  font-size: 1.5rem;
+  line-height: 1.05;
+}
+.gy-metric-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--rw-mute);
+}
+.gy-metric[data-on="true"] {
+  background: color-mix(in srgb, var(--gg) 13%, transparent);
+  border-color: color-mix(in srgb, var(--gg) 55%, transparent);
+}
+.gy-metric[data-on="true"] :is(dt, .gy-metric-value) {
+  color: var(--gg);
+}
+.gy-gym-odds {
+  height: 8px;
+  margin: 10px 12px 0;
+}
+.gy-gym-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 12px 12px 14px;
+}
+.gy-heat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--rw-mute);
+}
+.gy-heat-hot {
+  color: #ffb86b;
+}
+.gy-challenge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 6px 0 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--gi) 80%, #000);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--gi) 45%, #000);
+  transition: transform 0.12s, filter 0.2s;
+}
+.gy-challenge b {
+  padding: 4px 8px 3px;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.28);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1;
+}
+.gy-challenge:hover {
+  filter: brightness(1.12);
+}
+.gy-challenge:active {
+  transform: translateY(2px);
+}
+.gy-closed {
+  flex: none;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1.5px dashed rgb(255 255 255 / 0.2);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--rw-mute);
+}
+
+/* -------------------------------------------------------- hall of fame */
+.gy-hof {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 156px;
+  gap: 12px;
+  padding: 4px 2px 22px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+/* Wide screens fit all eight in one row, so nothing scrolls. */
+@media (min-width: 1200px) {
+  .gy-hof {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+    overflow: visible;
+  }
+}
+.gy-fame {
+  --c: #dfe6f0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1.5px solid color-mix(in srgb, var(--c) 42%, transparent);
+  scroll-snap-align: start;
+}
+.gy-fame img,
+.gy-fame-blank {
+  width: 100%;
+  aspect-ratio: 5 / 8;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.3);
+}
+.gy-fame-blank {
+  display: grid;
+  place-items: center;
+}
+.gy-fame-rank {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 1;
+  padding: 3px 9px;
+  border-radius: 9px;
+  background: rgb(7 6 15 / 0.82);
+  font-family: var(--ff-rip);
+  font-size: 15px;
+  line-height: 1.1;
+}
+.gy-fame[data-top] {
+  border-color: #ffcb05;
+  box-shadow: 0 0 0 3px rgb(255 203 5 / 0.18), 0 14px 30px -16px #ffcb05;
+}
+.gy-fame[data-top] .gy-fame-rank {
+  background: #ffcb05;
+  color: #29263d;
+}
+
+/* ---------------------------------------------------------------- badges */
+.gy-badge {
+  --s: 44px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / 0.45));
+}
+.gy-badge > svg:first-child {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.gy-badge-rim {
+  fill: var(--bg);
+  stroke: color-mix(in srgb, var(--bg) 40%, #000);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.gy-badge-face {
+  fill: var(--bi);
+  stroke: color-mix(in srgb, var(--bi) 40%, #000);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.gy-badge-shine {
+  fill: #fff;
+  opacity: 0.32;
+}
+.gy-badge-emblem {
+  position: relative;
+  width: 46%;
+  height: 46%;
+  color: #fff;
+}
+
+/* ------------------------------------------------------ smaller screens */
+@media (max-width: 760px) {
+  .gy-row {
+    grid-template-columns: 30px 40px minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 62px;
+    padding: 8px 12px 8px 6px;
+  }
+  .gy-row-best,
+  .gy-row-wide {
+    display: none;
+  }
+  .gy-ava-sm {
+    --a: 40px;
+  }
+  .gy-row-rank {
+    font-size: 1.3rem;
+  }
+  .gy-row-name {
+    font-size: 1.08rem;
+  }
+  .gy-row-stats dd {
+    font-size: 1.1rem;
+  }
+  .gy-row-ghost {
+    grid-template-columns: 30px 40px minmax(0, 1fr);
+  }
+  .gy-row-ghost .gy-ghost-cta {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .gy-top {
+    justify-content: center;
+  }
+  .gy-tabs,
+  .gy-stats {
+    width: 100%;
+  }
+  .gy-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0 8px;
+    font-size: 0.86rem;
+  }
+  .gy-stat {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 8px 6px;
+  }
+  .gy-stat dd {
+    font-size: 1.15rem;
+  }
+  .gy-podium {
+    gap: 8px;
+    margin-top: 44px;
+  }
+  .gy-spot .gy-ava {
+    --a: 64px;
+    border-width: 3px;
+    box-shadow: 0 0 0 3px rgb(7 6 15 / 0.7), 0 10px 24px -10px var(--m, transparent);
+  }
+  .gy-invite > .rp-ball {
+    display: none;
+  }
+  .gy-gym-arena {
+    height: 146px;
+    gap: 12px;
+    padding-bottom: 10px;
+  }
+  .gy-gym-pack {
+    height: 118px;
+  }
+  .gy-gym-boss {
+    height: 104px;
+  }
+  .gy-spot[data-place="1"] .gy-ava {
+    --a: 82px;
+  }
+  .gy-crown {
+    top: -25px;
+    width: 42px;
+  }
+  .gy-title {
+    padding: 2px 7px;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+  }
+  .gy-spot-best {
+    display: none;
+  }
+  .gy-plinth {
+    gap: 8px;
+    padding: 12px 6px;
+    border-radius: 16px 16px 6px 6px;
+  }
+  .gy-plinth-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .gy-spot[data-place="1"] .gy-plinth {
+    min-height: 186px;
+  }
+  .gy-spot[data-place="2"] .gy-plinth {
+    min-height: 160px;
+  }
+  .gy-spot[data-place="3"] .gy-plinth {
+    min-height: 142px;
+  }
+  .gy-claim {
+    min-height: 40px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+  }
+  .gy-rows,
+  .gy-open-card {
+    margin-top: 40px;
+  }
+  .gy-seg {
+    width: 100%;
+  }
+  .gy-seg button {
+    flex: 1;
+    padding: 0 8px;
+    font-size: 0.8rem;
+  }
+  .gy-case {
+    flex-basis: 100%;
+  }
+}
+
+/* ------------------------------------------------------------ entrances */
+/* Podium places rise in once their trainers land, ladder rows fade in, and a pull that joins the
+   Hall of Fame pops in. Opacity and transform only; reorders are instant. */
+.gy-spot:not([data-skeleton]) {
+  animation: gy-rise 0.5s var(--ease-out) 0.05s backwards;
+}
+.gy-spot[data-place="2"]:not([data-skeleton]) {
+  animation-delay: 0.15s;
+}
+.gy-spot[data-place="3"]:not([data-skeleton]) {
+  animation-delay: 0.25s;
+}
+.gy-row-in {
+  animation: gy-fade 0.3s ease backwards;
+}
+.gy-fame[data-new] {
+  animation: gy-pop 0.35s var(--ease-out) backwards;
+}
+
+/* ------------------------------------------------------------ keyframes */
+@keyframes gy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+}
+@keyframes gy-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes gy-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+/* Bobs on transform in px, leaving the -50% centring on translate: animating the percentage
+   translate kept the main thread busy every frame instead of running on the compositor. */
+@keyframes gy-bob {
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gy-crown,
+  .gy-skel::after,
+  .gy-spot[data-skeleton] .gy-plinth::after,
+  .gy-spot,
+  .gy-row-in,
+  .gy-fame {
+    animation: none !important;
+  }
+  .gy-gym,
+  .gy-gym-pack,
+  .gy-gym-boss {
+    transition: none;
+  }
+}

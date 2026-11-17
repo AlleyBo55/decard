@@ -1,0 +1,172 @@
+import type { Strings } from "../en";
+import type { Translation } from "../types";
+
+export const explainer: Translation<Strings["explainer"]> = {
+  meta: {
+    section: "Kad dagangan bertoken",
+    tags: ["Collector Crypt", "kad dagangan bertoken", "TCG on-chain", "Solana", "kad bergred"],
+  },
+  ld: {
+    about: ["Kad dagangan bertoken", "Collector Crypt", "Solana", "Permainan kad dagangan"],
+  },
+  breadcrumb: {
+    label: "Jejak navigasi",
+    page: "Kad dagangan bertoken",
+  },
+  hero: {
+    kicker: "Kad bergred · Solana · TCG on-chain",
+    h1: "Kad dagangan bertoken, {accent}",
+    h1Accent: "dijelaskan.",
+    lede: "Kad Pokémon, One Piece atau sukan yang bergred boleh kekal dilindungi dalam bilik kebal sementara pemilikannya berpindah di Solana. Di sini kami terangkan cara model ini berfungsi, cara Collector Crypt menyimpan kad bergred dalam bilik kebal dan menokenkannya, serta cara menyelidik sesebuah kad sebelum anda memperdagangkannya.",
+    scan: "Imbas penyenaraian langsung",
+    glossary: "Buka glosari kad bergred",
+    author: "Penyumbang Decard",
+    byline: "Oleh {author} · Diterbitkan dan disemak {date} · Bacaan 10 minit · Bebas, bukan nasihat kewangan",
+  },
+  pillars: [
+    { label: "FIZIKAL", text: "Slab yang digred secara profesional kekal disimpan dalam bilik kebal kustodian." },
+    { label: "ON-CHAIN", text: "Aset Solana yang unik merekodkan tuntutan pemilikan yang boleh dipindah milik." },
+    { label: "BOLEH DITEBUS", text: "Pemilik boleh mengikut proses kustodian untuk menerima kad itu." },
+  ],
+  whatIs: {
+    title: "Apakah kad dagangan bertoken?",
+    intro: "Kad dagangan bertoken menghubungkan aset blockchain yang unik dengan barang koleksi fizikal yang disimpan oleh kustodian. Slab fizikal itu tidak perlu merentas negara setiap kali pemilikan bertukar. Sebaliknya, aset on-chain berpindah antara dompet, dan kad asalnya kekal dalam simpanan sehingga pemilik menebusnya.",
+    redeemable: "Ini berbeza daripada barang koleksi yang digital semata-mata. Collector Crypt menyatakan bahawa aset kadnya boleh ditebus secara fizikal: pengumpul boleh mendepositkan kad bergred yang layak dan menerima aset yang sepadan, atau membakar aset itu semasa pengeluaran supaya kad fizikal boleh dihantar. Baca {product}, {deposit} dan {withdraw} yang terkini sebelum anda membuat transaksi, kerana jagaan, kelayakan, kos dan masa boleh berubah.",
+    productLink: "penerangan produk Collector Crypt",
+    depositLink: "proses deposit",
+    withdrawLink: "proses pengeluaran",
+    noteTitle: "TOKEN ≠ SLAB ITU SENDIRI",
+    note: "Aset itu ialah rekod on-chain yang boleh dipindah milik dan terikat pada kad dalam bilik kebal. Penebusan bergantung pada kustodian, status kad dan terma semasa platform.",
+  },
+  platform: {
+    title: "Cara Collector Crypt berfungsi di Solana",
+    intro: "Collector Crypt menggabungkan jagaan kad dengan pasaran Solana. Menurut dokumentasinya, kad yang didepositkan mesti sudah digred. Selepas diperiksa dan disimpan dalam bilik kebal, pendeposit menerima NFT yang mewakili kad itu. Pasaran menggunakan USDC untuk pembelian dan SOL untuk yuran rangkaian.",
+    step: "LANGKAH {n}",
+    steps: [
+      { title: "Gred dan simpan", text: "Slab yang layak diperiksa dan disimpan; identitinya merangkumi butiran seperti set, nombor siri, syarikat penggredan, gred dan pensijilan." },
+      { title: "Wakili pemilikan", text: "Aset unik dalam dompet Solana merujuk kepada kad itu sementara slab fizikal kekal dalam jagaan." },
+      { title: "Dagang", text: "Pemegang boleh menyenaraikan aset itu. Collector Crypt menyifatkan penyenaraiannya sebagai tanpa escrow: aset kekal dalam dompet penjual sehingga berlaku jualan." },
+      { title: "Tebus", text: "Pemilik memulakan pengeluaran, membakar aset on-chain dan membayar kos penghantaran yang berkenaan supaya kustodian boleh menghantar slab itu." },
+    ],
+    broader: "Model yang lebih luas ini sering dipanggil barang koleksi bertoken atau aset dunia sebenar (RWA). {link} menerangkan beberapa platform yang menggunakan pemilikan on-chain sementara barang fizikal kekal dalam jagaan. Setiap platform mempunyai terma yang berbeza, jadi perkataan \"bertoken\" sahaja tidak memberitahu anda siapa yang memegang barang itu atau apa sebenarnya yang dijamin oleh penebusan.",
+    solanaLink: "Gambaran keseluruhan oleh Solana Foundation",
+  },
+  research: {
+    title: "Cara menyelidik kad bergred bertoken",
+    intro: "Penyenaraian yang baik bukan sekadar watak yang dikenali dan harga yang rendah. Semak butiran ini bersama-sama:",
+    fields: [
+      { term: "Identiti", meaning: "Padankan tahun, set, nombor kad, bahasa, parallel dan status autograf. Keluaran yang kelihatan serupa boleh mempunyai nilai yang sangat berbeza." },
+      { term: "Gred dan sijil", meaning: "Sahkan syarikat penggredan, gred berangka dan nombor sijil. Ikuti pautan sijil di Decard ke laman penggred jika ada." },
+      { term: "Populasi", meaning: "Laporan populasi mengira berapa banyak salinan yang direkodkan oleh penggred pada gred ini dan ke atas. Populasi rendah boleh menyokong kejarangan, tetapi ia tidak mewujudkan permintaan." },
+      { term: "Harga dan nilai insurans", meaning: "Anggap nilai insurans sebagai satu rujukan yang disertakan bersama kad, bukan harga jualan yang dijamin atau penilaian yang lengkap." },
+      { term: "Bidaan dan aktiviti", meaning: "Bidaan langsung, jualan terkini dan perubahan penyenaraian lebih banyak mendedahkan tentang kecairan berbanding harga minta semata-mata." },
+      { term: "Jagaan dan penebusan", meaning: "Semak kustodian semasa, kelayakan pengeluaran, kos penghantaran, sekatan destinasi dan jangkaan masa di pasaran." },
+    ],
+    population: "PSA menyifatkan {link} miliknya sebagai rekod bilangan item yang telah digrednya pada setiap gred. Decard menunjukkan populasi gred yang dilaporkan, populasi gred lebih tinggi, jumlah populasi dan kadar Gem Mint apabila Collector Crypt menyediakannya.",
+    psaLink: "Laporan Populasi",
+  },
+  dealScore: {
+    title: "Skor tawaran Decard",
+    intro: "Skor tawaran ialah jalan pintas untuk menyusun penyenaraian yang berharga dalam USDC. Ia mengukur sejauh mana harga minta berada di bawah nilai insurans kad:",
+    formulaLabel: "FORMULA",
+    formula: "(1 − harga penyenaraian ÷ nilai insurans) × 100",
+    insured: "DIINSURANSKAN",
+    listed: "DISENARAIKAN",
+    score: "SKOR TAWARAN",
+    limits: "Skor ini dihadkan dari 0 hingga 100. Ia hanya muncul apabila kad mempunyai nilai insurans dan penyenaraian USDC, kerana Decard tidak meneka harga dolar bagi penyenaraian SOL semasa menyusun tawaran. Skor 20 bermaksud \"disenaraikan 20% di bawah nilai insurans\", bukan \"bernilai 20% lebih\" dan bukan \"untung yang dijamin\".",
+    more: "Buka senarai tawaran terbaik secara langsung",
+  },
+  terms: {
+    title: "TCG, NFT, RWA atau kad dagangan kripto?",
+    labels: "Label-label ini bertindih, tetapi setiap satu menjawab soalan yang berbeza. {tcg} bermaksud trading card game (permainan kad dagangan) dan merujuk kepada kategori seperti Pokémon, One Piece atau Magic: The Gathering. {nft} merujuk kepada aset blockchain yang unik. {rwa} menekankan bahawa aset itu berkait dengan sesuatu yang fizikal. \"Kad dagangan kripto\" ialah istilah tidak rasmi dan boleh juga bermaksud kad yang wujud secara digital sahaja.",
+    tcg: "TCG",
+    nft: "NFT",
+    rwa: "RWA",
+    tccNote: "{tcc} kadangkala digunakan secara tidak rasmi untuk \"trading card crypto\", tetapi istilah ini tiada makna yang konsisten dalam pasaran kad. \"Kad dagangan bertoken\" atau \"barang koleksi TCG on-chain\" menerangkan kategori ini dengan lebih jelas.",
+    tcc: "TCC",
+    best: "Bagi model yang dijejak oleh Decard, {phrase} ialah frasa yang paling jelas maksudnya: slab fizikal tertentu yang digred secara profesional dan diwakili on-chain sementara disimpan dalam jagaan.",
+    phrase: "kad dagangan bergred bertoken",
+  },
+  risks: {
+    title: "Apa yang tidak dihapuskan oleh token",
+    item: "{title} {text}",
+    items: [
+      { title: "Risiko pasaran.", text: "Penyenaraian, nilai insurans atau jualan lalu tidak menjamin berapa yang akan dibayar oleh pembeli lain. Kad yang jarang didagangkan mungkin mempunyai jurang yang luas antara harga minta dan bidaan yang benar-benar boleh dilaksanakan." },
+      { title: "Risiko jagaan.", text: "Kad fizikal dipegang oleh kustodian. Sahkan siapa yang memegangnya, pengaturan insurans dan apa yang berlaku jika platform atau kustodian menghadapi masalah." },
+      { title: "Risiko penebusan.", text: "Yuran penghantaran, destinasi yang disokong, cukai, kelewatan dan kelayakan kad boleh berubah. Kad dalam bilik kebal rakan kongsi mungkin mengambil masa lebih lama untuk dihantar." },
+      { title: "Risiko metadata.", text: "Data set, parallel, gred atau sijil yang salah boleh memesongkan perbandingan. Sahkan slab dan rekod penggred, jangan bergantung pada satu skrin sahaja." },
+      { title: "Risiko dompet dan kontrak.", text: "Transaksi pasaran memerlukan tandatangan dompet. Baca setiap transaksi, lindungi frasa pemulihan (seed phrase) anda dan gunakan pautan rasmi." },
+    ],
+  },
+  decard: {
+    title: "Apa yang Decard tambah",
+    intro: "Collector Crypt menyediakan aset dan pasaran. Decard ialah antara muka penyelidikan bebas yang dibina di atas data awam. Ia menggabungkan katalog pasaran dengan aktiviti on-chain supaya pengumpul boleh beralih daripada mencari kad kepada menyemaknya dengan teliti tanpa menyambung dompet.",
+    features: [
+      { title: "Pengimbas penyenaraian", text: "Menyusun penyenaraian ikut skor tawaran, harga atau masa disenaraikan di Collector Crypt dan Magic Eden." },
+      { title: "Halaman kad", text: "Menghimpunkan identiti kad, gred, sijil, nilai insurans, laporan pop, penyenaraian, bidaan dan sejarah." },
+      { title: "Pita dagangan langsung", text: "Menyahkod arahan pasaran Collector Crypt terkini kepada jualan, penyenaraian, perubahan harga dan bidaan." },
+      { title: "Penjejak dompet", text: "Menunjukkan kad bergred dan aktiviti pasaran yang telah dinyahkod bagi mana-mana alamat Solana." },
+    ],
+    data: "Decard tiada pangkalan data dan tiada pengindeks pasaran persendirian. Penyenaraian, nilai insurans, bidaan dan data populasi datang daripada API awam Collector Crypt; aktiviti datang daripada program pasaran Collector Crypt di Solana. Cache jangka pendek mengurangkan beban pada sumber asal, jadi angka mungkin lewat beberapa saat. Lihat {guide} untuk setiap medan dan hadnya.",
+    guideLink: "Panduan Jurulatih",
+  },
+  faq: {
+    title: "Soalan lazim",
+    items: [
+      {
+        q: "Adakah kad dagangan bertoken sama dengan kad digital?",
+        a: "Tidak. Dalam model yang dibincangkan di sini, aset on-chain yang unik mewakili kad fizikal yang digred secara profesional dan disimpan dalam bilik kebal. Token boleh berpindah antara dompet sementara slab kekal dalam jagaan, dan pemilik boleh mengikut proses platform untuk menebus kad fizikal itu.",
+      },
+      {
+        q: "Adakah ini TCG, NFT, RWA atau kad dagangan kripto?",
+        a: "Ia boleh diterangkan dengan keempat-empat istilah, tetapi maknanya berbeza. TCG mengenal pasti kategori kad, NFT merujuk kepada aset on-chain yang unik, dan RWA merujuk kepada kaitannya dengan barang fizikal. Kad dagangan bertoken ialah istilah keseluruhan yang paling jelas.",
+      },
+      {
+        q: "Adakah skor tawaran Decard yang tinggi menjamin keuntungan?",
+        a: "Tidak. Ia hanya mengukur diskaun antara penyenaraian USDC dan nilai insurans Collector Crypt. Ia tidak membuktikan permintaan, kecairan, ketulenan di luar rekod yang dipaparkan, harga jualan pada masa depan atau ekonomi penebusan.",
+      },
+      {
+        q: "Adakah saya perlukan dompet untuk menggunakan Decard?",
+        a: "Tidak. Decard ialah alat penyelidikan baca sahaja. Anda hanya perlukan dompet Solana yang serasi, USDC dan SOL apabila anda memilih untuk berurus niaga di pasaran seperti Collector Crypt.",
+      },
+      {
+        q: "Apakah sumber data kad dan pasaran Decard?",
+        a: "Penyenaraian, butiran kad, nilai insurans, bidaan dan laporan populasi datang daripada API awam Collector Crypt. Aktiviti pasaran datang daripada program pasaran Collector Crypt di Solana. Decard tiada pangkalan data atau pengindeks persendirian.",
+      },
+    ],
+  },
+  sources: {
+    title: "Sumber dan metodologi",
+    intro: "Panduan ini meringkaskan model platform; terma pasaran dikawal oleh penyedia asal. Semak sumber berikut untuk butiran operasi terkini:",
+    links: {
+      product: "Maklumat produk Collector Crypt",
+      market: "Panduan pengguna pasaran Collector Crypt",
+      deposit: "Collector Crypt: mendepositkan kad",
+      withdraw: "Collector Crypt: mengeluarkan kad",
+      solana: "Gambaran keseluruhan Solana tentang kad dan barang koleksi bertoken",
+      psa: "Laporan Populasi PSA (mungkin perlu log masuk)",
+      code: "Kod sumber dan logik pengiraan Decard",
+    },
+  },
+  cta: {
+    title: "SEDIA MENYELIDIK KAD?",
+    text: "Imbas pasaran langsung, kemudian buka sebuah kad untuk mengesahkan gred, populasi, bidaan dan sejarahnya.",
+    deals: "Cari tawaran langsung",
+    tape: "Tonton pita dagangan",
+  },
+  aside: {
+    label: "Dalam halaman ini",
+    title: "DALAM HALAMAN INI",
+    toc: {
+      whatIs: "Kad bertoken",
+      platform: "Collector Crypt",
+      research: "Senarai semak penyelidikan",
+      dealScore: "Skor tawaran",
+      terms: "TCG, NFT dan RWA",
+      risks: "Risiko",
+      decard: "Cara Decard berfungsi",
+      faq: "Soalan lazim",
+      sources: "Sumber",
+    },
+  },
+};

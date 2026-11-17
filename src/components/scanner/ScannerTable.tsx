@@ -1,38 +1,45 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import Link from "@/components/LocaleLink";
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import type { CardRow } from "@/lib/types";
 import type { ScannerParams } from "@/services/Scanner/getScanner";
 import { useScanner } from "@/hooks/pages/Scanner/useScanner";
-import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName, timeAgo, venueName } from "@/lib/format";
-import { cardImage } from "@/lib/constants";
+import { dealScore, fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { listingImage, venueLabel } from "@/lib/venue";
 import { listingUsd, useMediaQuery, useSolPrice } from "@/lib/hooks";
+import { localizeHref } from "@/lib/i18n";
+import { age, plural } from "@/lib/i18n/format";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { PRIMARY_CATEGORIES, TYPES, typeFor } from "@/lib/poke-types";
 import { CardTile, CardTileSkeleton } from "@/components/CardTile";
 import { CountUp } from "@/components/motion";
 import { DexMessage, FeedSkeleton, GradePill, HPBar, TypeChip, TypeIcon } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
 
-const SORTS = [
-  { id: "deal", label: "Best deal" },
-  { id: "listedDateDesc", label: "Newest" },
-  { id: "listedPriceAsc", label: "Price ↑" },
-  { id: "listedPriceDesc", label: "Price ↓" },
-] as const;
+// Labels: market.scannerTable.sorts in lib/i18n/strings.
+const SORTS = ["deal", "listedDateDesc", "listedPriceAsc", "listedPriceDesc"] as const;
 
+// Venue names are brands and stay as written; "All" comes from the strings.
 const SOURCES = [
-  { id: "", label: "All" },
+  { id: "", label: null },
   { id: "CC", label: "Collector Crypt" },
   { id: "ME", label: "Magic Eden" },
+  { id: "SLABZ", label: "Slabz" },
 ] as const;
 
-type Source = "" | "CC" | "ME";
+type Source = "" | "CC" | "ME" | "SLABZ";
 type View = "list" | "grid";
 
+/** A whole sentence with {name} slots filled by elements, so translators can reorder it. */
+function rich(template: string, slots: Record<string, ReactNode>) {
+  return template.split(/\{(\w+)\}/).map((part, i) => (i % 2 ? <Fragment key={i}>{slots[part]}</Fragment> : part));
+}
+
 function PriceCell({ c, solUsd }: { c: CardRow; solUsd: number | null }) {
-  if (!c.listing) return <span className="text-sm text-ink-mute">Unlisted</span>;
+  const t = useT();
+  if (!c.listing) return <span className="text-sm text-ink-mute">{t.market.scannerTable.unlisted}</span>;
   const usd = listingUsd(c.listing.price, c.listing.currency, solUsd);
   return (
     <div className="flex flex-col items-end md:items-start">
@@ -40,7 +47,7 @@ function PriceCell({ c, solUsd }: { c: CardRow; solUsd: number | null }) {
         {c.listing.currency === "USDC" ? fmtUsd(c.listing.price) : fmtSol(c.listing.price)}
       </span>
       <span className="mt-1 text-[11px] text-ink-mute">
-        {venueName(c.listing.marketplace)}
+        {venueLabel(c.listing.marketplace)}
         {c.listing.currency === "SOL" && usd != null && ` · ≈${fmtUsd(usd, { compact: true })}`}
       </span>
     </div>
@@ -48,6 +55,7 @@ function PriceCell({ c, solUsd }: { c: CardRow; solUsd: number | null }) {
 }
 
 function Row({ c, solUsd, i }: { c: CardRow; solUsd: number | null; i: number }) {
+  const { locale, t } = useLocale();
   const score = c.listing?.currency === "USDC" ? dealScore(c.listing.price, c.insuredValue) : null;
   const type = typeFor(c.category);
   return (
@@ -61,7 +69,7 @@ function Row({ c, solUsd, i }: { c: CardRow; solUsd: number | null; i: number })
         className="group menu-item grid grid-cols-[48px_1fr_auto] md:grid-cols-[52px_minmax(0,2.6fr)_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.3fr)_56px] items-center gap-4 py-3 px-2 rounded-xl hover:bg-cream-hi transition-colors"
       >
         <img
-          src={cardImage(c.nftAddress, "front", 128)}
+          src={listingImage(c, 128)}
           alt=""
           loading="lazy"
           decoding="async"
@@ -72,7 +80,7 @@ function Row({ c, solUsd, i }: { c: CardRow; solUsd: number | null; i: number })
             <span
               className="grid place-items-center h-4 w-4 shrink-0 rounded-full"
               style={{ background: TYPES[type].color, color: TYPES[type].fg }}
-              title={c.category}
+              title={t.common.categories[c.category] ?? c.category}
             >
               <TypeIcon type={type} className="h-2.5 w-2.5" />
             </span>
@@ -94,11 +102,11 @@ function Row({ c, solUsd, i }: { c: CardRow; solUsd: number | null; i: number })
           {score != null && score > 0 ? (
             <HPBar value={score} />
           ) : (
-            <span className="text-xs text-ink-mute">{score === 0 ? "Above insured" : "·"}</span>
+            <span className="text-xs text-ink-mute">{score === 0 ? t.market.scannerTable.aboveInsured : "·"}</span>
           )}
         </div>
         <span className="hidden md:block text-sm text-ink-mute tabular-nums">
-          {c.listing ? timeAgo(c.listing.updatedAt) : "·"}
+          {c.listing ? age(locale, c.listing.updatedAt) : "·"}
         </span>
       </Link>
     </motion.div>
@@ -114,12 +122,14 @@ export function ScannerTable({
   initialSource?: Source;
   initialOrder?: string;
 }) {
+  const { locale, t } = useLocale();
+  const tt = t.market.scannerTable;
   const isCategory = PRIMARY_CATEGORIES.includes(initialSearch);
   const [category, setCategory] = useState(isCategory ? initialSearch : "");
   const [search, setSearch] = useState(isCategory ? "" : initialSearch);
   const [debounced, setDebounced] = useState(search);
   const [source, setSource] = useState<Source>(initialSource);
-  const [orderBy, setOrderBy] = useState<string>(SORTS.some((s) => s.id === initialOrder) ? initialOrder : "deal");
+  const [orderBy, setOrderBy] = useState<string>(SORTS.some((s) => s === initialOrder) ? initialOrder : "deal");
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
   // Phones default to the visual grid, larger screens to the dense list.
@@ -143,8 +153,8 @@ export function ScannerTable({
     if (source) p.set("source", source);
     if (orderBy !== "deal") p.set("orderBy", orderBy);
     const qs = p.toString();
-    window.history.replaceState(null, "", qs ? `/scanner?${qs}` : "/scanner");
-  }, [effectiveSearch, source, orderBy]);
+    window.history.replaceState(null, "", localizeHref(locale, qs ? `/scanner?${qs}` : "/scanner"));
+  }, [effectiveSearch, source, orderBy, locale]);
 
   const params = useMemo<ScannerParams>(
     () => ({
@@ -186,7 +196,7 @@ export function ScannerTable({
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 py-1">
           <TypeChip
             category={null}
-            label="All types"
+            label={tt.allTypes}
             pressed={category === ""}
             onClick={() => setCategory("")}
           />
@@ -194,6 +204,7 @@ export function ScannerTable({
             <TypeChip
               key={c}
               category={c}
+              label={t.common.categories[c] ?? c}
               pressed={category === c}
               onClick={() => {
                 setCategory(category === c ? "" : c);
@@ -211,48 +222,48 @@ export function ScannerTable({
               setSearch(e.target.value);
               if (e.target.value) setCategory("");
             }}
-            placeholder="Filter by name, set, mint or cert #"
-            aria-label="Filter listings"
+            placeholder={tt.filter}
+            aria-label={tt.filterLabel}
             className="h-11 flex-1 min-w-[200px] rounded-full bg-cream-hi border-2 border-sand px-4 outline-none focus:border-ink"
           />
-          <div className="seg" role="group" aria-label="Sort">
+          <div className="seg" role="group" aria-label={tt.sortLabel}>
             {SORTS.map((s) => (
-              <button key={s.id} type="button" aria-pressed={orderBy === s.id} onClick={() => setOrderBy(s.id)}>
-                {s.label}
+              <button key={s} type="button" aria-pressed={orderBy === s} onClick={() => setOrderBy(s)}>
+                {tt.sorts[s]}
               </button>
             ))}
           </div>
-          <div className="seg" role="group" aria-label="Venue">
+          <div className="seg" role="group" aria-label={tt.venueLabel}>
             {SOURCES.map((s) => (
               <button key={s.id} type="button" aria-pressed={source === s.id} onClick={() => setSource(s.id)}>
-                {s.label}
+                {s.label ?? tt.allVenues}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-1.5">
             {(
               [
-                ["min", min, setMin],
-                ["max", max, setMax],
+                ["min", min, setMin, tt.min, tt.minLabel],
+                ["max", max, setMax, tt.max, tt.maxLabel],
               ] as const
-            ).map(([label, val, set]) => (
+            ).map(([key, val, set, placeholder, label]) => (
               <input
-                key={label}
+                key={key}
                 value={val}
                 onChange={(e) => set(e.target.value.replace(/[^\d.]/g, ""))}
-                placeholder={`$ ${label}`}
+                placeholder={placeholder}
                 inputMode="decimal"
-                aria-label={`${label} price`}
+                aria-label={label}
                 className="h-11 w-24 rounded-full bg-cream-hi border-2 border-sand px-4 outline-none focus:border-ink"
               />
             ))}
           </div>
-          <div className="seg ml-auto" role="group" aria-label="View">
+          <div className="seg ml-auto" role="group" aria-label={tt.viewLabel}>
             <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")}>
-              List
+              {tt.list}
             </button>
             <button type="button" aria-pressed={view === "grid"} onClick={() => setView("grid")}>
-              Grid
+              {tt.grid}
             </button>
           </div>
         </div>
@@ -263,35 +274,41 @@ export function ScannerTable({
         <p className="text-ink-soft">
           {first ? (
             <>
-              <b className="font-num font-extrabold text-2xl tabular-nums text-ink align-[-2px]">
-                <CountUp value={first.findTotal} />
-              </b>{" "}
-              matching cards
+              {rich(plural(locale, first.findTotal, tt.matching, { n: "{n}" }), {
+                n: (
+                  <b className="font-num font-extrabold text-2xl tabular-nums text-ink align-[-2px]">
+                    <CountUp value={first.findTotal} />
+                  </b>
+                ),
+              })}
               {orderBy === "deal" && (
-                <span className="text-ink-mute"> · graded-card deals from the freshest and cheapest, best first</span>
+                <span className="text-ink-mute">
+                  {" "}
+                  · {source === "SLABZ" ? tt.dealsSlabz : tt.deals}
+                </span>
               )}
             </>
           ) : (
-            "Scanning the market"
+            t.market.scanner.scanning
           )}
         </p>
         {q.isFetching && !q.isFetchingNextPage && (
           <span className="inline-flex items-center gap-2 font-pixel text-[9px] text-ink-mute">
-            <span className="pokeball pokeball-wobble" style={{ ["--s" as string]: "16px" }} /> UPDATING
+            <span className="pokeball pokeball-wobble" style={{ ["--s" as string]: "16px" }} /> {tt.updating}
           </span>
         )}
       </div>
 
       {q.isError && !q.data && (
         <DexMessage
-          title="The scanner fainted!"
+          title={tt.errorTitle}
           action={
             <button type="button" className="btn btn-red" onClick={() => q.refetch()}>
-              Revive it
+              {tt.retry}
             </button>
           }
         >
-          Collector Crypt didn&apos;t answer. Try again in a moment.
+          {tt.errorText}
         </DexMessage>
       )}
 
@@ -307,7 +324,7 @@ export function ScannerTable({
         ))}
 
       {!q.isLoading && !q.isError && cards.length === 0 && (
-        <DexMessage title="No cards here. Try another type or widen the price range." />
+        <DexMessage title={tt.empty} />
       )}
 
       {cards.length > 0 &&
@@ -321,11 +338,11 @@ export function ScannerTable({
           <div>
             <div className="hidden md:grid grid-cols-[52px_minmax(0,2.6fr)_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.3fr)_56px] gap-4 px-2 pb-2 border-b-2 border-ink/80 font-pixel text-[8px] text-ink-mute">
               <span />
-              <span>CARD</span>
-              <span>PRICE</span>
-              <span>INSURED</span>
-              <span>DEAL SCORE</span>
-              <span>LISTED</span>
+              <span>{tt.columns.card}</span>
+              <span>{tt.columns.price}</span>
+              <span>{tt.columns.insured}</span>
+              <span>{tt.columns.deal}</span>
+              <span>{tt.columns.listed}</span>
             </div>
             <div className="dash-divide">
               {cards.map((c, i) => (
@@ -343,7 +360,7 @@ export function ScannerTable({
             disabled={q.isFetchingNextPage}
             onClick={() => q.fetchNextPage()}
           >
-            {q.isFetchingNextPage ? "Loading..." : "Load more cards"}
+            {q.isFetchingNextPage ? tt.loadingMore : tt.loadMore}
           </button>
         </div>
       )}

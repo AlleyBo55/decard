@@ -1,7 +1,8 @@
 "use client";
 
-import { animate, motion, useInView } from "motion/react";
+import { motion } from "motion/react";
 import { Children, useEffect, useRef } from "react";
+import { useT } from "@/components/LocaleProvider";
 import { clsx } from "@/lib/clsx";
 
 /**
@@ -48,50 +49,8 @@ export function HoloCard({ children, className }: { children: React.ReactNode; c
   );
 }
 
-type CountKind = "int" | "usd" | "usdCompact";
-
-function formatCount(v: number, kind: CountKind) {
-  if (kind === "usd") {
-    // Same money rule as fmtUsd: full cents under $100 ("$10.80"), whole dollars whole.
-    const digits = Math.abs(v) < 100 && !Number.isInteger(v) ? 2 : 0;
-    return "$" + Intl.NumberFormat("en", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
-  }
-  if (kind === "usdCompact")
-    return "$" + Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(v);
-  return Math.round(v).toLocaleString("en");
-}
-
-/** Animated number. Writes textContent directly, no React re-renders. */
-export function CountUp({ value, kind = "int", className }: { value: number; kind?: CountKind; className?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const from = useRef(0);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !inView) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.textContent = formatCount(value, kind);
-      from.current = value;
-      return;
-    }
-    const controls = animate(from.current, value, {
-      duration: 1.1,
-      ease: [0.2, 0.8, 0.2, 1],
-      onUpdate: (v) => {
-        el.textContent = formatCount(v, kind);
-      },
-    });
-    from.current = value;
-    return () => controls.stop();
-  }, [inView, value, kind]);
-
-  return (
-    <span ref={ref} className={clsx("tabular-nums", className)}>
-      {formatCount(0, kind)}
-    </span>
-  );
-}
+// Motion-free, so a page that only needs a counter doesn't load the motion library.
+export { CountUp } from "./CountUp";
 
 /** Fade-and-rise when a section scrolls into view (IntersectionObserver). */
 export function Reveal({
@@ -118,6 +77,7 @@ export function Reveal({
 
 /** Horizontal card rail with snap scrolling and arrow buttons for mouse users. */
 export function Rail({ children, label }: { children: React.ReactNode; label: string }) {
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const scroll = (dir: 1 | -1) => {
     const el = ref.current;
@@ -147,7 +107,7 @@ export function Rail({ children, label }: { children: React.ReactNode; label: st
         <button
           key={dir}
           type="button"
-          aria-label={dir < 0 ? "Scroll left" : "Scroll right"}
+          aria-label={dir < 0 ? t.ui.rail.left : t.ui.rail.right}
           onClick={() => scroll(dir)}
           className={clsx(
             "hidden md:grid place-items-center absolute top-[38%] z-10 h-11 w-11 rounded-full btn-cream text-xl font-black",

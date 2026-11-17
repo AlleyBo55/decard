@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { TypeChip } from "@/components/ui";
-import { feedStats, fmtMultiple, multipleLevel, shortPackLabel, windowText } from "@/components/gacha/shared";
+import { feedStats, fmtMultiple, multipleLevel, shortPackLabel } from "@/components/gacha/shared";
 import { useLivePulls } from "@/hooks/pages/Gacha/useGachaFeeds";
 import { fmtUsd } from "@/lib/format";
+import { fmt, plural } from "@/lib/i18n/format";
 import type { LivePull } from "@/lib/types";
 import { NONE } from "./format";
 
@@ -52,10 +54,12 @@ function useDrip(pulls: LivePull[] | undefined) {
   return state.rows;
 }
 
-const categoryLabel = (c: string | null) => (c === "Pokemon" ? "Pokémon" : c || "Other");
-
 /** Packs and dollars ripped in the live feed's window, and the newest pulls popping in. */
 export function LiveRips({ buybackPerDollar }: { buybackPerDollar: number | null }) {
+  const t = useT();
+  const { locale } = useLocale();
+  const c = t.token.live;
+  const categoryLabel = (cat: string | null) => (cat ? (t.common.categories[cat] ?? cat) : t.ui.primitives.otherCategory);
   const { data, isLoading, isError } = useLivePulls();
   const pulls = data?.pulls;
   const rows = useDrip(pulls);
@@ -63,11 +67,19 @@ export function LiveRips({ buybackPerDollar }: { buybackPerDollar: number | null
   const dollars = pulls?.length ? pulls.reduce((sum, p) => sum + (p.free ? 0 : p.price || 0), 0) : null;
   const est = dollars != null && buybackPerDollar != null ? dollars * buybackPerDollar : null;
 
+  // Seconds under two minutes, whole minutes above (as gacha/shared.ts windowText rounds them).
+  const span = stats?.windowSeconds ?? 0;
+  const windowNote = !stats
+    ? c.noWindow
+    : span < 120
+      ? plural(locale, Math.max(1, Math.round(span)), c.inLastSeconds)
+      : plural(locale, Math.round(span / 60), c.inLastMinutes);
+
   const cells: [string, string, string][] = [
-    ["PACKS RIPPED", stats ? String(stats.count) : NONE, stats ? `in the last ${windowText(stats.windowSeconds)}` : "in the feed window"],
-    ["DOLLARS RIPPED", dollars != null ? fmtUsd(dollars) : NONE, "pack prices, free spins excluded"],
-    ["PACE", stats?.perMinute != null ? `${stats.perMinute.toFixed(0)}/min` : NONE, "packs a minute"],
-    ["TOWARD BUYBACKS", est != null ? `≈ ${fmtUsd(est)}` : NONE, "at the 30-day rate (estimate)"],
+    [c.packs, stats ? String(stats.count) : NONE, windowNote],
+    [c.dollars, dollars != null ? fmtUsd(dollars) : NONE, c.dollarsNote],
+    [c.pace, stats?.perMinute != null ? fmt(c.paceValue, { n: stats.perMinute.toFixed(0) }) : NONE, c.paceNote],
+    [c.buybacks, est != null ? `≈ ${fmtUsd(est)}` : NONE, c.buybacksNote],
   ];
 
   return (
@@ -81,13 +93,13 @@ export function LiveRips({ buybackPerDollar }: { buybackPerDollar: number | null
           </div>
         ))}
       </dl>
-      <ol className="tk-rips" aria-label="Newest pulls" aria-busy={isLoading}>
+      <ol className="tk-rips" aria-label={c.list} aria-busy={isLoading}>
         {rows.length > 0
           ? rows.map((p) => (
               <li key={p.id} className="tk-rip">
                 <TypeChip category={p.category} label={categoryLabel(p.category)} className="tk-rip-chip" />
                 <span className="tk-rip-pack">{shortPackLabel(p)}</span>
-                <span className="tk-rip-price">{p.free ? "Free" : fmtUsd(p.price)}</span>
+                <span className="tk-rip-price">{p.free ? c.free : fmtUsd(p.price)}</span>
                 <span className="tk-rip-mult" data-level={multipleLevel(p.multiple)}>
                   {p.multiple != null ? fmtMultiple(p.multiple) : "…"}
                 </span>
@@ -95,7 +107,7 @@ export function LiveRips({ buybackPerDollar }: { buybackPerDollar: number | null
             ))
           : Array.from({ length: SHOW }, (_, i) => (
               <li key={i} className="tk-rip tk-rip-empty">
-                {i === 0 && (isError ? "The live feed is unavailable right now." : "Waiting for the next pack…")}
+                {i === 0 && (isError ? c.error : c.waiting)}
               </li>
             ))}
       </ol>

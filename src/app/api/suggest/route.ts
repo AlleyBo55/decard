@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { marketSearch } from "@/lib/i18n/aliases";
 import { getMarketplace } from "@/lib/cc";
 import { cached, edgeCache } from "@/lib/cache";
 
 // Lightweight typeahead: up to 6 matching cards for a query.
 export async function GET(req: NextRequest) {
-  const q = (req.nextUrl.searchParams.get("q") ?? "").trim().slice(0, 60);
+  const q = marketSearch((req.nextUrl.searchParams.get("q") ?? "").trim()).slice(0, 60);
   if (q.length < 2) return NextResponse.json({ results: [], total: 0 });
 
   try {

@@ -53,8 +53,13 @@ const send = (method, params = {}) =>
 
 await send("Page.enable");
 for (const job of jobs) {
-  const [name, rest] = job.split("=");
-  const [path, size] = rest.split("@");
+  // Split on the first "=" and the last "@" only: paths may carry a query (?preview=1).
+  const eq = job.indexOf("=");
+  const name = job.slice(0, eq);
+  const rest = job.slice(eq + 1);
+  const at = rest.lastIndexOf("@");
+  const path = rest.slice(0, at);
+  const size = rest.slice(at + 1);
   const [w, h] = size.split("x").map(Number);
   const mobile = w < 768;
   await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: mobile ? 2 : 1, mobile });

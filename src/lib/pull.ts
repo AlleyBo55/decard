@@ -1,5 +1,6 @@
 import { fmtMultiple } from "@/components/gacha/shared";
 import { fmtNum, fmtUsd } from "./format";
+import { fmt } from "./i18n/format";
 
 // Pull receipt: one slab, optionally against the pack price the sharer paid.
 // Shared by the share image (app/og/card/[mint]), the card page's metadata and
@@ -71,14 +72,26 @@ export interface PullFacts {
   pop: number | null;
 }
 
+/** The post text's wording, in the page's language (strings/<locale>/card.ts receipt.post). */
+export interface PostCopy {
+  pulled: string;
+  pulledWithValue: string;
+  insured: string;
+  pop: string;
+}
+
 /** Post text. Facts only: the multiple is spelled out as insured value against the pack. */
-export function shareText({ title, insured, pop }: PullFacts, pack: number | null): string {
+export function shareText({ title, insured, pop }: PullFacts, pack: number | null, copy: PostCopy): string {
   const m = pullMultiple(insured, pack);
   if (pack) {
-    const value = insured > 0 ? ` Insured value ${fmtUsd(insured)} (${fmtMultiple(m)} the pack).` : "";
-    return `Pulled ${title} from a ${fmtPack(pack)} pack.${value}`;
+    const vars = { name: title, pack: fmtPack(pack), insured: fmtUsd(insured), multiple: fmtMultiple(m) };
+    return fmt(insured > 0 ? copy.pulledWithValue : copy.pulled, vars);
   }
-  return [title, insured > 0 ? `insured value ${fmtUsd(insured)}` : null, pop != null ? `pop ${fmtNum(pop)}` : null]
+  return [
+    title,
+    insured > 0 ? fmt(copy.insured, { insured: fmtUsd(insured) }) : null,
+    pop != null ? fmt(copy.pop, { pop: fmtNum(pop) }) : null,
+  ]
     .filter(Boolean)
     .join(" · ");
 }

@@ -1,0 +1,172 @@
+import type { Strings } from "../en";
+import type { Translation } from "../types";
+
+export const explainer: Translation<Strings["explainer"]> = {
+  meta: {
+    section: "Thẻ bài token hóa",
+    tags: ["Collector Crypt", "thẻ bài token hóa", "TCG on-chain", "Solana", "thẻ graded"],
+  },
+  ld: {
+    about: ["Thẻ bài token hóa", "Collector Crypt", "Solana", "Trò chơi thẻ bài"],
+  },
+  breadcrumb: {
+    label: "Đường dẫn",
+    page: "Thẻ bài token hóa",
+  },
+  hero: {
+    kicker: "Thẻ graded · Solana · TCG on-chain",
+    h1: "Thẻ bài token hóa, {accent}",
+    h1Accent: "giải thích dễ hiểu.",
+    lede: "Một lá thẻ Pokémon, One Piece hay thẻ thể thao đã chấm điểm có thể nằm an toàn trong kho, trong khi quyền sở hữu được chuyển trên Solana. Bài này giải thích mô hình đó hoạt động thế nào, cách Collector Crypt lưu ký và token hóa thẻ graded, và cách tìm hiểu một lá thẻ trước khi giao dịch.",
+    scan: "Quét thẻ đang niêm yết",
+    glossary: "Mở bảng thuật ngữ thẻ graded",
+    author: "Những người đóng góp cho Decard",
+    byline: "Bởi {author} · Đăng và rà soát ngày {date} · 10 phút đọc · Độc lập, không phải lời khuyên tài chính",
+  },
+  pillars: [
+    { label: "THẺ THẬT", text: "Slab đã được chấm điểm chuyên nghiệp vẫn nằm trong kho lưu ký." },
+    { label: "ON-CHAIN", text: "Một tài sản duy nhất trên Solana ghi nhận quyền sở hữu có thể chuyển nhượng." },
+    { label: "QUY ĐỔI ĐƯỢC", text: "Chủ sở hữu có thể làm theo quy trình của bên lưu ký để nhận thẻ." },
+  ],
+  whatIs: {
+    title: "Thẻ bài token hóa là gì?",
+    intro: "Thẻ bài token hóa gắn một tài sản blockchain duy nhất với một món đồ sưu tầm thật do bên lưu ký giữ. Slab thật không cần được gửi đi khắp nơi mỗi lần đổi chủ. Thay vào đó, tài sản on-chain được chuyển giữa các ví, còn lá thẻ gốc nằm trong kho cho đến khi chủ sở hữu quy đổi.",
+    redeemable: "Điều này khác với đồ sưu tầm thuần kỹ thuật số. Collector Crypt cho biết tài sản thẻ của họ có thể quy đổi ra thẻ thật: người sưu tầm có thể gửi một thẻ graded đủ điều kiện vào kho và nhận tài sản tương ứng, hoặc đốt tài sản đó khi rút khỏi kho để thẻ thật được gửi đi. Trước khi giao dịch, hãy đọc bản mới nhất của {product}, {deposit} và {withdraw}, vì việc lưu ký, điều kiện, chi phí và thời gian có thể thay đổi.",
+    productLink: "mô tả sản phẩm của Collector Crypt",
+    depositLink: "quy trình gửi thẻ vào kho",
+    withdrawLink: "quy trình rút khỏi kho",
+    noteTitle: "TOKEN ≠ BẢN THÂN SLAB",
+    note: "Tài sản này là bản ghi on-chain có thể chuyển nhượng, gắn với lá thẻ trong kho. Việc quy đổi phụ thuộc vào bên lưu ký, tình trạng của thẻ và điều khoản hiện hành của nền tảng.",
+  },
+  platform: {
+    title: "Collector Crypt hoạt động thế nào trên Solana",
+    intro: "Collector Crypt kết hợp dịch vụ lưu ký thẻ với một sàn giao dịch trên Solana. Theo tài liệu của họ, thẻ gửi vào phải được chấm điểm từ trước. Sau khi kiểm tra và đưa vào kho, người gửi nhận một NFT đại diện cho lá thẻ. Sàn dùng USDC để mua bán và SOL để trả phí mạng.",
+    step: "BƯỚC {n}",
+    steps: [
+      { title: "Chấm điểm và lưu kho", text: "Slab đủ điều kiện được kiểm tra và cất giữ; thông tin nhận dạng gồm các chi tiết như bộ, số sê-ri, hãng chấm điểm, điểm và chứng nhận." },
+      { title: "Đại diện quyền sở hữu", text: "Một tài sản duy nhất trong ví Solana trỏ tới lá thẻ đó, trong khi slab thật vẫn nằm trong kho lưu ký." },
+      { title: "Giao dịch", text: "Người nắm giữ có thể niêm yết tài sản. Collector Crypt mô tả việc niêm yết là không ký quỹ trung gian (escrowless): tài sản vẫn nằm trong ví người bán cho đến khi bán được." },
+      { title: "Quy đổi", text: "Chủ sở hữu tạo yêu cầu rút khỏi kho, đốt tài sản on-chain và trả phí vận chuyển áp dụng để bên lưu ký gửi slab đi." },
+    ],
+    broader: "Mô hình rộng hơn thường được gọi là đồ sưu tầm token hóa hoặc tài sản thực (RWA). {link} mô tả một số nền tảng dùng quyền sở hữu on-chain trong khi món đồ thật vẫn nằm trong kho lưu ký. Mỗi nền tảng có điều khoản khác nhau, nên chỉ hai chữ “token hóa” chưa cho bạn biết ai đang giữ món đồ hay việc quy đổi được đảm bảo chính xác những gì.",
+    solanaLink: "Bài tổng quan của Solana Foundation",
+  },
+  research: {
+    title: "Cách tìm hiểu một thẻ graded token hóa",
+    intro: "Một lượt niêm yết tốt không chỉ là nhân vật quen thuộc và giá rẻ. Hãy kiểm tra cùng lúc các mục sau:",
+    fields: [
+      { term: "Nhận dạng", meaning: "Đối chiếu năm, bộ, số thẻ, ngôn ngữ, bản parallel và tình trạng chữ ký. Những bản phát hành trông giống nhau có thể chênh giá rất xa." },
+      { term: "Điểm và chứng nhận", meaning: "Xác nhận hãng chấm điểm, điểm số và số chứng nhận (cert). Khi có liên kết cert trên Decard, hãy bấm vào để tra trên trang của hãng chấm điểm." },
+      { term: "Số pop", meaning: "Báo cáo pop (population report) đếm số thẻ hãng chấm điểm đã ghi nhận ở mức điểm này trở lên. Pop thấp có thể củng cố độ khan hiếm, nhưng không tạo ra nhu cầu." },
+      { term: "Giá và giá trị bảo hiểm", meaning: "Hãy xem giá trị bảo hiểm là một mốc tham khảo đi kèm lá thẻ, không phải giá bán được đảm bảo hay một bản định giá đầy đủ." },
+      { term: "Trả giá và hoạt động", meaning: "Các lượt trả giá đang mở, giao dịch gần đây và thay đổi niêm yết cho biết về thanh khoản nhiều hơn là riêng giá chào bán." },
+      { term: "Lưu ký và quy đổi", meaning: "Kiểm tra trên sàn: bên lưu ký hiện tại, điều kiện rút khỏi kho, phí vận chuyển, giới hạn nơi nhận và thời gian dự kiến." },
+    ],
+    population: "PSA mô tả {link} của mình là bản ghi số thẻ PSA đã chấm ở từng mức điểm. Decard hiển thị pop ở mức điểm được báo cáo, pop cao hơn, tổng pop và tỉ lệ gem (tỉ lệ đạt 10) khi Collector Crypt cung cấp các số này.",
+    psaLink: "Population Report (báo cáo pop)",
+  },
+  dealScore: {
+    title: "Điểm deal của Decard",
+    intro: "Điểm deal là cách xếp hạng nhanh cho các thẻ niêm yết bằng USDC. Điểm này đo giá chào bán thấp hơn giá trị bảo hiểm của thẻ bao nhiêu:",
+    formulaLabel: "CÔNG THỨC",
+    formula: "(1 − giá niêm yết ÷ giá trị bảo hiểm) × 100",
+    insured: "BẢO HIỂM",
+    listed: "NIÊM YẾT",
+    score: "ĐIỂM DEAL",
+    limits: "Điểm được giới hạn từ 0 đến 100. Điểm chỉ hiện khi thẻ có giá trị bảo hiểm và được niêm yết bằng USDC, vì Decard không đoán giá đô la cho thẻ niêm yết bằng SOL khi xếp hạng deal. Điểm 20 nghĩa là “niêm yết thấp hơn giá trị bảo hiểm 20%”, không phải “đáng giá hơn 20%” và cũng không phải “chắc chắn có lời”.",
+    more: "Xem bảng xếp hạng deal hời nhất trực tiếp",
+  },
+  terms: {
+    title: "TCG, NFT, RWA hay thẻ bài crypto?",
+    labels: "Các tên gọi này chồng lấn nhau, nhưng trả lời những câu hỏi khác nhau. {tcg} là viết tắt của trading card game (trò chơi thẻ bài), chỉ các dòng như Pokémon, One Piece hay Magic: The Gathering. {nft} chỉ một tài sản blockchain duy nhất. {rwa} nhấn mạnh rằng tài sản gắn với một thứ có thật ngoài đời. “Thẻ bài crypto” là cách gọi không chính thức và cũng có thể chỉ loại thẻ chỉ tồn tại ở dạng số.",
+    tcg: "TCG",
+    nft: "NFT",
+    rwa: "RWA",
+    tccNote: "{tcc} đôi khi được dùng không chính thức cho “trading card crypto”, nhưng thuật ngữ này không có nghĩa thống nhất trên thị trường thẻ. “Thẻ bài token hóa” hay “đồ sưu tầm TCG on-chain” mô tả nhóm này rõ ràng hơn.",
+    tcc: "TCC",
+    best: "Với mô hình Decard theo dõi, {phrase} là cách gọi ít mơ hồ nhất: một slab thật cụ thể, đã được chấm điểm chuyên nghiệp, được đại diện on-chain trong khi nằm trong kho lưu ký.",
+    phrase: "thẻ bài graded được token hóa",
+  },
+  risks: {
+    title: "Những rủi ro token không xóa bỏ được",
+    item: "{title} {text}",
+    items: [
+      { title: "Rủi ro thị trường.", text: "Giá niêm yết, giá trị bảo hiểm hay giá đã bán trước đây không đảm bảo người mua khác sẽ trả bao nhiêu. Thẻ ít giao dịch có thể có chênh lệch lớn giữa giá chào bán và mức trả giá mà bạn thực sự bán được." },
+      { title: "Rủi ro lưu ký.", text: "Thẻ thật do bên lưu ký giữ. Hãy xác minh ai đang giữ thẻ, thỏa thuận bảo hiểm ra sao và điều gì xảy ra nếu nền tảng hoặc bên lưu ký gặp sự cố." },
+      { title: "Rủi ro quy đổi.", text: "Phí vận chuyển, nơi nhận được hỗ trợ, thuế, độ trễ và điều kiện của thẻ có thể thay đổi. Thẻ nằm ở kho đối tác có thể mất nhiều thời gian hơn để gửi đi." },
+      { title: "Rủi ro metadata.", text: "Sai bộ, bản parallel, điểm hay dữ liệu chứng nhận có thể làm sai lệch việc so sánh. Hãy xác minh slab và hồ sơ của hãng chấm điểm thay vì chỉ dựa vào một màn hình." },
+      { title: "Rủi ro ví và hợp đồng.", text: "Giao dịch trên sàn cần chữ ký từ ví. Hãy đọc kỹ từng giao dịch, bảo vệ cụm từ khôi phục (seed phrase) và chỉ dùng liên kết chính thức." },
+    ],
+  },
+  decard: {
+    title: "Decard bổ sung những gì",
+    intro: "Collector Crypt cung cấp tài sản và sàn giao dịch. Decard là giao diện nghiên cứu độc lập dựa trên dữ liệu công khai. Decard kết hợp danh mục của sàn với hoạt động on-chain để người sưu tầm có thể đi từ khám phá đến thẩm định kỹ mà không cần kết nối ví.",
+    features: [
+      { title: "Máy quét niêm yết", text: "Xếp hạng thẻ đang niêm yết theo điểm deal, giá hoặc độ mới trên Collector Crypt và Magic Eden." },
+      { title: "Trang thẻ", text: "Gom đủ thông tin nhận dạng, điểm, chứng nhận, giá trị bảo hiểm, báo cáo pop, niêm yết, trả giá và lịch sử của thẻ." },
+      { title: "Giao dịch trực tiếp", text: "Giải mã các lệnh gần đây trên sàn Collector Crypt thành lượt bán, niêm yết, đổi giá và trả giá." },
+      { title: "Theo dõi ví", text: "Hiển thị thẻ graded và hoạt động trên sàn đã giải mã của bất kỳ địa chỉ Solana nào." },
+    ],
+    data: "Decard không có cơ sở dữ liệu và không có bộ lập chỉ mục thị trường riêng. Niêm yết, giá trị bảo hiểm, trả giá và dữ liệu pop lấy từ API công khai của Collector Crypt; hoạt động lấy từ chương trình sàn của Collector Crypt trên Solana. Bộ nhớ đệm ngắn giúp giảm tải cho nguồn dữ liệu, nên số liệu có thể trễ vài giây. Xem {guide} để biết mọi trường dữ liệu và giới hạn.",
+    guideLink: "Cẩm nang Huấn luyện viên",
+  },
+  faq: {
+    title: "Câu hỏi thường gặp",
+    items: [
+      {
+        q: "Thẻ bài token hóa có giống thẻ kỹ thuật số không?",
+        a: "Không. Trong mô hình được nói đến ở đây, một tài sản on-chain duy nhất đại diện cho một lá thẻ thật đã chấm điểm chuyên nghiệp và nằm trong kho. Token có thể chuyển giữa các ví trong khi slab vẫn được lưu ký, và chủ sở hữu có thể làm theo quy trình của nền tảng để đổi lấy thẻ thật.",
+      },
+      {
+        q: "Đây là TCG, NFT, RWA hay thẻ bài crypto?",
+        a: "Có thể dùng cả bốn thuật ngữ, nhưng mỗi cái mang nghĩa khác nhau. TCG chỉ loại thẻ, NFT mô tả tài sản on-chain duy nhất, còn RWA mô tả mối liên kết của nó với một món đồ thật. “Thẻ bài token hóa” là cách gọi rõ ràng nhất nói chung.",
+      },
+      {
+        q: "Điểm deal cao trên Decard có đảm bảo có lời không?",
+        a: "Không. Điểm này chỉ đo mức giảm giữa giá niêm yết bằng USDC và giá trị bảo hiểm của Collector Crypt. Nó không chứng minh nhu cầu, thanh khoản, tính xác thực ngoài những hồ sơ được hiển thị, giá bán trong tương lai hay bài toán chi phí khi quy đổi.",
+      },
+      {
+        q: "Có cần ví mới dùng được Decard không?",
+        a: "Không. Decard là công cụ nghiên cứu chỉ đọc. Bạn chỉ cần một ví Solana tương thích, USDC và SOL khi muốn giao dịch trên một sàn như Collector Crypt.",
+      },
+      {
+        q: "Decard lấy dữ liệu thẻ và thị trường từ đâu?",
+        a: "Niêm yết, chi tiết thẻ, giá trị bảo hiểm, trả giá và báo cáo pop lấy từ API công khai của Collector Crypt. Hoạt động thị trường lấy từ chương trình sàn của Collector Crypt trên Solana. Decard không có cơ sở dữ liệu hay bộ lập chỉ mục riêng.",
+      },
+    ],
+  },
+  sources: {
+    title: "Nguồn và phương pháp",
+    intro: "Bài hướng dẫn này tóm tắt mô hình của nền tảng; điều khoản của sàn do chính các nhà cung cấp quy định. Hãy xem các nguồn sau để biết chi tiết vận hành mới nhất:",
+    links: {
+      product: "Thông tin sản phẩm Collector Crypt",
+      market: "Hướng dẫn dùng sàn Collector Crypt",
+      deposit: "Collector Crypt: gửi thẻ vào kho",
+      withdraw: "Collector Crypt: rút slab khỏi kho",
+      solana: "Tổng quan của Solana về thẻ và đồ sưu tầm token hóa",
+      psa: "PSA Population Report (có thể cần đăng nhập)",
+      code: "Mã nguồn và logic tính toán của Decard",
+    },
+  },
+  cta: {
+    title: "SẴN SÀNG SOI THẺ CHƯA?",
+    text: "Quét thị trường trực tiếp, rồi mở một lá thẻ để kiểm tra điểm, pop, trả giá và lịch sử.",
+    deals: "Săn deal trực tiếp",
+    tape: "Xem giao dịch trực tiếp",
+  },
+  aside: {
+    label: "Trong trang này",
+    title: "TRONG TRANG NÀY",
+    toc: {
+      whatIs: "Thẻ token hóa",
+      platform: "Collector Crypt",
+      research: "Danh sách kiểm tra",
+      dealScore: "Điểm deal",
+      terms: "TCG, NFT và RWA",
+      risks: "Rủi ro",
+      decard: "Decard hoạt động thế nào",
+      faq: "Hỏi đáp",
+      sources: "Nguồn",
+    },
+  },
+};

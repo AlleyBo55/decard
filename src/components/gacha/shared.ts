@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n";
+import { fmt, plural, type Plural } from "@/lib/i18n/format";
 import { typeFor, TYPES } from "@/lib/poke-types";
 import type { BigHit, GachaMachine, GachaTier, LivePull } from "@/lib/types";
 
@@ -32,10 +34,10 @@ export function multipleLevel(m: number | null | undefined): MultipleLevel {
   return "muted";
 }
 
-/** 0.00005 → "1 in 20,000". */
-export function oneIn(chance: number): string {
+/** 0.00005 → "1 in 20,000", through `words` (luck.odds.oneIn: "1 in {n}"). */
+export function oneIn(chance: number, words: string): string {
   if (!(chance > 0)) return "·";
-  return `1 in ${Math.round(1 / chance).toLocaleString("en")}`;
+  return fmt(words, { n: Math.round(1 / chance).toLocaleString("en") });
 }
 
 /** 0.75 → "75%", 0.0585 → "5.9%". */
@@ -43,11 +45,12 @@ export function pct(x: number): string {
   return `${(x * 100).toFixed(1).replace(/\.0$/, "")}%`;
 }
 
-/** 0.402 → "about 1 in 2.5 pulls"; null above one in two. */
-export function oneInPulls(p: number): string | null {
+/** 0.402 → "about 1 in 2.5 pulls", through `words` (luck.odds.oneInPulls); null above one in two. */
+export function oneInPulls(p: number, locale: Locale, words: Plural): string | null {
   if (!(p > 0) || p > 0.5) return null;
   const n = 1 / p;
-  return `about 1 in ${n < 10 ? n.toFixed(1).replace(/\.0$/, "") : Math.round(n).toLocaleString("en")} pulls`;
+  const shown = n < 10 ? n.toFixed(1).replace(/\.0$/, "") : Math.round(n).toLocaleString("en");
+  return plural(locale, n < 10 ? Number(shown) : Math.round(n), words, { n: shown });
 }
 
 /** 0.9354 → "93.5¢". */
@@ -60,13 +63,16 @@ export function dollarsPerDollar(x: number): string {
   return `$${x.toFixed(2)}`;
 }
 
-/** Minutes since the pool snapshot, in words. */
-export function poolAgeText(minutes: number): string {
-  if (minutes < 1) return "under a minute";
-  if (minutes < 60) return `${Math.round(minutes)} min`;
-  if (minutes < 60 * 24) return `${Math.round(minutes / 60)} h`;
-  const days = Math.round(minutes / (60 * 24));
-  return `${days} day${days === 1 ? "" : "s"}`;
+/** Minutes since the pool snapshot, in words (luck.odds.poolAge). */
+export function poolAgeText(
+  minutes: number,
+  locale: Locale,
+  words: { underMinute: string; minutes: Plural; hours: Plural; days: Plural },
+): string {
+  if (minutes < 1) return words.underMinute;
+  if (minutes < 60) return plural(locale, Math.round(minutes), words.minutes);
+  if (minutes < 60 * 24) return plural(locale, Math.round(minutes / 60), words.hours);
+  return plural(locale, Math.round(minutes / (60 * 24)), words.days);
 }
 
 export function packLabel(p: Pick<LivePull, "packName" | "packType">): string {
@@ -109,10 +115,16 @@ export function feedStats(pulls: LivePull[]): FeedStats {
   return { perMinute, epics, best, windowSeconds, count };
 }
 
+/** A feed's time span: whole seconds under two minutes, else whole minutes. */
+export function windowSpan(seconds: number): { n: number; unit: "seconds" | "minutes" } {
+  if (seconds < 120) return { n: Math.max(1, Math.round(seconds)), unit: "seconds" };
+  return { n: Math.round(seconds / 60), unit: "minutes" };
+}
+
 /** "65s" under two minutes, else "3 min". */
 export function windowText(seconds: number): string {
-  if (seconds < 120) return `${Math.max(1, Math.round(seconds))}s`;
-  return `${Math.round(seconds / 60)} min`;
+  const span = windowSpan(seconds);
+  return span.unit === "seconds" ? `${span.n}s` : `${span.n} min`;
 }
 
 // Pack art colour by machine code prefix, through the same type palette as the category chips.

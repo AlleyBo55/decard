@@ -3,17 +3,11 @@
 // :has(), and every window's numbers are in the HTML for crawlers.
 import type { CardsFlywheel, FlywheelWindow, LlamaSeries } from "@/lib/cards-token";
 import { WINDOWS } from "@/lib/cards-token";
+import { fmt } from "@/lib/i18n/format";
+import { getStrings } from "@/lib/i18n/strings";
 import { BallGlyph, PixelIcon } from "./art";
 import { fmtCents, fmtShare, fmtUsdShort, NONE } from "./format";
 import "./token.css";
-
-const TAB: Record<FlywheelWindow, string> = { "24h": "24h", "7d": "7d", "30d": "30d", all: "All time" };
-const SPAN: Record<FlywheelWindow, string> = {
-  "24h": "in the last 24 hours",
-  "7d": "in the last 7 days",
-  "30d": "in the last 30 days",
-  all: "all time",
-};
 
 const total = (s: LlamaSeries | null, w: FlywheelWindow) => s?.totals[w] ?? null;
 const ratio = (a: number | null, b: number | null) => (a != null && b ? a / b : null);
@@ -60,27 +54,28 @@ function Node({
   );
 }
 
-function money(s: LlamaSeries | null, w: FlywheelWindow) {
+function money(s: LlamaSeries | null, w: FlywheelWindow, span: string) {
   return (
     <>
       {fmtUsdShort(total(s, w))}
-      <span className="sr-only"> {SPAN[w]}</span>
+      <span className="sr-only"> {span}</span>
     </>
   );
 }
 
-export function Flywheel({ data, centsPerDollar }: { data: CardsFlywheel | null; centsPerDollar: number | null }) {
+export async function Flywheel({ data, centsPerDollar }: { data: CardsFlywheel | null; centsPerDollar: number | null }) {
+  const c = (await getStrings()).tokenPage.flywheel;
   const volume = data?.volume ?? null;
   const revenue = data?.revenue ?? null;
   const buyback = data?.buyback ?? null;
 
   return (
     <div className="tk-fw">
-      <div className="seg tk-seg" role="radiogroup" aria-label="Time window">
+      <div className="seg tk-seg" role="radiogroup" aria-label={c.windowLabel}>
         {WINDOWS.map((w) => (
           <label key={w}>
             <input type="radio" name="tk-window" value={w} defaultChecked={w === "30d"} className="sr-only" />
-            {TAB[w]}
+            {c.tabs[w]}
           </label>
         ))}
       </div>
@@ -104,35 +99,35 @@ export function Flywheel({ data, centsPerDollar }: { data: CardsFlywheel | null;
         <Node
           step={1}
           icon="pack"
-          title="Packs ripped"
-          value={(w) => money(volume, w)}
-          sub={() => (volume ? "gacha pack sales" : "unavailable")}
+          title={c.packs}
+          value={(w) => money(volume, w, c.spans[w])}
+          sub={() => (volume ? c.packsSub : c.nodeUnavailable)}
         />
         <Node
           step={2}
           icon="bag"
-          title="Collector Crypt revenue"
-          value={(w) => money(revenue, w)}
+          title={c.revenue}
+          value={(w) => money(revenue, w, c.spans[w])}
           sub={(w) => {
             const r = ratio(total(revenue, w), total(volume, w));
-            return r != null ? `${fmtShare(r)} of pack sales` : revenue ? "kept after card buybacks" : "unavailable";
+            return r != null ? fmt(c.revenueSub, { share: fmtShare(r) }) : revenue ? c.revenueSubNoShare : c.nodeUnavailable;
           }}
         />
         <Node
           step={3}
           icon="ember"
-          title="CARDS bought back & burned"
-          value={(w) => money(buyback, w)}
+          title={c.buyback}
+          value={(w) => money(buyback, w, c.spans[w])}
           sub={(w) => {
             const r = ratio(total(buyback, w), total(revenue, w));
-            return r != null ? `${fmtShare(r)} of revenue` : buyback ? "in USD" : "unavailable";
+            return r != null ? fmt(c.buybackSub, { share: fmtShare(r) }) : buyback ? c.buybackSubNoShare : c.nodeUnavailable;
           }}
         />
 
         <div className="tk-fw-hub">
           <p className="tk-fw-hub-value">{centsPerDollar != null ? fmtCents(centsPerDollar) : NONE}</p>
-          <p className="tk-fw-hub-text">of every $1 ripped ends up as CARDS buybacks</p>
-          <p className="tk-fw-hub-note">30-day average · derived</p>
+          <p className="tk-fw-hub-text">{c.hubText}</p>
+          <p className="tk-fw-hub-note">{c.hubNote}</p>
         </div>
       </div>
     </div>
