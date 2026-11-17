@@ -1,16 +1,47 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/components/LocaleProvider";
+import { localizeHref } from "@/lib/i18n";
+import { age, fmt } from "@/lib/i18n/format";
+import type { ClientStrings } from "@/lib/i18n/strings/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Activity } from "@/lib/types";
 import { cardImage } from "@/lib/constants";
-import { activityDisplay, battleText, isBotChurn, isSale, timeAgo } from "@/lib/format";
+import { activityDisplay, gradeShort, isBotChurn, isSale, priceText, shortAddr, shortCardName } from "@/lib/format";
 import { useReducedMotion } from "@/lib/hooks";
 import "./gameboy.css";
 
 type Mode = "all" | "trainers" | "sales";
 const MODES: Mode[] = ["trainers", "all", "sales"];
-const MODE_LABEL: Record<Mode, string> = { all: "ALL", trainers: "NO BOTS", sales: "SALES" };
+
+/** lib/format.ts battleText() read from the strings file: the same English lines, translatable. */
+function battleLine(a: Activity, lines: ClientStrings["ui"]["gameBoy"]["battle"]): string {
+  const name = shortCardName(a.cardName).toUpperCase();
+  const grade = gradeShort(a.gradingCompany, a.grade);
+  const price = priceText(a);
+  const vars = { card: grade ? `${name} ${grade}` : name, price, trainer: shortAddr(a.actor ?? a.buyer ?? a.seller) };
+  switch (activityDisplay(a.kind).verb) {
+    case "SALE":
+      return fmt(price ? lines.sale : lines.saleNoPrice, vars);
+    case "BID TAKEN":
+      return fmt(price ? lines.bidTaken : lines.bidTakenNoPrice, vars);
+    case "LISTED":
+      return fmt(lines.listed, vars);
+    case "REPRICE":
+      return fmt(lines.reprice, vars);
+    case "DELIST":
+      return fmt(lines.delist, vars);
+    case "NEW BID":
+      return fmt(lines.newBid, vars);
+    case "BID EDIT":
+      return fmt(lines.bidEdit, vars);
+    case "BID PULLED":
+      return fmt(lines.bidPulled, vars);
+    default:
+      return fmt(lines.other, vars);
+  }
+}
 
 /** Draws the card into a tiny canvas so CSS can upscale it as real pixel art. */
 function PixelCard({ mint }: { mint: string }) {
@@ -74,6 +105,8 @@ function filterEvents(events: Activity[], mode: Mode) {
  */
 export function GameBoy({ events, loading }: { events: Activity[]; loading?: boolean }) {
   const router = useRouter();
+  const { locale, t } = useLocale();
+  const g = t.ui.gameBoy;
   const reduced = useReducedMotion();
   const [mode, setMode] = useState<Mode>("trainers");
   const [index, setIndex] = useState(0);
@@ -87,11 +120,8 @@ export function GameBoy({ events, loading }: { events: Activity[]; loading?: boo
   }, [events, mode]);
 
   const current = list.length ? list[index % list.length] : null;
-  const text = current
-    ? battleText(current)
-    : loading
-      ? "Booting up the DEX..."
-      : "No trainers nearby. Waiting for the next move...";
+  const verb = current ? activityDisplay(current.kind).verb : null;
+  const text = current ? battleLine(current, g.battle) : loading ? g.booting : g.empty;
   const done = reduced || doneText === text || skipText === text;
 
   // Auto-advance once the line is fully printed.
@@ -110,7 +140,7 @@ export function GameBoy({ events, loading }: { events: Activity[]; loading?: boo
     }
     setIndex((i) => (i + d + list.length) % list.length);
   };
-  const open = () => current?.assetMint && router.push(`/card/${current.assetMint}`);
+  const open = () => current?.assetMint && router.push(localizeHref(locale, `/card/${current.assetMint}`));
   const cycle = () => {
     setMode((m) => MODES[(MODES.indexOf(m) + 1) % MODES.length]);
     setIndex(0);
@@ -121,7 +151,7 @@ export function GameBoy({ events, loading }: { events: Activity[]; loading?: boo
       className="gb"
       tabIndex={0}
       role="group"
-      aria-label="Live market Game Boy. Use arrow keys to browse events and Enter to open a card."
+      aria-label={g.aria.device}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -139,24 +169,24 @@ export function GameBoy({ events, loading }: { events: Activity[]; loading?: boo
         }
       }}
     >
-      <div className="gb-grooves">◀ OFF · ON ▶</div>
+      <div className="gb-grooves">{g.device.power}</div>
 
       <div className="gb-bezel">
         <div className="gb-stripe">
           <i />
-          LIVE ON-CHAIN · DOT MATRIX
+          {g.device.stripe}
           <i />
         </div>
         <div className="gb-battery">
           <span className="gb-led" />
-          BATTERY
+          {g.device.battery}
         </div>
 
         <div className="gb-screen" onClick={open} role="presentation">
           <div className="gb-hud">
-            <span>{current ? activityDisplay(current.kind).verb : "LIVE"}</span>
+            <span>{verb ? (t.ui.verbs[verb] ?? verb) : g.live}</span>
             <span>
-              {current ? `${timeAgo(current.blockTime)} · ` : ""}
+              {current ? `${age(locale, current.blockTime)} · ` : ""}
               {list.length ? `${(index % list.length) + 1}/${list.length}` : "--"}
             </span>
           </div>
@@ -175,33 +205,33 @@ export function GameBoy({ events, loading }: { events: Activity[]; loading?: boo
       </div>
 
       <div className="gb-brand">
-        Decard<span>POCKET · {MODE_LABEL[mode]}</span>
+        Decard<span>{fmt(g.device.model, { mode: g.modes[mode] })}</span>
       </div>
 
       <div className="gb-controls">
         <div className="gb-dpad">
-          <button type="button" className="gb-up" aria-label="Previous event" onClick={() => step(-1)} />
-          <button type="button" className="gb-left" aria-label="Previous event" onClick={() => step(-1)} />
+          <button type="button" className="gb-up" aria-label={g.aria.previous} onClick={() => step(-1)} />
+          <button type="button" className="gb-left" aria-label={g.aria.previous} onClick={() => step(-1)} />
           <span className="gb-hub" />
-          <button type="button" className="gb-right" aria-label="Next event" onClick={() => step(1)} />
-          <button type="button" className="gb-down" aria-label="Next event" onClick={() => step(1)} />
+          <button type="button" className="gb-right" aria-label={g.aria.next} onClick={() => step(1)} />
+          <button type="button" className="gb-down" aria-label={g.aria.next} onClick={() => step(1)} />
         </div>
 
         <div className="gb-ab">
-          <button type="button" className="gb-key gb-keyB" aria-label="B: previous event" onClick={() => step(-1)}>
+          <button type="button" className="gb-key gb-keyB" aria-label={g.aria.b} onClick={() => step(-1)}>
             <span className="gb-keyLabel">B</span>
           </button>
-          <button type="button" className="gb-key gb-keyA" aria-label="A: next event" onClick={() => step(1)}>
+          <button type="button" className="gb-key gb-keyA" aria-label={g.aria.a} onClick={() => step(1)}>
             <span className="gb-keyLabel">A</span>
           </button>
         </div>
 
         <div className="gb-pills">
-          <button type="button" className="gb-pill" aria-label={`Select: filter is ${MODE_LABEL[mode]}`} onClick={cycle}>
-            <span className="gb-pillLabel">SELECT</span>
+          <button type="button" className="gb-pill" aria-label={fmt(g.aria.select, { mode: g.modes[mode] })} onClick={cycle}>
+            <span className="gb-pillLabel">{g.device.select}</span>
           </button>
-          <button type="button" className="gb-pill" aria-label="Start: open the full tape" onClick={() => router.push("/tape")}>
-            <span className="gb-pillLabel">START</span>
+          <button type="button" className="gb-pill" aria-label={g.aria.start} onClick={() => router.push(localizeHref(locale, "/tape"))}>
+            <span className="gb-pillLabel">{g.device.start}</span>
           </button>
         </div>
 

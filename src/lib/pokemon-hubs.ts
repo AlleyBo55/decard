@@ -49,6 +49,12 @@ export const POKEMON_HUBS: PokemonHub[] = [
   { slug: "ninetales", name: "Ninetales" },
 ];
 
+/**
+ * The Pokémon's Pokémon HOME render (256×256 PNG) on Pokémon Database, which lets sites embed its
+ * sprites. Every hub slug is the name pokemondb uses. Shown through lib/thumb.ts at tile size.
+ */
+export const hubSprite = (hub: PokemonHub) => `https://img.pokemondb.net/sprites/home/normal/${hub.slug}.png`;
+
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Whole-word match, so "Mewtwo" never counts as "Mew" and "Raichu" stays out of "Pikachu".
 const PATTERNS = new Map(POKEMON_HUBS.map((hub) => [hub.slug, new RegExp(`\\b${escape(hub.name)}\\b`, "i")]));

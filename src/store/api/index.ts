@@ -26,6 +26,12 @@ import getSolPrice from "@/services/Price/getSolPrice";
 import getHoldings from "@/services/Scanner/getHoldings";
 import getScanner, { type ScannerParams } from "@/services/Scanner/getScanner";
 import getSuggest, { type SuggestPayload } from "@/services/Suggest/getSuggest";
+import { getMyPulls, getRipConfig, getRipHits, getRipPacks, getRipPool, type PoolParams } from "@/services/Rip";
+import getLeaderboard from "@/services/Gym/getLeaderboard";
+import getLeague from "@/services/Gym/getLeague";
+import getRipPreview from "@/services/Gym/getRipPreview";
+import type { DecardLeaderboard, RipPreview, SlabzLeague } from "@/services/Gym/types";
+import type { Page, PoolCard, RipConfig, RipHit, RipPack, RipTx } from "@/lib/rip/types";
 
 /**
  * Redux state must stay serializable, so the APIError the fetcher throws is
@@ -86,8 +92,10 @@ const api = createApi({
     walletPulls: build.query<WalletPullsPayload, string>({
       queryFn: (wallet, { signal }) => run(getWalletPulls(wallet, signal)),
     }),
-    holdings: build.query<MarketplacePage, string>({
-      queryFn: (wallet, { signal }) => run(getHoldings(wallet, signal)),
+    // A wallet address (mainnet), or { wallet, network: "devnet" } for the redeem page on a devnet backend.
+    holdings: build.query<MarketplacePage, string | { wallet: string; network: "devnet" }>({
+      queryFn: (arg, { signal }) =>
+        run(typeof arg === "string" ? getHoldings(arg, signal) : getHoldings(arg.wallet, signal, true)),
     }),
     suggest: build.query<SuggestPayload, string>({
       queryFn: (q, { signal }) => run(getSuggest(q, signal)),
@@ -107,6 +115,45 @@ const api = createApi({
     gachaOdds: build.query<GachaOddsPayload, string>({
       queryFn: (code, { signal }) => run(getGachaOdds(code, signal)),
       keepUnusedDataFor: 300,
+    }),
+    // Rip: Slabz packs through decardbe (services/Rip).
+    ripConfig: build.query<RipConfig, void>({
+      queryFn: (_arg, { signal }) => run(getRipConfig(signal)),
+      keepUnusedDataFor: 3600,
+    }),
+    ripPacks: build.query<RipPack[], void>({
+      queryFn: (_arg, { signal }) => run(getRipPacks(signal)),
+    }),
+    ripPool: build.infiniteQuery<Page<PoolCard>, PoolParams, string | null>({
+      infiniteQueryOptions: {
+        initialPageParam: null,
+        getNextPageParam: (last) => (last.hasMore && last.cursor ? last.cursor : null),
+      },
+      queryFn: ({ queryArg, pageParam }, { signal }) => run(getRipPool(queryArg, pageParam, signal)),
+    }),
+    ripHits: build.query<RipHit[], void>({
+      queryFn: (_arg, { signal }) => run(getRipHits(signal)),
+    }),
+    // Keyed by wallet so a sign-in as someone else never shows the last wallet's pulls.
+    myPulls: build.infiniteQuery<Page<RipTx>, string, string | null>({
+      infiniteQueryOptions: {
+        initialPageParam: null,
+        getNextPageParam: (last) => (last.hasMore && last.cursor ? last.cursor : null),
+      },
+      queryFn: ({ pageParam }, { signal }) => run(getMyPulls(undefined, pageParam, signal)),
+      keepUnusedDataFor: 0,
+    }),
+    // Gym: the rip league (services/Gym). Decard trainers from decardbe, Slabz players from Slabz's winners feed.
+    ripLeaderboard: build.query<DecardLeaderboard, void>({
+      queryFn: (_arg, { signal }) => run(getLeaderboard(signal)),
+    }),
+    slabzLeague: build.query<SlabzLeague, void>({
+      queryFn: (_arg, { signal }) => run(getLeague(signal)),
+    }),
+    // Development only (?preview=1): the production catalog snapshot, read once.
+    ripPreview: build.query<RipPreview, void>({
+      queryFn: (_arg, { signal }) => run(getRipPreview(signal)),
+      keepUnusedDataFor: 3600,
     }),
   }),
 });
@@ -141,6 +188,14 @@ export const {
   useGachaHitsQuery,
   useGachaMachinesQuery,
   useGachaOddsQuery,
+  useRipConfigQuery,
+  useRipPacksQuery,
+  useRipPoolInfiniteQuery,
+  useRipHitsQuery,
+  useMyPullsInfiniteQuery,
+  useRipLeaderboardQuery,
+  useSlabzLeagueQuery,
+  useRipPreviewQuery,
 } = api;
 
 export default api;

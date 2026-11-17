@@ -15,10 +15,24 @@ const nextConfig: NextConfig = {
     // compile per dev restart; builds keep their cache. Drop once fixed upstream.
     turbopackFileSystemCacheForDev: false,
   },
+  // Slabz card art is full-size JPEG only; lib/thumb.ts sends tiles through the optimizer, and the
+  // Pokémon price guides' sprites from Pokémon Database (which allows embedding them).
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "dq63y5568o1bp.cloudfront.net", pathname: "/**" },
+      { protocol: "https", hostname: "d1xpxki1g4htqu.cloudfront.net", pathname: "/**" },
+      { protocol: "https", hostname: "img.pokemondb.net", pathname: "/sprites/home/normal/**" },
+    ],
+  },
   // Crawlers may fetch /api to render pages (see app/robots.ts), but the JSON
   // itself must never show up in search results.
   async headers() {
-    return [{ source: "/api/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex" }] }];
+    return [
+      { source: "/api/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+      // Pack art URLs carry a content hash (?v=, scripts/rip-art.mjs), so they can be cached for good.
+      { source: "/rip/packs/:file*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      { source: "/rip/slabz.webp", headers: [{ key: "Cache-Control", value: "public, max-age=86400" }] },
+    ];
   },
   // Shared pull receipts moved from /card/<mint>?pull=50 to /card/<mint>/pull/50
   // so the card page never reads searchParams and can be cached. Only a
@@ -31,6 +45,12 @@ const nextConfig: NextConfig = {
         source: "/card/:mint",
         has: [{ type: "query", key: "pull", value: "(?<pack>\\d{1,6}(?:\\.\\d{1,2})?)" }],
         destination: "/card/:mint/pull/:pack",
+        permanent: true,
+      },
+      {
+        source: "/:lang(ja|id|ms|th|vi|ko|ru|zh|es|fr|it|nb|de|nl)/card/:mint",
+        has: [{ type: "query", key: "pull", value: "(?<pack>\\d{1,6}(?:\\.\\d{1,2})?)" }],
+        destination: "/:lang/card/:mint/pull/:pack",
         permanent: true,
       },
     ];

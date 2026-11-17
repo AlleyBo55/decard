@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import fetcher from "@/helpers/fetcher";
+import { fmt } from "@/lib/i18n/format";
 import { fmtChange, fmtClock, fmtPrice } from "./format";
 
 export interface Quote {
@@ -20,6 +22,8 @@ const EVERY_MS = 60_000;
  * tab is visible. A change flashes green or red.
  */
 export function PriceTicker({ initial }: { initial: Quote | null }) {
+  const t = useT().token.ticker;
+  const { locale } = useLocale();
   const [quote, setQuote] = useState(initial);
   const [flash, setFlash] = useState({ dir: "", n: 0 });
   const shown = useRef(initial?.price ?? null);
@@ -64,18 +68,18 @@ export function PriceTicker({ initial }: { initial: Quote | null }) {
   const updated = quote ? Date.parse(quote.updatedAt) : NaN;
 
   return (
-    <div className="tk-ticker" title={Number.isFinite(updated) ? `Updated ${fmtClock(updated)}` : undefined}>
+    <div className="tk-ticker" title={Number.isFinite(updated) ? fmt(t.updated, { time: fmtClock(updated, locale) }) : undefined}>
       <span className="tk-ticker-label">
-        <span className="live-dot" aria-hidden /> PRICE
+        <span className="live-dot" aria-hidden /> {t.price}
       </span>
       <span className="tk-ticker-price">
         {flash.n > 0 && <span key={flash.n} className="tk-flash" data-dir={flash.dir} aria-hidden />}
-        <span className="sr-only">CARDS price </span>
-        {quote ? fmtPrice(quote.price) : "Unavailable"}
+        <span className="sr-only">{t.srPrice} </span>
+        {quote ? fmtPrice(quote.price) : t.unavailable}
       </span>
       <span className="tk-ticker-change" data-tone={tone}>
         {tone === "up" ? "▲" : tone === "down" ? "▼" : ""} {fmtChange(change)}
-        <span className="tk-ticker-unit"> 24h</span>
+        <span className="tk-ticker-unit"> {t.unit}</span>
       </span>
     </div>
   );

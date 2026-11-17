@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { useLivePulls } from "@/hooks/pages/Gacha/useGachaFeeds";
@@ -8,11 +9,15 @@ import { CountUp } from "@/components/motion";
 import { FeedSkeleton } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
 import { cardImage } from "@/lib/constants";
-import { fmtUsd, timeAgo } from "@/lib/format";
+import { fmtNum, fmtUsd } from "@/lib/format";
+import { ago, fmt, plural } from "@/lib/i18n/format";
+import type { ClientStrings } from "@/lib/i18n/strings/types";
 import { useReducedMotion } from "@/lib/hooks";
 import type { LivePull, LivePullsPayload } from "@/lib/types";
 import { CountTo, DexPanel, LiveBadge, MultipleChip, Sparkles, TierBadge, WalletLuckLink } from "./parts";
-import { feedStats, packLabel, shortPackLabel, windowText } from "./shared";
+import { feedStats, packLabel, shortPackLabel, windowSpan } from "./shared";
+
+type FeedCopy = ClientStrings["luck"]["feed"];
 
 /** What the latest poll changed, so only those rows animate and only new epics are announced. */
 interface Fresh {
@@ -28,12 +33,17 @@ interface Fresh {
 
 const NO_FRESH: Fresh = { order: new Map(), epicIds: new Set(), announce: "", batch: 0, epicBatch: 0 };
 
-function epicLine(p: LivePull) {
-  const times = p.multiple != null ? `, ${p.multiple.toFixed(1)} times the ${fmtUsd(p.price)} price` : "";
-  return `Epic hit: a ${fmtUsd(p.insuredValue)} card from ${packLabel(p)}${times}.`;
+function epicLine(p: LivePull, copy: FeedCopy) {
+  const vars = { value: fmtUsd(p.insuredValue), pack: packLabel(p), price: fmtUsd(p.price) };
+  return p.multiple != null ? fmt(copy.epicMultiple, { ...vars, multiple: p.multiple.toFixed(1) }) : fmt(copy.epic, vars);
 }
 
-function diffPulls(prev: LivePullsPayload | undefined, next: LivePullsPayload | undefined, last: Fresh): Fresh {
+function diffPulls(
+  prev: LivePullsPayload | undefined,
+  next: LivePullsPayload | undefined,
+  last: Fresh,
+  copy: FeedCopy,
+): Fresh {
   if (!next) return last;
   // First data: nothing counts as new, but the lens still lights up.
   if (!prev) return { ...NO_FRESH, batch: last.batch + 1, epicBatch: last.epicBatch };
@@ -43,13 +53,16 @@ function diffPulls(prev: LivePullsPayload | undefined, next: LivePullsPayload | 
   return {
     order: new Map(added.map((p, i) => [p.id, i])),
     epicIds: new Set(epics.map((p) => p.id)),
-    announce: epics.map(epicLine).join(" "),
+    announce: epics.map((p) => epicLine(p, copy)).join(" "),
     batch: added.length ? last.batch + 1 : last.batch,
     epicBatch: epics.length ? last.epicBatch + 1 : last.epicBatch,
   };
 }
 
 function PullRow({ pull: p }: { pull: LivePull }) {
+  const t = useT();
+  const { locale } = useLocale();
+  const copy = t.luck.feed;
   const name = packLabel(p);
   const short = shortPackLabel(p);
   const value = p.insuredValue != null ? fmtUsd(p.insuredValue) : null;
@@ -84,9 +97,9 @@ function PullRow({ pull: p }: { pull: LivePull }) {
             {fmtUsd(p.price)} <span className="text-poke">→</span> {value ?? "…"}
           </span>
           <WalletLuckLink wallet={p.wallet} />
-          <span className="whitespace-nowrap tabular-nums">{timeAgo(p.at)} ago</span>
-          {p.turbo && <span className="gx-tag gx-tag-turbo">TURBO</span>}
-          {p.free && <span className="gx-tag gx-tag-free">FREE</span>}
+          <span className="whitespace-nowrap tabular-nums">{ago(locale, p.at)}</span>
+          {p.turbo && <span className="gx-tag gx-tag-turbo">{copy.turbo}</span>}
+          {p.free && <span className="gx-tag gx-tag-free">{copy.free}</span>}
         </div>
       </div>
 
@@ -98,11 +111,13 @@ function PullRow({ pull: p }: { pull: LivePull }) {
           prefetch={false}
           className="-my-[18px] py-[18px] font-pixel text-[8px] leading-none text-azure-deep transition-colors after:absolute after:inset-0 hover:text-poke-deep"
         >
-          SCORE
+          <span aria-hidden>{copy.score}</span>
           <span className="sr-only">
-            {" "}
-            this pull: {name}, {p.tier ?? "not awarded yet"}
-            {value ? `, ${value}` : ""}
+            {fmt(value ? copy.scorePullValue : copy.scorePull, {
+              pack: name,
+              tier: p.tier ? t.ui.gachaTiers[p.tier] : copy.notAwarded,
+              value,
+            })}
           </span>{" "}
           ▶
         </Link>
@@ -122,31 +137,34 @@ export function LiveFeed({
   className?: string;
 }) {
   const { data, isLoading, isError } = useLivePulls();
+  const { locale } = useLocale();
+  const copy = useT().luck.feed;
   const reduced = useReducedMotion();
   // Diff each new payload against the last one during render (no effect, no extra paint).
-  const [track, setTrack] = useState(() => ({ data, fresh: diffPulls(undefined, data, NO_FRESH) }));
-  if (track.data !== data) setTrack({ data, fresh: diffPulls(track.data, data, track.fresh) });
+  const [track, setTrack] = useState(() => ({ data, fresh: diffPulls(undefined, data, NO_FRESH, copy) }));
+  if (track.data !== data) setTrack({ data, fresh: diffPulls(track.data, data, track.fresh, copy) });
   const { fresh } = track;
 
   const pulls = data?.pulls;
   const stats = useMemo(() => feedStats(pulls ?? []), [pulls]);
   const visible = (pulls ?? []).slice(0, rows);
   const titleId = `${idPrefix}-feed-title`;
+  const span = windowSpan(stats.windowSeconds);
 
   const lcd = (
     <dl className="gx-lcd">
       <div>
-        <dt className="gx-lcd-label">Pulls / min</dt>
+        <dt className="gx-lcd-label">{copy.perMinute}</dt>
         <dd className="gx-lcd-value">
           {stats.perMinute != null ? <CountUp value={Math.round(stats.perMinute)} /> : "--"}
         </dd>
       </div>
       <div>
-        <dt className="gx-lcd-label">Epics</dt>
+        <dt className="gx-lcd-label">{copy.epics}</dt>
         <dd className="gx-lcd-value">{data ? <CountUp value={stats.epics} /> : "--"}</dd>
       </div>
       <div>
-        <dt className="gx-lcd-label">Best ×</dt>
+        <dt className="gx-lcd-label">{copy.best}</dt>
         <dd className="gx-lcd-value">{stats.best != null ? <CountTo value={stats.best} kind="mult" /> : "--"}</dd>
       </div>
     </dl>
@@ -154,7 +172,7 @@ export function LiveFeed({
 
   return (
     <DexPanel
-      title="Live pulls"
+      title={copy.title}
       titleId={titleId}
       status={<LiveBadge />}
       lcd={lcd}
@@ -164,10 +182,13 @@ export function LiveFeed({
       foot={
         stats.count > 0 ? (
           <span>
-            LAST {windowText(stats.windowSeconds).toUpperCase()} · {stats.count} PULLS
+            {fmt(span.unit === "seconds" ? copy.footSeconds : copy.footMinutes, {
+              n: span.n,
+              pulls: plural(locale, stats.count, copy.footPulls, { n: fmtNum(stats.count) }),
+            })}
           </span>
         ) : (
-          <span>REFRESHES EVERY 10S</span>
+          <span>{copy.refresh}</span>
         )
       }
     >
@@ -178,16 +199,14 @@ export function LiveFeed({
 
       {isLoading || (isError && !data) ? (
         isError ? (
-          <p className="px-4 py-10 text-center text-sm text-ink-mute">
-            The gacha feed didn&apos;t answer. It usually comes back within a few seconds.
-          </p>
+          <p className="px-4 py-10 text-center text-sm text-ink-mute">{copy.error}</p>
         ) : (
           <div className="px-3 sm:px-4">
             <FeedSkeleton rows={Math.min(rows, 8)} />
           </div>
         )
       ) : visible.length === 0 ? (
-        <p className="px-4 py-10 text-center text-sm text-ink-mute">No packs opened in the last couple of minutes.</p>
+        <p className="px-4 py-10 text-center text-sm text-ink-mute">{copy.empty}</p>
       ) : (
         <ul className="gx-rows relative" aria-labelledby={titleId}>
           <AnimatePresence initial={false} mode="popLayout">

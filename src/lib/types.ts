@@ -2,7 +2,8 @@
 // marketplace API and decoded Solana RPC transactions.
 
 // The API also returns other venues (e.g. "OPENSEA"); keep known ones typed.
-export type Marketplace = "CC" | "ME" | "OPENSEA" | (string & {});
+// "SLABZ" rows come from Slabz's own marketplace (lib/slabz.ts), mapped into the same shape.
+export type Marketplace = "CC" | "ME" | "SLABZ" | "OPENSEA" | (string & {});
 export type Currency = "USDC" | "SOL";
 
 /** A listing as returned on a marketplace row (`/marketplace`). */

@@ -1,4 +1,9 @@
 export const CC_API = "https://api.collectorcrypt.com";
+/** Collector Crypt's devnet API: same routes and row shape, for cards minted on Solana devnet. */
+export const CC_DEV_API = "https://dev-api.collectorcrypt.com";
+// Slabz's public consumer API. Its marketplace reads need no key: the Slabz partner key lives in
+// decardbe only and is never sent from here.
+export const SLABZ_API = "https://api-v2.slabz.com/api/v1";
 export const CC_NFT = "https://nft.collectorcrypt.com";
 export const CC_GACHA = "https://gacha.collectorcrypt.com";
 // Keyless default RPC (PublicNode), also the fallback when Helius is down. It
@@ -7,7 +12,7 @@ export const CC_GACHA = "https://gacha.collectorcrypt.com";
 export const SOLANA_RPC = "https://solana-rpc.publicnode.com";
 // Keyless RPC with full signature history. SOLANA_RPC only serves recent
 // signatures, which hides older gacha pulls; used only for wallet pack history.
-export const SOLANA_ARCHIVE_RPC = "https://api.mainnet-beta.solana.com";
+export const SOLANA_ARCHIVE_RPC = "https://api.mainnet.solana.com";
 // Primary RPC when a Helius key is configured. The key is server-only and appended in lib/rpc.ts, never here.
 export const HELIUS_RPC = "https://mainnet.helius-rpc.com";
 

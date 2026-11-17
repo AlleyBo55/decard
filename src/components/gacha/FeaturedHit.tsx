@@ -2,11 +2,13 @@
 
 import { motion } from "motion/react";
 import { useMemo } from "react";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { useBigHits } from "@/hooks/pages/Gacha/useGachaFeeds";
 import { HoloCard } from "@/components/motion";
 import { Skeleton } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
-import { shortCardName, timeAgo } from "@/lib/format";
+import { fmtNum, shortCardName } from "@/lib/format";
+import { ago, fmt, plural } from "@/lib/i18n/format";
 import { biggestHit, hitSpan, HitImage } from "./HallOfFame";
 import { MotionLink, TAP, WalletLuckLink } from "./parts";
 import { fmtMultiple, packLabel } from "./shared";
@@ -14,12 +16,15 @@ import { fmtMultiple, packLabel } from "./shared";
 /** Home: the best multiple among the latest epic pulls, as a holo card on the gold plate. */
 export function FeaturedHit({ className }: { className?: string }) {
   const { data, isLoading } = useBigHits();
+  const t = useT();
+  const { locale } = useLocale();
+  const copy = t.luck.featured;
   const hit = useMemo(() => biggestHit(data?.hits), [data]);
 
   return (
     <section aria-labelledby="featured-hit-title" className={clsx("flex min-w-0 flex-col items-center text-center", className)}>
       <h3 id="featured-hit-title" className="kicker">
-        Biggest hit lately
+        {copy.title}
       </h3>
       {!hit ? (
         <div className="mt-5 flex w-full flex-col items-center gap-3" aria-hidden>
@@ -30,7 +35,7 @@ export function FeaturedHit({ className }: { className?: string }) {
               <Skeleton className="h-6 w-48" />
             </>
           ) : (
-            <p className="py-10 text-sm text-ink-mute">No epic pulls in the recent window.</p>
+            <p className="py-10 text-sm text-ink-mute">{t.luck.gacha.noEpics}</p>
           )}
         </div>
       ) : (
@@ -49,7 +54,7 @@ export function FeaturedHit({ className }: { className?: string }) {
                 <HitImage hit={hit} className="gx-podium-img" />
               </HoloCard>
               <span className="sr-only">
-                {shortCardName(hit.cardName)}, {fmtMultiple(hit.multiple)} the pack price
+                {fmt(copy.label, { name: shortCardName(hit.cardName), multiple: fmtMultiple(hit.multiple) })}
               </span>
             </MotionLink>
             <span className="gx-burst-badge -right-7 -top-7 w-[46%] text-[15px]" aria-hidden>
@@ -67,12 +72,14 @@ export function FeaturedHit({ className }: { className?: string }) {
             <p className="mt-1 flex flex-wrap items-center justify-center gap-x-2 text-[13px] text-ink-mute">
               <span className="max-w-[14rem] truncate">{packLabel(hit)}</span>
               <WalletLuckLink wallet={hit.wallet} />
-              <span className="tabular-nums">{timeAgo(hit.at)} ago</span>
+              <span className="tabular-nums">{ago(locale, hit.at)}</span>
             </p>
             {data && (
               <p className="mt-1 text-xs text-ink-mute">
-                Best multiple of the {data.hits.length} latest epic pulls
-                {data.since ? `, since ${timeAgo(data.since)} ago` : ""}.
+                {plural(locale, data.hits.length, data.since ? copy.captionSince : copy.caption, {
+                  n: fmtNum(data.hits.length),
+                  ago: ago(locale, data.since),
+                })}
               </p>
             )}
           </div>

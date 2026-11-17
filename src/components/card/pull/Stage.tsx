@@ -2,7 +2,9 @@
 
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/components/LocaleProvider";
 import { useMediaQuery } from "@/lib/hooks";
+import { fmt } from "@/lib/i18n/format";
 import type { RarityTier } from "@/lib/pull";
 
 /** The catch, in order. "lid" only runs on the clamshell, while the lid swings open. */
@@ -60,6 +62,7 @@ export function Stage({
   reduced: boolean;
   onSkip: () => void;
 }) {
+  const { card: t } = useT();
   const [flipped, setFlipped] = useState(false);
   const [stamped, setStamped] = useState(false);
   const [gyro, setGyro] = useState<"off" | "on" | "denied">("off");
@@ -180,7 +183,7 @@ export function Stage({
                 data-flipped={flipped}
                 tabIndex={shown ? 0 : -1}
                 onClick={flip}
-                aria-label={flipped ? "Show the front of the slab" : "Show the back of the slab"}
+                aria-label={flipped ? t.stage.showFront : t.stage.showBack}
               >
                 <span className="pr-face">
                   {/* Same srcSet and sizes as CardFlip, so the browser picks the copy it already has. */}
@@ -188,7 +191,7 @@ export function Stage({
                   <span className="pr-sweep" />
                 </span>
                 <span className="pr-face pr-back">
-                  <img src={slab.back} alt={`${slab.name}, back of slab`} loading="lazy" draggable={false} />
+                  <img src={slab.back} alt={fmt(t.slab.backAlt, { name: slab.name })} loading="lazy" draggable={false} />
                 </span>
               </button>
               <span className="pr-glare" aria-hidden />
@@ -206,7 +209,7 @@ export function Stage({
               }}
             >
               {slab.grade}
-              {slab.tier && <small>{slab.tier}</small>}
+              {slab.tier && <small>{t.rarity[slab.tier]}</small>}
             </motion.div>
           )}
         </motion.div>
@@ -215,7 +218,7 @@ export function Stage({
       {shown ? (
         <div className="pr-tools">
           <button type="button" className="pr-tool" onClick={flip}>
-            ↻ Flip
+            {t.stage.flip}
           </button>
           {canGyro && gyro !== "denied" && (
             <button
@@ -227,7 +230,7 @@ export function Stage({
                 void toggleGyro();
               }}
             >
-              ◎ Tilt
+              {t.stage.tilt}
             </button>
           )}
         </div>
@@ -240,7 +243,7 @@ export function Stage({
             onSkip();
           }}
         >
-          Skip ▸▸
+          {t.stage.skip}
         </button>
       )}
     </div>

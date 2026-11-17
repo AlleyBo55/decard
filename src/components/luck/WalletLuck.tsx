@@ -1,23 +1,25 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { useState } from "react";
 import { useWalletLuck, type WalletPullRow } from "@/hooks/pages/Luck/useWalletLuck";
 import { clsx } from "@/lib/clsx";
 import { cardImage } from "@/lib/constants";
 import { fmtNum, fmtPct, fmtUsd, shortAddr, shortCardName } from "@/lib/format";
+import { fmt, plural } from "@/lib/i18n/format";
+import type { ClientStrings } from "@/lib/i18n/strings/types";
 import { TIER_ORDER } from "@/lib/luck";
 import type { WalletLuckSummary } from "@/lib/types";
 import { DexMessage, DialogBox, PokeLoader, Skeleton, StatBar } from "@/components/ui";
-import { scoreOutOf100, shareOrCopy, TIER_STYLE, titleCase, type ShareState } from "./shared";
+import { rich } from "@/components/gacha/rich";
+import { scoreOutOf100, shareOrCopy, TIER_STYLE, type ShareState } from "./shared";
+
+type WalletCopy = ClientStrings["luck"]["wallet"];
 
 const TIERS_BEST_FIRST = [...TIER_ORDER].reverse();
 
 const luckHref = (memo: string) => `/luck?memo=${encodeURIComponent(memo)}`;
-
-function pullCount(n: number) {
-  return `${fmtNum(n)} ${n === 1 ? "pull" : "pulls"}`;
-}
 
 /** Rounded to one decimal, a percentile can read 0.0% or 100.0%, which no run can be. */
 function runPct(value: number) {
@@ -36,39 +38,31 @@ function utcDate(blockTime: number | null, pulledAt: string | null) {
 }
 
 /** Plain reason for a pull /api/luck could not score, by its error code (see lib/gacha.ts). */
-function failureReason(code: string) {
+function failureReason(code: string, reasons: WalletCopy["reasons"]) {
   switch (code) {
     case "LEGACY_PULL":
-      return "Legacy pull, no pool snapshot";
+      return reasons.legacy;
     case "UNVERIFIED_PULL":
-      return "Not verified by Collector Crypt";
+      return reasons.unverified;
     case "PULL_PENDING":
-      return "Not verified yet";
+      return reasons.pending;
     case "INCOMPLETE_PULL":
-      return "Incomplete historical data";
+      return reasons.incomplete;
     case "UNSUPPORTED_PULL":
     case "PULL_NOT_FOUND":
     case "BAD_MEMO":
-      return "Unsupported pull";
+      return reasons.unsupported;
     default:
-      return "Unavailable right now";
+      return reasons.unavailable;
   }
 }
 
-function walletErrorCopy(error: unknown) {
+function walletErrorCopy(error: unknown, errors: WalletCopy["errors"]) {
   const value = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
   if (value.code === "BAD_WALLET" || value.status === 400) {
-    return {
-      title: "That wallet address could not be read.",
-      body: "Check that it is a Solana wallet address, then paste it again.",
-      retry: false,
-    };
+    return { ...errors.badWallet, retry: false };
   }
-  return {
-    title: "This wallet's history is unavailable right now.",
-    body: "Its Solana transaction history could not be loaded. The wallet is still in the URL, so you can try again safely.",
-    retry: true,
-  };
+  return { ...errors.unavailable, retry: true };
 }
 
 function Summary({
@@ -82,17 +76,19 @@ function Summary({
   scoring: boolean;
   progress: { done: number; total: number };
 }) {
+  const t = useT();
+  const { locale } = useLocale();
+  const w = t.luck.wallet;
   const [shareState, setShareState] = useState<ShareState>("idle");
   const score = scoreOutOf100(summary.meanScore);
-  const runLine = `Across ${pullCount(summary.scored)}, luckier than ${runPct(summary.runPercentile)} of fair ${fmtNum(
-    summary.scored,
-  )}-pull runs.`;
+  const scored = fmtNum(summary.scored);
+  const runLine = plural(locale, summary.scored, w.run, { n: scored, pct: runPct(summary.runPercentile) });
   const best = summary.best;
   const showBest = Boolean(best) || scoring;
 
   async function share() {
     const next = await shareOrCopy({
-      title: `Collector Crypt wallet luck: ${score}/100`,
+      title: fmt(w.shareTitle, { score }),
       text: runLine,
       url: `${window.location.origin}/luck?wallet=${encodeURIComponent(wallet)}`,
     });
@@ -105,60 +101,60 @@ function Summary({
         <div className={clsx("grid", showBest && "lg:grid-cols-[minmax(0,1.55fr)_minmax(230px,0.72fr)]")}>
           <div className="flex min-w-0 flex-col gap-6 p-5 sm:p-8">
             <div>
-              <p className="font-pixel text-[9px] uppercase text-ink-mute">Wallet pull luck</p>
+              <p className="font-pixel text-[9px] uppercase text-ink-mute">{w.kicker}</p>
               <h2 id="wallet-luck-title" className="mt-2 h-display text-[clamp(1.6rem,4vw,2.8rem)]">
-                Wallet {shortAddr(wallet)}
+                {fmt(w.title, { wallet: shortAddr(wallet) })}
               </h2>
               <p className="mt-2 break-all font-mono text-xs text-ink-mute">{wallet}</p>
             </div>
 
             <div className="rounded-2xl border-2 border-ink bg-pika/25 p-5 shadow-[4px_4px_0_var(--color-ink)]">
-              <p className="font-pixel text-[10px] uppercase text-ink-mute">Average luck score</p>
+              <p className="font-pixel text-[10px] uppercase text-ink-mute">{w.average}</p>
               <p className="mt-2 h-display text-[clamp(2rem,6vw,4rem)] leading-none tabular-nums">
-                Wallet luck {summary.scored > 0 ? `${score}/100` : "…"}
+                {summary.scored > 0 ? fmt(w.score, { score }) : w.scorePending}
               </p>
               {summary.scored > 0 && (
                 <>
                   <div className="mt-5">
-                    <StatBar label="Luck" value={summary.meanScore} max={1} display={`${score}/100`} color="var(--color-poke)" />
+                    <StatBar label={t.luck.bar} value={summary.meanScore} max={1} display={`${score}/100`} color="var(--color-poke)" />
                   </div>
                   <p className="mt-5 text-lg font-extrabold">
-                    Across {pullCount(summary.scored)}, luckier than{" "}
-                    <span className="text-up tabular-nums">{runPct(summary.runPercentile)}</span> of fair{" "}
-                    {fmtNum(summary.scored)}-pull runs.
+                    {rich(plural(locale, summary.scored, w.run, { n: scored }), {
+                      pct: <span className="text-up tabular-nums">{runPct(summary.runPercentile)}</span>,
+                    })}
                   </p>
                 </>
               )}
               {scoring ? (
                 <p className="mt-2 text-sm tabular-nums text-ink-soft">
-                  Scoring {fmtNum(progress.done)} of {fmtNum(progress.total)} pulls…
+                  {plural(locale, progress.total, w.scoring, { done: fmtNum(progress.done), n: fmtNum(progress.total) })}
                 </p>
               ) : (
-                summary.scored === 0 && (
-                  <p className="mt-5 text-sm text-ink-soft">None of these pulls could be scored. The list below says why.</p>
-                )
+                summary.scored === 0 && <p className="mt-5 text-sm text-ink-soft">{w.noneScored}</p>
               )}
             </div>
 
             {summary.valueRatio != null && summary.expectedTotal != null && (
               <p className="text-sm text-ink-soft">
-                Pulled <span className="font-extrabold tabular-nums text-ink">{fmtUsd(summary.valueInsured)}</span> of
-                insured value vs <span className="font-extrabold tabular-nums text-ink">{fmtUsd(summary.expectedTotal)}</span>{" "}
-                expected ({fmtPct(summary.valueRatio)}).
+                {rich(w.value, {
+                  value: <span className="font-extrabold tabular-nums text-ink">{fmtUsd(summary.valueInsured)}</span>,
+                  expected: <span className="font-extrabold tabular-nums text-ink">{fmtUsd(summary.expectedTotal)}</span>,
+                  ratio: fmtPct(summary.valueRatio),
+                })}
                 {summary.valueSample < summary.scored &&
-                  ` Covers the ${fmtNum(summary.valueSample)} of ${pullCount(summary.scored)} that report expected value.`}
+                  ` ${plural(locale, summary.scored, w.valueSample, { sample: fmtNum(summary.valueSample), n: scored })}`}
               </p>
             )}
 
             <div>
-              <p className="font-pixel text-[9px] uppercase text-ink-mute">Tiers pulled</p>
+              <p className="font-pixel text-[9px] uppercase text-ink-mute">{w.tiers}</p>
               <ul className="mt-2 flex flex-wrap gap-2">
                 {TIERS_BEST_FIRST.map((tier) => (
                   <li
                     key={tier}
                     className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-pixel text-[9px] uppercase ${TIER_STYLE[tier]}`}
                   >
-                    {titleCase(tier)} <span className="tabular-nums">{summary.tiers[tier]}</span>
+                    {t.ui.gachaTiers[tier]} <span className="tabular-nums">{summary.tiers[tier]}</span>
                   </li>
                 ))}
               </ul>
@@ -166,16 +162,16 @@ function Summary({
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-sand pt-5">
               <button type="button" onClick={share} className="btn btn-red" disabled={scoring || summary.scored === 0}>
-                {shareState === "shared" ? "Shared" : shareState === "copied" ? "Link copied" : "Share wallet luck"}
+                {shareState === "shared" ? t.luck.share.shared : shareState === "copied" ? t.luck.share.copied : w.share}
               </button>
               <Link
                 href={`/wallet/${encodeURIComponent(wallet)}`}
                 className="text-sm font-extrabold text-azure-deep hover:text-poke-deep"
               >
-                Wallet page →
+                {w.walletPage}
               </Link>
               <span role="status" aria-live="polite" className="text-xs text-ink-mute">
-                {shareState === "failed" ? "Sharing failed. Copy the URL from the address bar." : ""}
+                {shareState === "failed" ? t.luck.share.failed : ""}
               </span>
             </div>
           </div>
@@ -185,10 +181,10 @@ function Summary({
               href={luckHref(best.memo)}
               className="group flex flex-col items-center justify-center gap-3 bg-cream-lo p-6 text-center sm:p-8"
             >
-              <span className="font-pixel text-[9px] uppercase text-ink-mute">Best pull</span>
+              <span className="font-pixel text-[9px] uppercase text-ink-mute">{w.best}</span>
               <img
                 src={cardImage(best.card.mint, "front", 512)}
-                alt={`Front of ${best.card.name}`}
+                alt={fmt(t.luck.cardFront, { name: best.card.name })}
                 width={337}
                 height={568}
                 className="w-full max-w-[200px] rounded-[14px] object-contain shadow-[0_12px_28px_rgb(44_38_29_/_0.22)] transition-transform group-hover:-rotate-1 group-hover:scale-[1.02]"
@@ -197,7 +193,8 @@ function Summary({
                 {shortCardName(best.card.name)}
               </span>
               <span className="text-sm tabular-nums text-ink-soft">
-                Luck score {scoreOutOf100(best.luckScore)}/100 · {titleCase(best.tier)} tier
+                {fmt(t.luck.score, { score: scoreOutOf100(best.luckScore) })} ·{" "}
+                {fmt(t.luck.tier, { tier: t.ui.gachaTiers[best.tier] })}
               </span>
             </Link>
           ) : (
@@ -219,6 +216,8 @@ const ROW_CLASS =
   "group menu-item flex items-center gap-3 rounded-lg py-3 pl-1 pr-1 transition-colors hover:bg-cream-hi/80";
 
 function PullRow({ row }: { row: WalletPullRow }) {
+  const t = useT();
+  const w = t.luck.wallet;
   const { state } = row;
 
   if (state.status === "loading") {
@@ -246,7 +245,7 @@ function PullRow({ row }: { row: WalletPullRow }) {
         <div className="min-w-0 flex-1">
           <p className="truncate font-mono text-[13px] font-bold text-ink-soft">{shortMemo(row.memo)}</p>
           <p className="mt-1 text-[13px] text-ink-mute">
-            {failureReason(state.code)}
+            {failureReason(state.code, w.reasons)}
             {date && (
               <>
                 {" · "}
@@ -255,7 +254,7 @@ function PullRow({ row }: { row: WalletPullRow }) {
             )}
           </p>
         </div>
-        <span className="shrink-0 font-pixel text-[8px] uppercase text-ink-mute">Not scored</span>
+        <span className="shrink-0 font-pixel text-[8px] uppercase text-ink-mute">{w.notScored}</span>
       </Link>
     );
   }
@@ -277,11 +276,11 @@ function PullRow({ row }: { row: WalletPullRow }) {
           <span
             className={`inline-flex rounded-md border px-1.5 py-1 font-pixel text-[8px] uppercase leading-none ${TIER_STYLE[result.tier]}`}
           >
-            {titleCase(result.tier)}
+            {t.ui.gachaTiers[result.tier]}
           </span>
         </div>
         <p className="mt-1 text-[13px] tabular-nums text-ink-mute">
-          {fmtUsd(result.insuredValue)} insured
+          {fmt(w.insured, { value: fmtUsd(result.insuredValue) })}
           {date && (
             <>
               {" · "}
@@ -308,10 +307,13 @@ function PullRow({ row }: { row: WalletPullRow }) {
 
 export function WalletLuck({ wallet }: { wallet: string }) {
   const { payload, isError, error, isFetching, refetch, rows, progress, summary } = useWalletLuck(wallet);
+  const t = useT();
+  const { locale } = useLocale();
+  const w = t.luck.wallet;
 
   if (!payload) {
     if (isError && !isFetching) {
-      const copy = walletErrorCopy(error);
+      const copy = walletErrorCopy(error, w.errors);
       return (
         <div role="alert">
           <DexMessage
@@ -319,7 +321,7 @@ export function WalletLuck({ wallet }: { wallet: string }) {
             action={
               copy.retry && (
                 <button type="button" onClick={() => refetch()} className="btn btn-red">
-                  Try again
+                  {t.luck.retry}
                 </button>
               )
             }
@@ -329,45 +331,41 @@ export function WalletLuck({ wallet }: { wallet: string }) {
         </div>
       );
     }
-    return <PokeLoader label="Reading this wallet's pack history" />;
+    return <PokeLoader label={w.loading} />;
   }
 
   const scoring = progress.done < progress.total;
   const visible = rows.filter((row) => row.state.status !== "other");
   const failed = rows.filter((row) => row.state.status === "failed").length;
   const other = rows.length - visible.length;
-  const otherNote =
-    other > 0
-      ? `${pullCount(other)} not credited to this wallet by the official verifier ${other === 1 ? "is" : "are"} left out.`
-      : null;
+  const otherNote = other > 0 ? plural(locale, other, w.notes.other, { n: fmtNum(other) }) : null;
   const scanNote = payload.complete
     ? null
     : payload.memos.length >= 50
-      ? `Showing your latest ${fmtNum(payload.memos.length)} pulls.`
-      : `Scanned the latest ${fmtNum(payload.scanned)} transactions.`;
+      ? plural(locale, payload.memos.length, w.notes.latest, { n: fmtNum(payload.memos.length) })
+      : plural(locale, payload.scanned, w.notes.scanned, { n: fmtNum(payload.scanned) });
 
   if (visible.length === 0 && !scoring) {
     return (
       <DexMessage
-        title="No Collector Crypt pack pulls found in this wallet."
+        title={w.empty.title}
         action={
           <Link
             href={`/wallet/${encodeURIComponent(wallet)}`}
             className="text-sm font-extrabold text-azure-deep hover:text-poke-deep"
           >
-            Open wallet {shortAddr(wallet)} →
+            {fmt(w.empty.open, { wallet: shortAddr(wallet) })}
           </Link>
         }
       >
-        Collector Crypt may open packs from an embedded wallet. If so, paste the wallet address shown in your Collector
-        Crypt profile instead.
+        {w.empty.body}
         {otherNote && ` ${otherNote}`}
         {scanNote && ` ${scanNote}`}
       </DexMessage>
     );
   }
 
-  const notes = [scanNote, failed > 0 ? `${pullCount(failed)} could not be scored.` : null, otherNote].filter(
+  const notes = [scanNote, failed > 0 ? plural(locale, failed, w.notes.failed, { n: fmtNum(failed) }) : null, otherNote].filter(
     (note): note is string => Boolean(note),
   );
 
@@ -379,9 +377,11 @@ export function WalletLuck({ wallet }: { wallet: string }) {
         <DialogBox arrow={false} className="max-w-none">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <h3 id="wallet-pulls-title" className="font-display text-xl font-bold">
-              Pulls, newest first
+              {w.list}
             </h3>
-            <span className="text-xs tabular-nums text-ink-mute">{pullCount(visible.length)}</span>
+            <span className="text-xs tabular-nums text-ink-mute">
+              {plural(locale, visible.length, w.pulls, { n: fmtNum(visible.length) })}
+            </span>
           </div>
           <ul className="dash-divide mt-3">
             {visible.map((row) => (
@@ -401,19 +401,12 @@ export function WalletLuck({ wallet }: { wallet: string }) {
       </section>
 
       <DialogBox arrow={false} className="max-w-none">
-        <h3 className="font-display text-xl font-bold">How wallet luck works</h3>
-        <p className="mt-3 text-sm leading-6 text-ink-soft">
-          Every pull gets its own luck score and the wallet score is their average. 50 is average luck: a fair pull
-          scores above 50 about half the time.
-        </p>
-        <p className="mt-2 text-sm leading-6 text-ink-soft">
-          The run percentile compares that average with fair runs of the same number of pulls. Averaging 60 over 40
-          pulls is far rarer than one pull scoring 60.
-        </p>
-        <p className="mt-2 text-sm leading-6 text-ink-soft">
-          Values are insured values from each pack&apos;s historical witness, not sale prices or profit. Each pull is
-          independent, so a cold streak doesn&apos;t make the next pack luckier.
-        </p>
+        <h3 className="font-display text-xl font-bold">{w.howTitle}</h3>
+        {w.how.map((line, i) => (
+          <p key={i} className={`${i ? "mt-2" : "mt-3"} text-sm leading-6 text-ink-soft`}>
+            {line}
+          </p>
+        ))}
       </DialogBox>
     </div>
   );

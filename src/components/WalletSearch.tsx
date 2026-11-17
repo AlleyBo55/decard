@@ -1,9 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/components/LocaleProvider";
+import { localizeHref } from "@/lib/i18n";
+import { plural } from "@/lib/i18n/format";
 import { useEffect, useId, useRef, useState } from "react";
 import { cardImage } from "@/lib/constants";
-import { fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
+import { fmtNum, fmtSol, fmtUsd, gradeShort, shortCardName } from "@/lib/format";
 import { BallSearch } from "@/components/icons";
 import { GradePill } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
@@ -26,6 +29,8 @@ export function WalletSearch({
   onDone?: () => void;
 }) {
   const router = useRouter();
+  const { locale, t } = useLocale();
+  const s = t.ui.search;
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -85,7 +90,7 @@ export function WalletSearch({
     setValue("");
     setCleared(true);
     onDone?.();
-    router.push(path);
+    router.push(localizeHref(locale, path));
   }
 
   function submit(e: React.FormEvent) {
@@ -122,14 +127,14 @@ export function WalletSearch({
               setOpen(false);
             }
           }}
-          placeholder={compact ? "Search cards or wallets" : "Search a card, or paste a wallet address"}
+          placeholder={compact ? s.placeholderCompact : s.placeholder}
           spellCheck={false}
           autoComplete="off"
           role="combobox"
           aria-expanded={showList}
           aria-controls={listId}
           aria-autocomplete="list"
-          aria-label="Search cards or wallets"
+          aria-label={s.label}
           className={clsx(
             "w-full rounded-full bg-cream-hi border-2 border-ink/80 pl-11 text-ink placeholder:text-ink-mute/80 outline-none transition-shadow",
             "focus:border-ink focus:shadow-[0_0_0_4px_rgb(255_203_5_/_0.55)]",
@@ -140,7 +145,7 @@ export function WalletSearch({
           <kbd className="absolute right-3 font-pixel text-[9px] text-ink-mute border border-sand rounded px-1.5 py-1">/</kbd>
         ) : (
           <button type="submit" className="absolute right-1.5 btn btn-red !h-11 !px-5">
-            {loading ? "..." : "Search"}
+            {loading ? "..." : s.button}
           </button>
         )}
       </form>
@@ -152,7 +157,7 @@ export function WalletSearch({
           className="absolute z-50 mt-2 w-full min-w-[320px] paper overflow-hidden animate-pop"
         >
           {results.length === 0 && (
-            <p className="px-4 py-3 font-pixel text-[9px] text-ink-mute">{loading ? "Searching..." : "No cards found"}</p>
+            <p className="px-4 py-3 font-pixel text-[9px] text-ink-mute">{loading ? s.searching : s.empty}</p>
           )}
           {results.map((r, i) => (
             <button
@@ -177,7 +182,7 @@ export function WalletSearch({
                 className="h-11 w-8 rounded object-contain bg-cream-lo shrink-0"
               />
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-extrabold truncate">{shortCardName(r.name)}</span>
+                <span className="block text-sm font-extrabold truncate">{r.name ? shortCardName(r.name) : t.ui.unknownCard}</span>
                 <span className="block text-[11px] text-ink-mute truncate">{r.name}</span>
               </span>
               <GradePill label={gradeShort(r.gradingCompany, r.grade)} />
@@ -197,7 +202,7 @@ export function WalletSearch({
               }}
               className="w-full px-3 py-2.5 text-center text-sm font-extrabold text-azure-deep hover:bg-cream-lo border-t border-sand"
             >
-              See all {total.toLocaleString()} results →
+              {plural(locale, total, s.seeAll, { n: fmtNum(total) })} →
             </button>
           )}
         </div>

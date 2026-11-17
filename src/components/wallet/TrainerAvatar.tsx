@@ -1,3 +1,6 @@
+"use client";
+
+import { useT } from "@/components/LocaleProvider";
 import { TYPES, type PokeType } from "@/lib/poke-types";
 
 const PALETTE: PokeType[] = ["fire", "water", "grass", "electric", "psychic", "dragon", "fairy", "ghost", "fighting", "flying"];
@@ -23,6 +26,7 @@ function rng(seed: number) {
 
 /** Deterministic 7×7 mirrored pixel sprite for a wallet, in a type colour. */
 export function TrainerAvatar({ address, size = 96 }: { address: string; size?: number }) {
+  const t = useT();
   const rand = rng(hash(address));
   const color = TYPES[PALETTE[hash(address.slice(-6)) % PALETTE.length]].color;
   const cells: [number, number][] = [];
@@ -41,7 +45,7 @@ export function TrainerAvatar({ address, size = 96 }: { address: string; size?: 
       height={size}
       shapeRendering="crispEdges"
       role="img"
-      aria-label="Trainer sprite"
+      aria-label={t.market.wallet.sprite}
       className="rounded-xl bg-cream-lo"
     >
       {cells.map(([x, y]) => (

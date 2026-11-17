@@ -9,6 +9,11 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
+    # default: Caddy reaches the app. decard-internal: the app reaches decardbe, the private Slabz
+    # backend, which publishes no port and admits only this network.
+    networks:
+      - default
+      - decard-internal
     healthcheck:
       # 127.0.0.1, not localhost: in this Alpine image localhost resolves to ::1 first, and the
       # Next.js server listens on IPv4 only (HOSTNAME=0.0.0.0), so a localhost probe is refused.
@@ -41,3 +46,7 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+networks:
+  # Shared with decardbe's compose project; the deploy workflows create it if missing.
+  decard-internal:
+    external: true

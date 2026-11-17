@@ -1,20 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
+import { useT } from "@/components/LocaleProvider";
 import { animate, motion, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { clsx } from "@/lib/clsx";
 import { fmtUsd, shortAddr } from "@/lib/format";
+import { fmt } from "@/lib/i18n/format";
 import { useReducedMotion } from "@/lib/hooks";
 import type { GachaMachine, GachaTier } from "@/lib/types";
-import {
-  centsPerDollar,
-  dollarsPerDollar,
-  fmtMultiple,
-  multipleLevel,
-  packColor,
-  TIER_LABEL,
-} from "./shared";
+import { centsPerDollar, dollarsPerDollar, fmtMultiple, multipleLevel, packColor } from "./shared";
 import "./gacha.css";
 
 // Building blocks shared by the live feed, the hall of fame and the odds panel.
@@ -26,17 +21,23 @@ export const TAP = { scale: 0.97 } as const;
 export const LIFT = { y: -4 } as const;
 
 export function TierBadge({ tier, className }: { tier: GachaTier | null; className?: string }) {
+  const t = useT();
   return (
     <span className={clsx("gx-tier", className)} data-tier={tier ?? "pending"}>
-      {tier ? TIER_LABEL[tier] : "Opening"}
+      {tier ? t.ui.gachaTiers[tier] : t.luck.gacha.opening}
     </span>
   );
 }
 
 export function MultipleChip({ multiple, className }: { multiple: number | null; className?: string }) {
+  const t = useT();
   if (multiple == null) return null;
   return (
-    <span className={clsx("gx-mult", className)} data-level={multipleLevel(multiple)} title={`${multiple}× the pack price`}>
+    <span
+      className={clsx("gx-mult", className)}
+      data-level={multipleLevel(multiple)}
+      title={fmt(t.luck.gacha.packMultiple, { multiple: `${multiple}×` })}
+    >
       {fmtMultiple(multiple)}
     </span>
   );
@@ -44,12 +45,13 @@ export function MultipleChip({ multiple, className }: { multiple: number | null;
 
 /** A short wallet linking to its pull luck. Sits above a row's stretched link, padded to a 44px tap target. */
 export function WalletLuckLink({ wallet, small, className }: { wallet: string; small?: boolean; className?: string }) {
+  const t = useT();
   return (
     <Link
       href={`/luck?wallet=${encodeURIComponent(wallet)}`}
       prefetch={false}
       title={wallet}
-      aria-label={`Pull luck for wallet ${shortAddr(wallet)}`}
+      aria-label={fmt(t.luck.gacha.walletLuck, { wallet: shortAddr(wallet) })}
       className={clsx(
         "relative z-[1] -my-3 inline-flex items-center py-3 font-mono font-bold text-azure-deep transition-colors hover:text-poke-deep",
         small ? "text-[12px]" : "text-[13px]",
@@ -138,9 +140,10 @@ export function DexPanel({
 
 /** The red shell's LIVE light. */
 export function LiveBadge() {
+  const t = useT();
   return (
     <span className="inline-flex items-center gap-2 rounded-full bg-ink/25 px-2.5 py-1.5 font-pixel text-[8px] leading-none text-white">
-      <span className="live-dot" /> LIVE
+      <span className="live-dot" /> {t.luck.gacha.live}
     </span>
   );
 }

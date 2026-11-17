@@ -33,7 +33,7 @@ const POLICIES: Record<string, HostPolicy> = {
   // are charged per call inside them (see `cost`).
   "solana-rpc.publicnode.com": { rps: 5, burst: 20, concurrency: 4 },
   // Solana Foundation keyless RPC, used only for wallet pack history: 40 calls per 10s per method per IP.
-  "api.mainnet-beta.solana.com": { rps: 3, burst: 10, concurrency: 4 },
+  "api.mainnet.solana.com": { rps: 3, burst: 10, concurrency: 4 },
   // Collector Crypt's gacha site (VRF witness, live feed, pools). No published limit: stay polite.
   "gacha.collectorcrypt.com": { rps: 6, burst: 24, concurrency: 6 },
   // Helius free plan: 10 RPC requests/s, and every item of a JSON-RPC batch counts as one.
@@ -43,6 +43,9 @@ const POLICIES: Record<string, HostPolicy> = {
   "api.jup.ag": { rps: 0.5, burst: 2, concurrency: 1 },
   // CoinGecko keyless: about 10-30 calls per minute per IP, varies with load.
   "api.coingecko.com": { rps: 0.15, burst: 2, concurrency: 1 },
+  // Slabz consumer API (marketplace reads, lib/slabz.ts): 120 requests per 60s per IP, from its
+  // RateLimit-Policy header. 1.5/s keeps a quarter of that free for bursts and other callers.
+  "api-v2.slabz.com": { rps: 1.5, burst: 20, concurrency: 4 },
 };
 
 const DEFAULT_POLICY: HostPolicy = { rps: 10, burst: 20, concurrency: 8 };

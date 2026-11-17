@@ -2,7 +2,7 @@ import type { Activity, ActivityDisplay } from "./types";
 
 export const EMPTY = "·";
 
-const VENUES: Record<string, string> = { CC: "Collector Crypt", ME: "Magic Eden", OPENSEA: "OpenSea" };
+const VENUES: Record<string, string> = { CC: "Collector Crypt", ME: "Magic Eden", SLABZ: "Slabz", OPENSEA: "OpenSea" };
 
 export function venueName(m: string | null | undefined): string {
   return m ? VENUES[m] ?? m.charAt(0) + m.slice(1).toLowerCase() : "";

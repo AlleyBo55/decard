@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/components/LocaleProvider";
 
 const CODE = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
 
 /** ↑↑↓↓←→←→BA flips the whole site into original Game Boy (DMG) green. */
 export function Konami() {
-  const [toast, setToast] = useState<string | null>(null);
+  const t = useT();
+  const [toast, setToast] = useState<"on" | "off" | null>(null);
 
   useEffect(() => {
     let pos = 0;
@@ -19,7 +21,7 @@ export function Konami() {
         const on = root.dataset.theme !== "dmg";
         if (on) root.dataset.theme = "dmg";
         else delete root.dataset.theme;
-        setToast(on ? "DMG mode on! Welcome back to 1996." : "Back to full colour.");
+        setToast(on ? "on" : "off");
         window.setTimeout(() => setToast(null), 2600);
       }
     };
@@ -30,7 +32,7 @@ export function Konami() {
   if (!toast) return null;
   return (
     <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-50 dialog animate-pop" role="status">
-      <p className="dialog-text whitespace-nowrap">{toast}</p>
+      <p className="dialog-text whitespace-nowrap">{t.ui.konami[toast]}</p>
     </div>
   );
 }

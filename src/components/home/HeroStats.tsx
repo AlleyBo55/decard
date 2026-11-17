@@ -2,16 +2,18 @@
 
 import { CountUp } from "@/components/motion";
 import { useMarket } from "@/hooks/pages/Home/useMarket";
+import { useT } from "@/components/LocaleProvider";
 import { useSolPrice } from "@/lib/hooks";
 import type { MarketTop } from "@/services/Market/getMarket";
 
 export type { MarketTop };
 
+// The label comes first for screen readers; the number shows above it.
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="font-pixel text-[9px] text-ink-mute uppercase">{label}</span>
-      <span className="font-num font-extrabold text-[1.7rem] leading-none tabular-nums">{children}</span>
+      <dt className="text-[13px] font-bold text-ink-mute">{label}</dt>
+      <dd className="order-first font-num font-extrabold text-[1.4rem] leading-none tabular-nums text-ink">{children}</dd>
     </div>
   );
 }
@@ -20,22 +22,24 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
 export function HeroStats() {
   const { data } = useMarket("", "");
   const sol = useSolPrice();
+  const s = useT().home.stats;
   const usd = (p: MarketTop | null) => (p ? (p.currency === "SOL" && sol ? p.price * sol : p.price) : 0);
 
   return (
-    <div className="mt-9 flex flex-wrap gap-x-9 gap-y-5 border-t-2 border-dashed border-sand pt-6">
-      <Stat label="Cards listed">
+    // Fixed columns: the numbers count up from 0 without nudging their neighbours.
+    <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4 sm:max-w-[34rem]">
+      <Stat label={s.listed}>
         <CountUp value={data?.listed ?? 0} />
       </Stat>
-      <Stat label="Floor">
+      <Stat label={s.floor}>
         <CountUp value={usd(data?.floor ?? null)} kind="usd" />
       </Stat>
-      <Stat label="Top listing">
+      <Stat label={s.top}>
         <CountUp value={usd(data?.ceiling ?? null)} kind="usdCompact" />
       </Stat>
       <Stat label="SOL">
         <CountUp value={sol ?? 0} kind="usd" />
       </Stat>
-    </div>
+    </dl>
   );
 }

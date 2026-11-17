@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/LocaleLink";
+import { useLocale, useT } from "@/components/LocaleProvider";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { useBigHits } from "@/hooks/pages/Gacha/useGachaFeeds";
@@ -8,18 +9,15 @@ import { HoloCard } from "@/components/motion";
 import { Skeleton } from "@/components/ui";
 import { clsx } from "@/lib/clsx";
 import { cardImage } from "@/lib/constants";
-import { fmtUsd, shortCardName, timeAgo } from "@/lib/format";
+import { fmtNum, fmtUsd, shortCardName } from "@/lib/format";
+import { ago, fmt, plural } from "@/lib/i18n/format";
 import type { BigHit } from "@/lib/types";
 import { DexPanel, MotionLink, MultipleChip, TAP, usePulse, WalletLuckLink } from "./parts";
 import { fmtMultiple, hitKey, packLabel } from "./shared";
 
 type Sort = "multiple" | "value" | "newest";
 
-const SORTS: { key: Sort; label: string }[] = [
-  { key: "multiple", label: "Biggest ×" },
-  { key: "value", label: "Highest $" },
-  { key: "newest", label: "Newest" },
-];
+const SORTS: Sort[] = ["multiple", "value", "newest"];
 
 function sortHits(hits: BigHit[], sort: Sort): BigHit[] {
   const list = [...hits];
@@ -64,6 +62,8 @@ export function HitImage({ hit, className, eager }: { hit: BigHit; className?: s
 const FLIP_DELAY: Record<number, number> = { 1: 0.32, 2: 0.16, 3: 0 };
 
 function PodiumCard({ hit, rank }: { hit: BigHit; rank: 1 | 2 | 3 }) {
+  const t = useT();
+  const { locale } = useLocale();
   const name = shortCardName(hit.cardName);
   return (
     <motion.div
@@ -95,10 +95,13 @@ function PodiumCard({ hit, rank }: { hit: BigHit; rank: 1 | 2 | 3 }) {
             {fmtMultiple(hit.multiple)}
           </span>
         </span>
-        <span className="mt-2.5 block truncate text-center text-[13px] font-extrabold leading-tight group-hover:text-poke-deep sm:text-sm">
+        <span
+          className="mt-2.5 block truncate text-center text-[13px] font-extrabold leading-tight group-hover:text-poke-deep sm:text-sm"
+          aria-hidden
+        >
           {name}
         </span>
-        <span className="sr-only">, {fmtMultiple(hit.multiple)} the pack price, rank {rank}</span>
+        <span className="sr-only">{fmt(t.luck.hall.podium, { name, multiple: fmtMultiple(hit.multiple), rank })}</span>
       </MotionLink>
       <div className="mt-1 flex w-full min-w-0 flex-col items-center gap-0.5 text-center">
         <span className="whitespace-nowrap text-[11px] font-bold tabular-nums text-ink-soft sm:text-xs">{hitSpan(hit)}</span>
@@ -113,15 +116,16 @@ function PodiumCard({ hit, rank }: { hit: BigHit; rank: 1 | 2 | 3 }) {
         </span>
         <span className="w-full truncate text-[11px] text-ink-mute sm:text-xs">{packLabel(hit)}</span>
         <WalletLuckLink wallet={hit.wallet} small />
-        <span className="text-[11px] tabular-nums text-ink-mute">{timeAgo(hit.at)} ago</span>
+        <span className="text-[11px] tabular-nums text-ink-mute">{ago(locale, hit.at)}</span>
       </div>
     </motion.div>
   );
 }
 
 function Podium({ hits }: { hits: BigHit[] }) {
+  const t = useT();
   return (
-    <ol className="gx-podium" aria-label="Top three">
+    <ol className="gx-podium" aria-label={t.luck.hall.topThree}>
       {([1, 2, 3] as const).map((rank) => {
         const hit = hits[rank - 1];
         return (
@@ -138,6 +142,7 @@ function Podium({ hits }: { hits: BigHit[] }) {
 }
 
 function RankRow({ hit, rank }: { hit: BigHit; rank: number }) {
+  const { locale } = useLocale();
   return (
     <div className="flex items-center gap-2.5 px-1 py-2 sm:gap-3 sm:px-2">
       <span className="w-6 shrink-0 text-center font-pixel text-[10px] text-ink-mute">{rank}</span>
@@ -162,7 +167,7 @@ function RankRow({ hit, rank }: { hit: BigHit; rank: number }) {
           <span className="whitespace-nowrap font-bold tabular-nums text-ink-soft">{hitSpan(hit)}</span>
           <span className="max-w-[11rem] truncate">{packLabel(hit)}</span>
           <WalletLuckLink wallet={hit.wallet} />
-          <span className="whitespace-nowrap tabular-nums">{timeAgo(hit.at)} ago</span>
+          <span className="whitespace-nowrap tabular-nums">{ago(locale, hit.at)}</span>
         </div>
       </div>
       <MultipleChip multiple={hit.multiple} className="shrink-0" />
@@ -194,38 +199,44 @@ function HallSkeleton() {
 /** Section B: the 100 latest epic pulls, ranked. Top three on a podium, 4-10 below. */
 export function HallOfFame({ idPrefix = "hof", className }: { idPrefix?: string; className?: string }) {
   const { data, isLoading, isError } = useBigHits();
+  const t = useT();
+  const { locale } = useLocale();
+  const copy = t.luck.hall;
   const [sort, setSort] = useState<Sort>("multiple");
   const hits = data?.hits;
   const ranked = useMemo(() => sortHits(hits ?? [], sort).slice(0, 10), [hits, sort]);
   const pulse = usePulse(hits?.[0] ? hitKey(hits[0]) : null);
   const titleId = `${idPrefix}-title`;
   const windowLabel = data
-    ? `${data.hits.length} latest epic pulls${data.since ? ` · since ${timeAgo(data.since)} ago` : ""}`
-    : "Latest epic pulls";
+    ? plural(locale, data.hits.length, data.since ? copy.windowSince : copy.window, {
+        n: fmtNum(data.hits.length),
+        ago: ago(locale, data.since),
+      })
+    : copy.windowLoading;
 
   return (
     <DexPanel
       id="hall-of-fame"
-      title="Hall of fame"
+      title={copy.title}
       titleId={titleId}
       pulse={pulse}
       className={clsx("scroll-mt-6", className)}
-      status={<span className="font-pixel text-[8px] leading-none text-white/90">EPIC TIER</span>}
-      foot={<span>REFRESHES EVERY MINUTE</span>}
+      status={<span className="font-pixel text-[8px] leading-none text-white/90">{copy.status}</span>}
+      foot={<span>{copy.refresh}</span>}
     >
       <div className="flex flex-col gap-5 p-3 sm:p-4">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <div className="seg max-w-full" role="group" aria-label="Rank hits by">
-            {SORTS.map((s) => (
+          <div className="seg max-w-full" role="group" aria-label={copy.sortLabel}>
+            {SORTS.map((key) => (
               <motion.button
-                key={s.key}
+                key={key}
                 type="button"
                 whileTap={TAP}
-                aria-pressed={sort === s.key}
-                onClick={() => setSort(s.key)}
+                aria-pressed={sort === key}
+                onClick={() => setSort(key)}
                 className="min-h-11 whitespace-nowrap px-3 sm:px-4"
               >
-                {s.label}
+                {copy.sorts[key]}
               </motion.button>
             ))}
           </div>
@@ -234,19 +245,17 @@ export function HallOfFame({ idPrefix = "hof", className }: { idPrefix?: string;
 
         {isLoading || (isError && !data) ? (
           isError ? (
-            <p className="py-10 text-center text-sm text-ink-mute">
-              The winners list didn&apos;t load. It tries again every minute.
-            </p>
+            <p className="py-10 text-center text-sm text-ink-mute">{copy.error}</p>
           ) : (
             <HallSkeleton />
           )
         ) : ranked.length === 0 ? (
-          <p className="py-10 text-center text-sm text-ink-mute">No epic pulls in the recent window.</p>
+          <p className="py-10 text-center text-sm text-ink-mute">{t.luck.gacha.noEpics}</p>
         ) : (
           <>
             <Podium hits={ranked.slice(0, 3)} />
             {ranked.length > 3 && (
-              <ol className="gx-rows relative border-t-[1.5px] border-dashed border-sand" start={4} aria-label="Ranks 4 to 10">
+              <ol className="gx-rows relative border-t-[1.5px] border-dashed border-sand" start={4} aria-label={copy.ranks}>
                 <AnimatePresence initial={false} mode="popLayout">
                   {ranked.slice(3).map((h, i) => (
                     <motion.li

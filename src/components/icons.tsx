@@ -116,3 +116,88 @@ export function Books({ className }: P) {
     </svg>
   );
 }
+
+/** Chevron — disclosure caret on menu triggers. */
+export function Chevron({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 9.5 6 6 6-6" />
+    </svg>
+  );
+}
+
+/** Four tiles — the "More" menu. */
+export function MenuGrid({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+      <rect x="4" y="4" width="6.5" height="6.5" rx="2" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="2" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="2" />
+      <circle cx="16.75" cy="16.75" r="3.4" />
+    </svg>
+  );
+}
+
+/** Cross — close a sheet or dialog. */
+export function Close({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
+/** Trophy — leaderboards. */
+export function Trophy({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7.5 4h9v4.5a4.5 4.5 0 0 1-9 0V4Z" />
+      <path d="M7.5 6H4.5a3 3 0 0 0 3.4 3.5M16.5 6h3a3 3 0 0 1-3.4 3.5" />
+      <path d="M12 13v3.5M8.5 20h7M10 16.5h4l.4 3.5H9.6l.4-3.5Z" />
+    </svg>
+  );
+}
+
+/** Parcel — shipping a card home. */
+export function Parcel({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+      <path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4v-9Z" />
+      <path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9" />
+      <path d="m7.75 5.5 8.5 4v3" />
+    </svg>
+  );
+}
+
+/** Coin with a C — the $CARDS token. */
+export function TokenCoin({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="6.2" strokeOpacity="0.45" />
+      <path d="M14.4 9.6a3.2 3.2 0 1 0 0 4.8" />
+    </svg>
+  );
+}
+
+/** Graded slab — a card in its case, label on top. */
+export function Slab({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+      <rect x="5.5" y="2.5" width="13" height="19" rx="2" />
+      <path d="M5.5 7h13" />
+      <rect x="8" y="9.5" width="8" height="9.5" rx="1" />
+    </svg>
+  );
+}
+
+/** Vault door — cards held in custody. */
+export function Vault({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.5" y="4" width="17" height="14.5" rx="2" />
+      <circle cx="12" cy="11.25" r="3.6" />
+      <path d="M12 7.65v1.4M12 13.45v1.4M8.4 11.25h1.4M14.2 11.25h1.4M7 18.5V20M17 18.5V20" />
+    </svg>
+  );
+}

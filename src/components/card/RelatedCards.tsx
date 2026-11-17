@@ -5,6 +5,8 @@ import { CardRailSkeleton, Kicker, MoreLink } from "@/components/ui";
 import { getMarketplace } from "@/lib/cc";
 import { isGradedCard } from "@/lib/credible";
 import { shortCardName } from "@/lib/format";
+import { fmt } from "@/lib/i18n/format";
+import { getStrings, type Strings } from "@/lib/i18n/strings";
 import { hubForName, matchesHub } from "@/lib/pokemon-hubs";
 import type { CardDetail, CardRow, MarketplaceQuery } from "@/lib/types";
 
@@ -34,13 +36,13 @@ interface SameCard {
 }
 
 /** What "the same card" means here: its Pokémon's price guide when it has one, else the first words of its name. */
-function sameCard(card: CardDetail): SameCard | null {
+function sameCard(card: CardDetail, s: Strings["card"]["related"]): SameCard | null {
   const hub = card.category === "Pokemon" ? hubForName(card.itemName) : null;
   if (hub) {
     return {
       search: hub.name,
       label: hub.name,
-      more: { href: `/pokemon/${hub.slug}`, label: `${hub.name} card prices by grade` },
+      more: { href: `/pokemon/${hub.slug}`, label: fmt(s.hubLink, { name: hub.name }) },
       matches: (name) => matchesHub(hub, name),
     };
   }
@@ -54,7 +56,7 @@ function sameCard(card: CardDetail): SameCard | null {
   return {
     search: pick.join(" "),
     label: pick.join(" "),
-    more: { href: `/scanner?search=${encodeURIComponent(pick[0])}`, label: `Every ${pick[0]} listing in the scanner` },
+    more: { href: `/scanner?search=${encodeURIComponent(pick[0])}`, label: fmt(s.scannerLink, { name: pick[0] }) },
     matches: (name) => shortCardName(name).toLowerCase().includes(first),
   };
 }
@@ -98,7 +100,8 @@ function RailSection({
 }
 
 async function SameCardRail({ card }: { card: CardDetail }) {
-  const same = sameCard(card);
+  const s = (await getStrings()).card.related;
+  const same = sameCard(card, s);
   if (!same) return null;
   const rows = await search({ search: same.search, orderBy: "listedPriceAsc" });
   const cards = (rows ?? [])
@@ -108,10 +111,10 @@ async function SameCardRail({ card }: { card: CardDetail }) {
   if (!cards.length) return null;
   return (
     <RailSection
-      kicker="Compare grades"
-      title={`Other ${same.label} slabs listed now`}
-      sub="Current asking prices, lowest first."
-      label={`Other ${same.label} listings`}
+      kicker={s.sameKicker}
+      title={fmt(s.sameTitle, { name: same.label })}
+      sub={s.sameSub}
+      label={fmt(s.sameLabel, { name: same.label })}
       cards={cards}
       more={same.more}
     />
@@ -130,14 +133,15 @@ async function SameSetRail({ card }: { card: CardDetail }) {
     .filter((c) => c.nftAddress !== card.nftAddress && isGradedCard(c) && c.set?.trim().toLowerCase() === set.toLowerCase())
     .slice(0, MAX);
   if (cards.length < 3) return null;
+  const s = (await getStrings()).card.related;
   return (
     <RailSection
-      kicker="Same set"
-      title={`More from ${set}`}
-      sub="Newest listings first."
-      label={`More listings from ${set}`}
+      kicker={s.setKicker}
+      title={fmt(s.setTitle, { set })}
+      sub={s.setSub}
+      label={fmt(s.setLabel, { set })}
       cards={cards}
-      more={{ href: `/scanner?search=${encodeURIComponent(words.join(" "))}`, label: `Every ${set} listing in the scanner` }}
+      more={{ href: `/scanner?search=${encodeURIComponent(words.join(" "))}`, label: fmt(s.scannerLink, { name: set }) }}
     />
   );
 }

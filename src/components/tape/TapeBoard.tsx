@@ -9,16 +9,14 @@ import { GameBoy } from "@/components/gameboy/GameBoy";
 import { CountUp } from "@/components/motion";
 import { DexMessage, FeedSkeleton } from "@/components/ui";
 import { Coins, Pulse, Sparkle, Target } from "@/components/icons";
-import { isBotChurn, isSale } from "@/lib/format";
+import { useLocale } from "@/components/LocaleProvider";
+import { fmtNum, isBotChurn, isSale } from "@/lib/format";
+import { plural, type Plural } from "@/lib/i18n/format";
 
 type Filter = "all" | "sales" | "listings" | "bids";
 
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: "all", label: "All moves" },
-  { id: "sales", label: "Sales" },
-  { id: "listings", label: "Listings" },
-  { id: "bids", label: "Bids" },
-];
+// Labels: market.tapeBoard.filters in lib/i18n/strings.
+const FILTERS: Filter[] = ["all", "sales", "listings", "bids"];
 
 function matches(a: Activity, f: Filter) {
   if (f === "sales") return isSale(a);
@@ -28,6 +26,8 @@ function matches(a: Activity, f: Filter) {
 }
 
 export function TapeBoard() {
+  const { locale, t } = useLocale();
+  const tt = t.market.tapeBoard;
   const [filter, setFilter] = useState<Filter>("all");
   const [hideBots, setHideBots] = useState(true);
 
@@ -51,11 +51,12 @@ export function TapeBoard() {
 
   const rows = all.filter((a) => matches(a, filter) && (!hideBots || !isBotChurn(a)));
 
+  const count = (n: number, forms: Plural) => plural(locale, n, forms, { n: fmtNum(n) });
   const STATS = [
-    { Icon: Coins, label: "Sale volume", value: <CountUp value={stats.volume} kind="usdCompact" />, note: `${stats.sales} sales` },
-    { Icon: Sparkle, label: "Biggest sale", value: <CountUp value={stats.biggest} kind="usd" />, note: "in this window" },
-    { Icon: Target, label: "Bid moves", value: <CountUp value={stats.bids} />, note: `${stats.bots} by bulk bots` },
-    { Icon: Pulse, label: "Active trainers", value: <CountUp value={stats.traders} />, note: `last ${all.length} events` },
+    { Icon: Coins, label: tt.volume, value: <CountUp value={stats.volume} kind="usdCompact" />, note: count(stats.sales, tt.volumeNote) },
+    { Icon: Sparkle, label: tt.biggest, value: <CountUp value={stats.biggest} kind="usd" />, note: tt.biggestNote },
+    { Icon: Target, label: tt.bids, value: <CountUp value={stats.bids} />, note: count(stats.bots, tt.bidsNote) },
+    { Icon: Pulse, label: tt.traders, value: <CountUp value={stats.traders} />, note: count(all.length, tt.tradersNote) },
   ];
 
   return (
@@ -81,10 +82,10 @@ export function TapeBoard() {
 
         <div className="min-w-0 flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="seg" role="group" aria-label="Filter">
+            <div className="seg" role="group" aria-label={tt.filterLabel}>
               {FILTERS.map((f) => (
-                <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
-                  {f.label}
+                <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}>
+                  {tt.filters[f]}
                 </button>
               ))}
             </div>
@@ -95,30 +96,28 @@ export function TapeBoard() {
                 onChange={(e) => setHideBots(e.target.checked)}
                 className="h-4 w-4 accent-[var(--color-poke-deep)]"
               />
-              Hide bulk bid bots
+              {tt.hideBots}
             </label>
             <span className="ml-auto inline-flex items-center gap-2 font-pixel text-[9px] text-ink-mute">
-              <span className="live-dot" /> REFRESH 10s
+              <span className="live-dot" /> {tt.refresh}
             </span>
           </div>
 
           {isLoading && <FeedSkeleton rows={10} />}
           {isError && !data && (
             <DexMessage
-              title="The tape got tangled!"
+              title={tt.errorTitle}
               action={
                 <button type="button" className="btn btn-red" onClick={() => refetch()}>
-                  Try again
+                  {tt.retry}
                 </button>
               }
             >
-              The public Solana RPC didn&apos;t answer. It usually recovers within seconds.
+              {tt.errorText}
             </DexMessage>
           )}
           {!isLoading && !isError && rows.length === 0 && (
-            <DexMessage title="Nothing in this filter right now.">
-              Try All moves, or show bulk bots. Sales on Collector Crypt come in bursts.
-            </DexMessage>
+            <DexMessage title={tt.emptyTitle}>{tt.emptyText}</DexMessage>
           )}
 
           <div className="dash-divide">

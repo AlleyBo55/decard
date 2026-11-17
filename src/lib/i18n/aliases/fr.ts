@@ -1,0 +1,33 @@
+// French names for the subjects in ./entities.ts, keyed by entity key. Rules: the top of entities.ts.
+export const names: Record<string, string[]> = {
+  charizard: ["Dracaufeu"],
+  gengar: ["Ectoplasma"],
+  eevee: ["Évoli"],
+  umbreon: ["Noctali"],
+  venusaur: ["Florizarre"],
+  blastoise: ["Tortank"],
+  charmander: ["Salamèche"],
+  moltres: ["Sulfura"],
+  bulbasaur: ["Bulbizarre"],
+  zapdos: ["Électhor"],
+  dragonite: ["Dracolosse"],
+  snorlax: ["Ronflex"],
+  squirtle: ["Carapuce"],
+  articuno: ["Artikodin"],
+  greninja: ["Amphinobi"],
+  gyarados: ["Léviator"],
+  espeon: ["Mentali"],
+  mimikyu: ["Mimiqui"],
+  jolteon: ["Voltali"],
+  sylveon: ["Nymphali"],
+  vaporeon: ["Aquali"],
+  leafeon: ["Phyllali"],
+  tyranitar: ["Tyranocif"],
+  flareon: ["Pyroli"],
+  glaceon: ["Givrali"],
+  lapras: ["Lokhlass"],
+  ninetales: ["Feunard"],
+  "spider-man": ["Homme-Araignée"],
+};
+
+export const fillers: string[] = ["carte", "prix"];

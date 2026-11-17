@@ -3,6 +3,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type * as THREE from "three";
+import { useT } from "@/components/LocaleProvider";
 import { useReducedMotion } from "@/lib/hooks";
 
 export type CatchPhase = "idle" | "shaking" | "caught";
@@ -126,6 +127,7 @@ export default function Pokeball3D({ phase, onThrow }: { phase: CatchPhase; onTh
   const pressRef = useRef<{ last: number; moved: number } | null>(null);
   const [visible, setVisible] = useState(true);
   const reduced = useReducedMotion();
+  const label = useT().home.catch.throw3d;
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -149,7 +151,7 @@ export default function Pokeball3D({ phase, onThrow }: { phase: CatchPhase; onTh
       ref={wrapRef}
       role="button"
       tabIndex={0}
-      aria-label="Throw the Poké Ball to catch a random deal"
+      aria-label={label}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onThrow()}
       className="relative h-full w-full cursor-grab active:cursor-grabbing select-none"
       style={{ touchAction: "pan-y" }}

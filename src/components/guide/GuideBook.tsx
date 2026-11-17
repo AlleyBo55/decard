@@ -2,10 +2,13 @@
 
 import { useMemo, useState } from "react";
 import type { GuideSection } from "@/lib/guide";
+import { useT } from "@/components/LocaleProvider";
 import { TypeChip } from "@/components/ui";
+import { fmt } from "@/lib/i18n/format";
 
 /** Pokédex-style guide: numbered entries, sticky index and live search. */
 export function GuideBook({ sections }: { sections: GuideSection[] }) {
+  const copy = useT().learn.book;
   const [q, setQ] = useState("");
 
   const numbered = useMemo(() => {
@@ -27,11 +30,11 @@ export function GuideBook({ sections }: { sections: GuideSection[] }) {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search the guide"
-          aria-label="Search the guide"
+          placeholder={copy.search}
+          aria-label={copy.search}
           className="h-11 rounded-full bg-cream-hi border-2 border-sand px-4 outline-none focus:border-ink"
         />
-        <nav aria-label="Guide index" className="hidden lg:flex flex-col gap-4 max-h-[70vh] overflow-y-auto thin-scroll pr-2">
+        <nav aria-label={copy.index} className="hidden lg:flex flex-col gap-4 max-h-[70vh] overflow-y-auto thin-scroll pr-2">
           {numbered.map((s) => (
             <div key={s.id} className="flex flex-col gap-1.5">
               <a href={`#${s.id}`} className="font-extrabold hover:text-poke-deep">
@@ -53,7 +56,7 @@ export function GuideBook({ sections }: { sections: GuideSection[] }) {
       </aside>
 
       <div className="flex flex-col gap-16 min-w-0">
-        {visible.length === 0 && <p className="text-ink-mute">No entries match &ldquo;{q}&rdquo;.</p>}
+        {visible.length === 0 && <p className="text-ink-mute">{fmt(copy.empty, { query: q })}</p>}
         {visible.map((s) => (
           <section key={s.id} id={s.id} className="scroll-mt-28 flex flex-col gap-2">
             <div className="flex items-center gap-3 mb-2">
