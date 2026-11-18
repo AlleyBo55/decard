@@ -4,8 +4,8 @@
 
 # Decard
 
-**The free, open-source scanner and tracker for [Collector Crypt](https://collectorcrypt.com) graded cards on Solana.**<br>
-DexScreener, Magic Eden, GMGN and Arkham for card traders, wrapped in a Game Boy.
+**The free, open-source scanner and tracker for tokenized graded cards on Solana, across [Collector Crypt](https://collectorcrypt.com), Magic Eden and [Slabz](https://slabz.com).**<br>
+DexScreener, Magic Eden, GMGN and Arkham for card traders, wrapped in a Game Boy. Now you can play too: rip packs, redeem the real slab, climb the league.
 
 [![Live site](https://img.shields.io/badge/live-decard.fun-e3350d?style=flat-square)](https://www.decard.fun)
 [![License: MIT](https://img.shields.io/badge/license-MIT-ffcb05?style=flat-square)](./LICENSE)
@@ -16,32 +16,101 @@ DexScreener, Magic Eden, GMGN and Arkham for card traders, wrapped in a Game Boy
 [![$CARDS tracker](https://img.shields.io/badge/%24CARDS-buybacks_%2B_burns-ee8130?style=flat-square)](#cards-token)
 [![18 franchise hubs](https://img.shields.io/badge/franchise_hubs-18-6390f0?style=flat-square)](#franchise-hubs)
 [![Self-hosted](https://img.shields.io/badge/self--hosted-Docker_%2B_Caddy-1d5690?style=flat-square&logo=docker&logoColor=white)](#deploy)
+[![Rip packs](https://img.shields.io/badge/rip_packs-real_slabs-e3350d?style=flat-square)](#rip-packs)
+[![Redeem](https://img.shields.io/badge/redeem-vault_to_door-2a75bb?style=flat-square)](#redeem)
+[![Rip League](https://img.shields.io/badge/Rip_League-climb_to_Champion-ffcb05?style=flat-square)](#rip-league)
+[![15 languages](https://img.shields.io/badge/languages-15-3dbe6e?style=flat-square)](#languages)
 
-**[Open decard.fun](https://www.decard.fun)** · [$CARDS token](https://www.decard.fun/cards-token) · [Franchise hubs](https://www.decard.fun/cards/pokemon) · [Live gacha](https://www.decard.fun/luck#live) · [Listing scanner](https://www.decard.fun/scanner) · [Trade tape](https://www.decard.fun/tape) · [Trainer's guide](https://www.decard.fun/guide)
+**[Open decard.fun](https://www.decard.fun)** · [Rip packs](https://www.decard.fun/rip) · [Redeem](https://www.decard.fun/redeem) · [Rip League](https://www.decard.fun/gym) · [$CARDS token](https://www.decard.fun/cards-token) · [Franchise hubs](https://www.decard.fun/cards/pokemon) · [Live gacha](https://www.decard.fun/luck#live) · [Listing scanner](https://www.decard.fun/scanner) · [Trade tape](https://www.decard.fun/tape) · [Trainer's guide](https://www.decard.fun/guide)
 
-🔥 **New:** [rip graded Pokémon packs](#rip-packs), the [$CARDS token tracker](#cards-token), [18 franchise hubs](#franchise-hubs), a slang-savvy glossary, and a [faster, leaner Decard](#faster-lighter).
+🔥 **New:** [rip graded card packs](#rip-packs), [redeem the real slab](#redeem), the [Rip League leaderboards](#rip-league), [15 languages with local-name search](#languages), the [$CARDS token tracker](#cards-token), [18 franchise hubs](#franchise-hubs) and a [faster, leaner Decard](#faster-lighter).
+
+<table>
+  <tr>
+    <td width="33%" valign="top" align="center">
+      <a href="#rip-packs"><img src=".github/assets/rip.jpg" alt="Decard's Rip page: a Slabz pack on a glowing stage, tier odds, chase cards and the Rip pack button"></a>
+      <br><b>🔴 Rip packs</b><br>A real graded slab in every pack.
+    </td>
+    <td width="33%" valign="top" align="center">
+      <a href="#redeem"><img src=".github/assets/redeem.jpg" alt="Decard's Redeem page: a seven-stop route map from the vault to your door and a shipping pass"></a>
+      <br><b>📦 Redeem</b><br>Burn the NFT, ship the slab home.
+    </td>
+    <td width="33%" valign="top" align="center">
+      <a href="#rip-league"><img src=".github/assets/gym.jpg" alt="Decard's Rip League: a spotlit podium with the Champion, Elite Four spots and the best pull"></a>
+      <br><b>🏆 Rip League</b><br>Climb to Champion.
+    </td>
+  </tr>
+</table>
 
 </div>
 
 ---
 
-Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on Solana. Its marketplace shows what's for sale. **Decard shows what's worth buying**: every live listing on Collector Crypt and Magic Eden ranked by discount to insured value, every on-chain sale and bid as it lands, and any wallet's collection. Now it watches the gacha too: every pack as it rips, the odds of your next pull, and a verified luck score for every pull. Browsing is read-only and keyless: no login, no wallet connection, no API key. A wallet is only needed to rip packs.
+Collector Crypt vaults real PSA, CGC and BGS slabs and trades them as tokens on Solana. Its marketplace shows what's for sale. **Decard shows what's worth buying**: every live listing on Collector Crypt and Magic Eden ranked by discount to insured value, every on-chain sale and bid as it lands, and any wallet's collection. Now it watches the gacha too: every pack as it rips, the odds of your next pull, and a verified luck score for every pull. Browsing is read-only and keyless: no login, no wallet connection, no API key. A wallet is only needed to rip packs or redeem a slab.
 
 <a href="https://www.decard.fun"><img src=".github/assets/home.jpg" alt="Decard home page with live listing stats, card and wallet search, and a 3D Poké Ball" width="100%"></a>
 
 <a id="rip-packs"></a>
 
-## 🔥 New: rip graded Pokémon packs
+## 🔴 New: rip graded card packs
 
-**Throw a ball. Catch a slab.** [decard.fun/rip](https://www.decard.fun/rip) rips mystery packs of real graded cards through the [Slabz](https://slabz.com) Partner API.
+**Throw a ball. Catch a slab.** [decard.fun/rip](https://www.decard.fun/rip) rips mystery packs of real graded cards through the [Slabz](https://slabz.com) Partner API: Pokémon, One Piece, Dragon Ball, Lorcana, sports and more, 10 universes that each rip their own way.
 
-- 🎯 **Odds before you pay**: each pack's price, average pull and tier odds, drawn as Poké, Great, Ultra and Master Balls, plus a Pokédex of every card in the pool.
-- 🔴 **The catch**: approve the USDC payment in your wallet, the ball lands and shakes while the card is dealt, then pops into a holo reveal with a tier glow.
-- 💱 **Sell back**: keep the slab, or sell it back in one tap within 72 hours.
+<a href="https://www.decard.fun/rip"><img src=".github/assets/rip.jpg" alt="Decard's Rip page: a Slabz pack on a glowing stage, the tier odds as Poké, Great, Ultra and Master Balls, chase cards, the pack's price, average pull and sell-back rate, and a live pulls bar" width="100%"></a>
+
+<img src=".github/assets/rip-mobile.jpg" alt="The Rip page on a phone: hold the pack to rip it" width="230" align="right">
+
+- 🎯 **Odds before you pay**: each pack's price, average pull and tier odds, drawn as Poké, Great, Ultra and Master Balls, plus the chase cards and a Pokédex of every card in the pool.
+- 🔴 **Hold to rip**: approve the USDC payment in your wallet, the ball lands and shakes while the card is dealt, then pops into a holo reveal with a tier glow. Each universe has its own cutscene.
+- 💱 **Sell back**: keep the slab, or sell it back in one tap within 72 hours. **Turbo** auto-sells commons for USDC.
 - 🖥 **Trainer's PC**: every pull, with paid packs waiting to open if a rip gets interrupted.
-- 📣 **Live hits bar**: what other trainers just pulled.
+- 📣 **Live pulls bar**: what other trainers just pulled.
+- 📱 **Made for thumbs**: the same arena on a phone, an iPad or a desktop.
 
 Wallets connect through the Wallet Standard (Phantom, Solflare, Backpack) and sign in with a free message, no transaction. Decard's optional fee per pack (set in decardbe) is a separate USDC transfer in the same wallet prompt, sent only once the pack is paid; the button shows the total. Decard never holds funds or keys: Slabz builds each transaction and your wallet signs it. The partner key lives in [decardbe](https://github.com/AlleyBo55/decard-backend), a private Go backend this app reaches over an internal network with signed requests; browsers never talk to it.
+
+<br clear="right">
+
+<a id="redeem"></a>
+
+## 📦 New: redeem the real slab
+
+**Bring your slab home. Vault to your door.** [decard.fun/redeem](https://www.decard.fun/redeem) trades a card NFT for the physical graded slab: seven stops, two free signatures, one approval that burns and pays.
+
+<a href="https://www.decard.fun/redeem"><img src=".github/assets/redeem.jpg" alt="Decard's Redeem page: a seven-stop route map from check-in to journey, the trainer check-in steps and a shipping pass from the Slabz vault to your town" width="100%"></a>
+
+- 🗺 **Seven stops**: Check in → Party → Region → Hometown → Review → Release → Journey, drawn as a route map you travel along.
+- ✍️ **Two free check-ins**: sign in to Decard and open a 14-minute shipping pass with Slabz's shipping desk. Free messages, no transaction, no fee.
+- 🌍 **Pick your country on the globe**: published rates while you choose, then the live quote at review (shipping, insurance and fees in USDC). That number is what you pay, and you confirm it before your wallet opens.
+- 🔥 **One card, one claim**: the NFT is burned in the same approval that pays shipping, so a card can never ship and still trade. A burn is final.
+- 🚚 **Journey tracking**: booked, packing, on the road with the carrier's tracking number, delivered. An interrupted release finishes from your journeys without paying twice.
+- 🔒 **Your address stays out of Decard**: it is kept by Slabz's shipping provider and relayed without being stored or logged.
+
+<a id="rip-league"></a>
+
+## 🏆 New: the Rip League
+
+**Climb to Champion.** [decard.fun/gym](https://www.decard.fun/gym) ranks trainers by the packs they rip, and every Slabz pack as a gym by its odds.
+
+<a href="https://www.decard.fun/gym"><img src=".github/assets/gym.jpg" alt="Decard's Rip League: a spotlit podium with the Champion's rips, value pulled and best pull, open Elite Four spots and league totals" width="100%"></a>
+
+- 👑 **Champion and Elite Four**: trainers rank by packs ripped, then by value pulled. First is the Champion, second to fifth the Elite Four, sixth to tenth Ace Trainers, everyone after a Challenger.
+- 🏟 **Two leagues**: the **Decard League** counts every pack ripped on Decard, all time. **Slabz live** ranks every Slabz player across the last 100 pulls and refreshes every 30 seconds.
+- 🥇 **Every pack is a gym**: gyms rank by each pack's published odds of an Epic or Legendary pull, or by average pull against the pack price. A gym's leader is the most valuable Legendary card in its pool.
+- 🎖 **Badges and a Hall of Fame**: a badge per universe, and the biggest pulls on a podium with each trainer's best pull.
+
+Rank never changes the odds: every pull is random and the same for everyone.
+
+<a id="languages"></a>
+
+## 🌏 New: 15 languages, and search in yours
+
+Decard now speaks English, 日本語, Bahasa Indonesia, Bahasa Melayu, ไทย, Tiếng Việt, 한국어, Русский, 简体中文, Español, Français, Italiano, Norsk, Deutsch and Nederlands.
+
+- 🌐 **A language picker for every screen**: a bottom sheet on phones, a card under the header on tablets and desktops, each language in its own words.
+- 🔗 **Real URLs per language** (`/ja/rip`, `/id/cards/one-piece`) with hreflang, translated titles and descriptions, and structured data in that language. English stays at the unprefixed URLs.
+- 🔎 **Search by the names your country uses**: `jeki kartu tcg` finds Shanks (Indonesia), `kairyuu` finds Dragonite (Japan), `リザードン` Charizard, `Hombre Araña` Spider-Man, `C罗` Cristiano Ronaldo. About 230 Pokémon, anime and TCG characters, heroes and players, each franchise hub listing what collectors call them.
+- 🧭 Card names, grades and prices stay as the marketplace lists them. `node scripts/i18n-gaps.mjs` shows anything a language still reads in English.
 
 <a id="cards-token"></a>
 
