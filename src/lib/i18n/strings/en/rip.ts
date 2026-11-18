@@ -339,13 +339,13 @@ export const rip = {
     rejected: "You closed the wallet prompt. Nothing was signed.",
     failed: "That wallet couldn't sign in. Try again, or pick another wallet.",
   },
-  /** Why a rip stopped (hooks/pages/Rip/useRipFlow.ts). "My Pulls" is the trainer card section. */
+  /** Why a rip stopped (hooks/pages/Rip/useRipFlow.ts). "Your collection" is the trainer card's box of pulls (box above). */
   flow: {
     /** {error} is the server's reason, a full sentence in English. */
-    openFailed: "{error} Your pack is paid: open it from My Pulls.",
-    openSlow: "Your card is still being dealt. The pack is paid and safe: open it from My Pulls in a minute.",
+    openFailed: "{error} Your pack is paid: open it from your collection.",
+    openSlow: "Your card is still being dealt. The pack is paid and safe: open it from your collection in a minute.",
     rejected: "The network rejected the payment, usually for not enough USDC or SOL, or a prompt left open too long. Nothing was charged.",
-    unconfirmed: "We couldn't confirm the payment yet. If it went through, the pack shows up in My Pulls ready to open. Don't pay again.",
+    unconfirmed: "We couldn't confirm the payment yet. If it went through, the pack shows up in your collection ready to open. Don't pay again.",
     closed: "You closed the wallet prompt, so nothing was charged. The reserved pack is released on its own.",
     signFailed: "Your wallet couldn't sign the payment. Nothing was charged.",
     generic: "Something went wrong. Please try again.",

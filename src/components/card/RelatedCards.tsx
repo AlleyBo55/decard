@@ -6,7 +6,9 @@ import { getMarketplace } from "@/lib/cc";
 import { isGradedCard } from "@/lib/credible";
 import { shortCardName } from "@/lib/format";
 import { fmt } from "@/lib/i18n/format";
-import { getStrings, type Strings } from "@/lib/i18n/strings";
+import { localPokemonName } from "@/lib/i18n/copy";
+import { getLocale, getStrings, type Strings } from "@/lib/i18n/strings";
+import type { Locale } from "@/lib/i18n";
 import { hubForName, matchesHub } from "@/lib/pokemon-hubs";
 import type { CardDetail, CardRow, MarketplaceQuery } from "@/lib/types";
 
@@ -35,14 +37,18 @@ interface SameCard {
   matches: (itemName: string) => boolean;
 }
 
-/** What "the same card" means here: its Pokémon's price guide when it has one, else the first words of its name. */
-function sameCard(card: CardDetail, s: Strings["card"]["related"]): SameCard | null {
+/**
+ * What "the same card" means here: its Pokémon's price guide when it has one, else the first words of its name.
+ * The search stays English (listing names are); the label uses the Pokémon's name in the page's language.
+ */
+function sameCard(card: CardDetail, s: Strings["card"]["related"], locale: Locale): SameCard | null {
   const hub = card.category === "Pokemon" ? hubForName(card.itemName) : null;
   if (hub) {
+    const name = localPokemonName(locale, hub.slug, hub.name);
     return {
       search: hub.name,
-      label: hub.name,
-      more: { href: `/pokemon/${hub.slug}`, label: fmt(s.hubLink, { name: hub.name }) },
+      label: name,
+      more: { href: `/pokemon/${hub.slug}`, label: fmt(s.hubLink, { name }) },
       matches: (name) => matchesHub(hub, name),
     };
   }
@@ -100,8 +106,9 @@ function RailSection({
 }
 
 async function SameCardRail({ card }: { card: CardDetail }) {
-  const s = (await getStrings()).card.related;
-  const same = sameCard(card, s);
+  const [t, locale] = await Promise.all([getStrings(), getLocale()]);
+  const s = t.card.related;
+  const same = sameCard(card, s, locale);
   if (!same) return null;
   const rows = await search({ search: same.search, orderBy: "listedPriceAsc" });
   const cards = (rows ?? [])

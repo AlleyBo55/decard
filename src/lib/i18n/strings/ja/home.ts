@@ -1,82 +1,185 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
-
 export const home: Translation<Strings["home"]> = {
-  "kicker": "Solana · 鑑定カード図鑑",
-  "live": "ライブ",
-  "hero": { "lead": "", "scan": "スキャン", "tail": "しよう。" },
-  "lede": "Collector CryptとMagic Edenに並ぶ、トークン化された鑑定カードの出品・ディールスコア・ウォレットの動き。",
-  "newKicker": "新機能",
-  "newTitle": "パックを開けて、本物のスラブを手に。",
-  "typeKicker": "タイプを選ぶ",
-  "typeTitle": "作品から探す。",
-  "typeSub": "ポケモン、ワンピース、ドラゴンボール、Riftbound、マーベル、スポーツカード。グレードごとの出品価格。",
-  "faqKicker": "よくある質問",
-  "faqTitle": "質問と答え。",
-  "tipTitle": "博士のヒント",
-  "tip": "人口12枚のPSA 10と、誰でも持っているPSA 10は別物です。買う前にポピュレーション、ジェム率、保険価格との差を見てください。",
-  "guideBtn": "ガイドを読む",
-  "dealBtn": "お得な出品を見る",
-  "title": "鑑定カードのパック開封・出品スキャン・現物交換をSolanaで",
-  "description": "PSA・CGC・BGSの本物のスラブが入ったパックを開封。Collector Crypt、Magic Eden、Slabzの出品からお得なカードを探し、現物を自宅へ発送。ポケモン、ワンピース、スポーツなど。ライブ取引とウォレット追跡も。",
-  "faq": [
+  kicker: "Solana · 鑑定カード図鑑",
+  live: "ライブ",
+  hero: { lead: "鑑定カード", scan: "スキャン", tail: "だぜ！" },
+  lede: "Solanaのトークン化鑑定カードを網羅。Collector Crypt、Magic Eden、Slabzのリアルタイムの出品、お得度スコア、すべてのウォレットの動きを追えます。",
+  newKicker: "Decardの新機能",
+  newTitle: "パックを開封して、本物の鑑定品を手元に。",
+  typeKicker: "タイプを選ぶ",
+  typeTitle: "タイトルから探す。",
+  typeSub:
+    "鑑定済みのポケモンカード、ワンピースカード、ドラゴンボールカード、Riftbound、マーベル、スポーツカードなど。Collector Crypt、Magic Eden、Slabzに出品中のすべての鑑定品の出品価格を、グレード別にリアルタイムで。",
+  faqKicker: "トレーナーのよくある質問",
+  faqTitle: "疑問にお答えします。",
+  tipTitle: "博士のヒント",
+  tip: "ポップ数12枚のPSA10と、誰もが持っているPSA10はまったくの別物です。買う前に、ポップレポート、PSA10率、そして価格が保険評価額からどれだけ離れているかを確認しましょう。",
+  guideBtn: "トレーナーズガイドを読む",
+  dealBtn: "掘り出し物を探す",
+  title: "鑑定カードのパック開封・相場チェック・現物引き換え",
+  description:
+    "PSAなどの鑑定品入りパックを開封、Collector Crypt・Magic Eden・Slabzで掘り出し物探し、現物は自宅へ。ポケカ・ワンピース・スポーツ対応、ライブ取引とウォレット追跡も。",
+  faq: [
     {
-      "q": "Decardとは？",
-      "a": "Solana上のCollector Crypt鑑定カードを見る、無料でオープンソースのスキャナーです。出品をディールスコアで並べ、売買と入札を読み、ポピュレーションとウォレットの保有を表示します。"
+      q: "Decardとは？",
+      a: "Solanaのトークン化鑑定カードを対象にした、無料でオープンソースのスキャナー兼トラッカーです。Collector Crypt、Magic Eden、Slabzのリアルタイムの出品をお得度スコアで並べ、オンチェーンの成約・出品・オファーをすべて解読し、ポップレポートや任意のウォレットのカードを表示します。",
     },
     {
-      "q": "ディールスコアとは？",
-      "a": "USDCの出品価格が保険価格よりどれだけ安いかを0から100で示します。保険100ドル、出品80ドルなら20です。保証された利益ではありません。"
+      q: "お得度スコアとは？",
+      a: "USDC建ての出品価格が、カードの保険評価額をどれだけ下回っているかを0〜100で表したものです。保険評価額100ドルのカードが80ドルで出品されていれば、スコアは20です。スキャナーを「お得順」で並べると、割引の大きい出品から表示されます。",
     },
     {
-      "q": "DecardはCollector Cryptの公式サイト？",
-      "a": "いいえ。ファン制作の独立したサイトです。公開APIとSolanaを読み、購入はCollector CryptかMagic Edenへリンクします。"
+      q: "DecardはCollector Cryptの一部ですか？",
+      a: "いいえ。Decardは独立したファンメイド（非公式）のサイトです。Collector Cryptの公開マーケットAPIとSolanaブロックチェーンのデータを読み取り、購入するときはCollector Crypt、Magic Eden、Slabzへリンクします。",
     },
     {
-      "q": "登録やウォレット接続は必要？",
-      "a": "見るだけなら不要です。パックを開封するときだけウォレットを接続します。"
+      q: "登録やウォレット接続は必要ですか？",
+      a: "見るだけなら不要です。スキャナー、ライブ取引、各トラッカーは閲覧のみで、アカウントもウォレット接続もAPIキーもいりません。Solanaのアドレスを貼り付ければ、そのウォレットの鑑定カードとマーケットでの取引履歴が見られます。ウォレットの接続が必要なのは、パックを開封するときだけです。",
     },
     {
-      "q": "どのカードがある？",
-      "a": "Collector Cryptに出品された鑑定カードです。ポケモン、ワンピース、Riftbound、ドラゴンボール、ロルカナ、マジック、遊戯王、ガンダム、スポーツ。PSA、CGC、BGSなど。"
+      q: "どのカードに対応していますか？",
+      a: "Collector Crypt、Magic Eden、Slabzに出品されているトークン化鑑定カードすべてです。ポケモンカード、ワンピースカード、Riftbound、ドラゴンボールカード、ディズニー・ロルカナ、マジック：ザ・ギャザリング、遊戯王、ガンダムカード、スポーツカードなど。鑑定会社はPSA、CGC、Beckett（BGS）などです。",
     },
     {
-      "q": "データの出どころは？",
-      "a": "出品、保険価格、入札、ポピュレーションはCollector Cryptの公開API。売買履歴はSolana上のマーケットプレイスプログラムです。自前のデータベースはありません。"
-    }
+      q: "データはどこから取得していますか？",
+      a: "出品、保険評価額、オファー、ポップレポートはCollector Cryptの公開APIから取得しています。ライブ取引は、Solana上のCollector Cryptマーケットプログラムを解読したものです。データベースは持たず、すべての数値をその場で読み込んでいます。",
+    },
   ],
-  "more": [
-    {
-      "href": "/pokemon-card-value-checker",
-      "label": "ポケモンカードの価格を調べる"
+  more: [
+    { href: "/pokemon-card-value-checker", label: "ポケモンカードの相場を調べる" },
+    { href: "/pokemon", label: "ポケモン別のカード相場" },
+    { href: "/luck", label: "ガチャの運を診断する" },
+    { href: "/cards-token", label: "$CARDSの価格・買い戻し・バーン" },
+    { href: "/sales", label: "検証済みの最近の成約" },
+    { href: "/cards", label: "出品中の全カードを見る" },
+    { href: "/tokenized-trading-cards", label: "トークン化トレカの仕組み" },
+    { href: "/guide", label: "トレーナーズガイドの用語一覧" },
+  ],
+  stats: { listed: "出品数", floor: "最安値", top: "最高額の出品" },
+  catch: {
+    unlisted: "未出品",
+    blip: "{card}、{price}",
+    blipUnder: "{card}、{price}、保険評価額より{under}%安い",
+    throw: "モンスターボールを投げて掘り出し物をつかまえる",
+    throw3d: "モンスターボールを投げて、ランダムな掘り出し物をつかまえる",
+    caught: "やった！ {card}を つかまえたぞ！",
+    insured: "保険額{value}",
+    under: "{pct}%安",
+    view: "カードを見る",
+    again: "もう一度投げる",
+    shaking: "ゆら… ゆら…",
+    prompt: "ボールをタップして掘り出し物をつかまえよう",
+    promptAgain: "ボールをタップしてもう一度投げよう",
+  },
+  ticker: {
+    label: "新着出品",
+    loading: "マーケットを読み込み中…",
+    empty: "ここ数分、新しい出品はありません。",
+  },
+  ripCard: {
+    title: "鑑定カードのパックを開封。",
+    hook: "どのパックにも、{psa}・{bgs}・{cgc}いずれかの本物の鑑定品が入っています。",
+    body: "ポケモンカード、ワンピースカード、ドラゴンボールカード、ディズニー・ロルカナ、スポーツ。それぞれ専用の開封演出つきです。鑑定品はそのまま持っておくことも、ワンタップで買取に出すこともできます。",
+    cta: "パックを開封",
+    gym: "{gym}ランキングとパックの排出率",
+    gymName: "開封ジム：",
+    pulled: "いま出た",
+    pullsLabel: "Decardの最新の排出",
+    idle: "どのパックにも本物の鑑定品が入っています。開封すると、引いたカードがここに表示されます。",
+  },
+  redeemCard: {
+    eyebrow: "現物引き換え",
+    title: "鑑定品を{em}",
+    titleEm: "自宅へ。",
+    body: "手元に置きたい一枚が出たら、そのNFTを本物の鑑定品に引き換えましょう。保管庫から自宅まで配送します。",
+    cta: "カードを引き換える",
+    vault: "保管庫",
+    town: "あなたの街",
+  },
+  gachaCard: {
+    live: "ライブガチャ",
+    title: "いま開封されているパック。",
+    body: "Collector Cryptのパック開封をすべて、リアルタイムで。",
+    cta: "ライブガチャを見る",
+    score: "自分の排出を診断",
+    counting: "排出を集計中…",
+    perMinute: { other: "毎分{n}回の排出" },
+    biggest: "最近の大当たりは{multiple}、{card} {value}",
+  },
+  market: {
+    kicker: "マーケット",
+    tabsLabel: "出品",
+    tabs: {
+      deals: {
+        label: "お得な出品",
+        title: "保険評価額を下回る出品を{em}",
+        em: "ランキング。",
+        sub: "USDC建ての出品を、保管庫の保険評価額をどれだけ下回っているかで並べています。HPバーが満タンに近いほど、割引が大きい出品です。",
+        more: "スキャナーを開く",
+      },
+      new: {
+        label: "新着出品",
+        title: "マーケットの新着。",
+        sub: "Collector CryptとMagic Edenの最新の出品を、リアルタイムで。",
+        more: "新着をすべて見る",
+      },
+      top: {
+        label: "高額カード",
+        title: "出品中の最高額カード。",
+        sub: "憧れの一枚やGem Mintを、価格の高い順に。",
+        more: "高額カードを見る",
+      },
     },
-    {
-      "href": "/pokemon",
-      "label": "ポケモンごとの価格"
+  },
+  onChain: {
+    kicker: "リアルタイム・オンチェーン",
+    title: "すべての動きを、その瞬間に。",
+    sub: "Collector Cryptのマーケットプログラムから直接解読。成約・出品・オファーをすべて表示します。",
+    more: "ライブ取引をすべて見る",
+    gameBoy: "AとBでイベントを切り替え、SELECTでBotを非表示、STARTでライブ取引を開きます。",
+    moves: "最新の動き",
+    quiet: "いまのマーケットは静かです。",
+    bidsTitle: "注目のオファー",
+    bidsSub: "いまオファーが集まっているカードと、現在の最高オファー。",
+    bids: { other: "{n}件のオファー" },
+    ofInsured: "保険額の{pct}%",
+    noBids: "直近の期間に有効なオファーはありません。",
+  },
+  offline: {
+    title: "図鑑の通信が一瞬とぎれました。",
+    retry: "もう一度試す",
+    text: "マーケットのデータが応答しませんでした。たいていは数秒で戻ります。",
+  },
+  snapshot: {
+    kicker: "マーケット概況",
+    title: "タイプを選んで、相場を読もう。",
+    sub: "Collector Crypt、Magic Eden、Slabzの出品数・最安値・最高額の出品を、タイトルごとに。",
+  },
+  dex: {
+    allVenues: "全マーケット",
+    venue: "マーケット",
+    no: "No.{no}",
+    type: "{type}タイプ",
+    listed: "出品数",
+    floor: "最安値",
+    top: "最高額の出品",
+    floorCard: "最安値のカード：{card}（{price}）",
+    types: {
+      electric: "でんき",
+      water: "みず",
+      fire: "ほのお",
+      grass: "くさ",
+      psychic: "エスパー",
+      fighting: "かくとう",
+      dragon: "ドラゴン",
+      fairy: "フェアリー",
+      ghost: "ゴースト",
+      dark: "あく",
+      steel: "はがね",
+      ground: "じめん",
+      flying: "ひこう",
+      normal: "ノーマル",
     },
-    {
-      "href": "/luck",
-      "label": "ガチャの排出を見る"
-    },
-    {
-      "href": "/cards-token",
-      "label": "$CARDSの価格とバーン"
-    },
-    {
-      "href": "/sales",
-      "label": "最近の成約"
-    },
-    {
-      "href": "/cards",
-      "label": "出品中のカード一覧"
-    },
-    {
-      "href": "/tokenized-trading-cards",
-      "label": "トークン化カードの仕組み"
-    },
-    {
-      "href": "/guide",
-      "label": "用語ガイド"
-    }
-  ]
+  },
 };

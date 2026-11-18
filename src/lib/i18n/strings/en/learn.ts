@@ -51,7 +51,7 @@ export const learn = {
     /** {accent} is h1Accent, drawn in the accent colour. */
     h1: "Everything Decard {accent}",
     h1Accent: "actually prices.",
-    lede: "Live asks for vaulted graded cards, plus plain-language guides for the graders and marketplaces people confuse with each other. English pages, indexable worldwide. A character, club, or celebrity with no slab in the catalogue does not get an empty page.",
+    lede: "Live asks for vaulted graded cards, plus plain-language guides for the graders and marketplaces people confuse with each other. A character, club, or celebrity with no slab in the catalogue does not get an empty page.",
     guides: "Guides",
     franchises: "Franchises",
     franchisesNote: "Each hub is live asks by grade for that game, comic, manga, or sport.",

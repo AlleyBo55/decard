@@ -1,113 +1,112 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
-
 export const seo: Translation<Strings["seo"]> = {
-  "pages": {
+  pages: {
     "/scanner": {
-      "title": "鑑定カードの出品スキャナー",
-      "description": "Collector CryptとMagic Edenの鑑定カードを、ディールスコア・価格・新しさで並べます。"
+      title: "鑑定カードのお得な出品ランキング",
+      description: "Collector Crypt、Magic Eden、Slabzの鑑定カードの出品をすべて、お得度スコア・価格・新着順で表示。ポケカ、ワンピース、Riftboundなどで絞り込めます。",
     },
     "/cards": {
-      "title": "鑑定カード一覧",
-      "description": "いま出品中の鑑定カードを、名前、グレード、セット、年で探せます。"
+      title: "鑑定カード一覧：ポケモン・PSAなど",
+      description: "出品中の鑑定カードを、名前・グレード・セット・年・カード番号・タイトルで探せます。ポケモンカードやPSA鑑定品も一覧で。",
     },
     "/tape": {
-      "title": "鑑定カードのライブ取引",
-      "description": "Collector Cryptの売買、出品、入札をSolana上でそのまま表示します。"
+      title: "鑑定カードのライブ取引",
+      description: "Collector Cryptマーケットの鑑定カードの成約・出品・オファーを、カード・グレード・価格・ウォレット付きでリアルタイムに解読。一括オファーBotは非表示にできます。",
     },
     "/luck": {
-      "title": "ガチャ排出の運勢",
-      "description": "ウォレットのパック排出を、公開されている確率と比べます。"
+      title: "ガチャ運診断：排出を確率で採点",
+      description: "ウォレット内の検証済みCollector Cryptガチャの排出、または1回の排出を、その時点のカードとレア度別の排出率と比べて採点します。",
     },
     "/guide": {
-      "title": "鑑定カードのガイド",
-      "description": "PSA、CGC、BGS、ポピュレーション、スラブ、コレクターの言葉。"
+      title: "トレカ用語集：PSAとCGCの違い・スラング",
+      description: "トークン化鑑定カードの用語をやさしく解説。PSA・CGC・BGSの違い、ポップレポート、SIRやコミパラ、Xでよく見るコレクターやSolanaのスラングまで。",
     },
     "/pokemon-card-value-checker": {
-      "title": "ポケモンカードの価格チェッカー",
-      "description": "鑑定済みポケモンカードの出品価格、保険価格、PSA・CGC・BGSを比べます。出品は鑑定額ではありません。"
+      title: "ポケモンカード相場チェッカー：PSA10の価格",
+      description: "ポケモンカードの現在の出品価格、保険評価額、グレードをチェック。PSA・CGC・BGS鑑定品をリアルタイムの出品で比べられます。無料・ログイン不要。",
     },
     "/pokemon": {
-      "title": "ポケモンごとのカード価格",
-      "description": "ポケモンごとの鑑定価格。PSA、CGC、BGSのグレード別の出品価格。"
+      title: "ポケモンカードのポケモン別相場：鑑定品の価格",
+      description: "リザードン、ピカチュウからブラッキー、ゲンガーまで、{count}種のポケモンの鑑定品相場ガイド。PSA・CGC・BGSの出品価格をグレード別にリアルタイムで。",
     },
     "/sales": {
-      "title": "最近の鑑定カード成約",
-      "description": "Solana上で確定したCollector Cryptの売買。カード、グレード、価格、取引。"
+      title: "鑑定カードの最新成約履歴（Solana）",
+      description: "Collector Cryptマーケットで成約した鑑定済みポケモンカードなどの最新履歴。カード、グレード、価格、買い手、売り手、各成約のSolanaトランザクションまで。",
     },
     "/tokenized-trading-cards": {
-      "title": "Solanaのトークン化トレカ",
-      "description": "ボルトの鑑定スラブがSolanaのトークンになり、引き換えで現物が届く仕組み。"
+      title: "トークン化トレカとは？Solanaでの仕組みを解説",
+      description: "Solanaのトークン化鑑定カードの仕組みを解説。保管庫での保管、カードのNFT、USDCでの売買、保険評価額、お得度スコア、ポップレポート、現物引き換え、リスクまで。",
     },
     "/cards-token": {
-      "title": "$CARDSの価格・買い戻し・バーン",
-      "description": "価格と供給、そしてガチャ収益がCARDSを買い戻して燃やす量。"
+      title: "$CARDSトークンの価格・買い戻し・バーン",
+      description: "CARDSのリアルタイム価格、Collector Cryptのガチャ収益によるCARDSの買い戻し・バーン量、累計バーン量、11月29日のロック解除、Coinbase上場の状況。",
     },
     "/rip": {
-      "title": "鑑定カードのパック開封",
-      "description": "パックを開けると、PSA・CGC・BGS済みの本物のスラブが当たります。"
+      title: "鑑定品オリパを開封：ポケモンカード・ワンピースカード",
+      description: "本物の鑑定カード入りオリパをDecardで開封（Slabz提供）。ポケカ、ワンピース、ドラゴンボール、スポーツなど。排出率と高額の目玉カードを見て、ウォレットからUSDCで支払い、ワンタップで買取も。",
     },
     "/gym": {
-      "title": "リップジムのランキングと確率",
-      "description": "鑑定カードパックのランキングと排出率。"
+      title: "開封リーグ：開封ランキングとSlabzの排出率",
+      description: "Slabzパックの開封ランキング。Decardのトレーナーをジムのチャレンジャーのように順位づけ、Slabz全プレイヤーもライブ表示。各パックをエピック・レジェンド排出率と還元率でジムとして格付け。",
     },
     "/redeem": {
-      "title": "NFTを現物のスラブと交換",
-      "description": "トークンをバーンして、PSA・CGC・BGSの実物を発送。送料はUSDC。"
+      title: "鑑定カードNFTを現物に引き換えて自宅へ配送",
+      description: "カードのNFTを本物の鑑定品に引き換え。地球儀で国を選んで送料をその場で見積もり、NFTをバーン（焼却）して送料をUSDCで支払います。保管庫から自宅まで追跡付きで配送。",
     },
     "/topics": {
-      "title": "鑑定カードのトピックと作品",
-      "description": "PSA、CGC、BGS、引き換え、パック開封、そして作品ごとの出品価格。"
-    }
+      title: "鑑定カードのトピック・マーケット・タイトル別相場",
+      description: "PSA・CGC・BGS、鑑定品、現物引き換え、パック開封のガイドと、ポケモンカード、ワンピースカード、マーベル、スポーツなど全タイトルのリアルタイム相場。",
+    },
   },
-  "hub": {
-    "title": "{name}カードの鑑定価格",
-    "description": "{name}のPSA・CGC・BGS鑑定スラブ。Collector CryptとMagic Edenの出品価格をSolana上で比較。",
-    "h1": "{name}カードの価格と出品",
-    "intro": "いま出品されている{name}の鑑定カードです。実物のスラブはボルトにあり、Solanaのトークンとして取引され、現物と引き換えられます。"
+  hub: {
+    title: "{name}の鑑定品相場と出品一覧",
+    description: "Solana上の{name}の鑑定品をリアルタイム価格で。Collector Crypt、Magic Eden、SlabzでのPSA・CGC・BGSの出品価格をチェックできます。",
+    h1: "{name}の鑑定品相場と出品一覧",
+    intro: "いま出品中の{name}の鑑定品です。どれも保管庫にある本物の鑑定品で、Solana上のトークンを通じて所有します。",
   },
-  "mon": {
-    "title": "{name}のカード価格・PSA10",
-    "description": "{name}（{english}）の鑑定カード。PSA10、PSA9、CGC、BGSの最安値と中央値。",
-    "h1": "{name}のカード価格",
-    "lede": "いま出品されている{name}の鑑定スラブです。グレードごとの最安値と中央値を表示します。価格は希望価格であり、成約ではありません。"
+  mon: {
+    title: "{name}のポケモンカード相場：PSA10・PSA9",
+    description: "{name}（{english}）のポケモンカード相場をグレード別にリアルタイムで。Collector CryptとMagic EdenでのPSA10・PSA9・CGC・BGSの出品価格。",
+    h1: "{name}のカード相場",
+    lede: "いま出品中の{name}の鑑定品すべてを、グレードごとの最安値と出品価格の中央値つきで表示します。",
   },
-  "pokemon": {
-    "charizard": "リザードン",
-    "pikachu": "ピカチュウ",
-    "gengar": "ゲンガー",
-    "eevee": "イーブイ",
-    "mewtwo": "ミュウツー",
-    "umbreon": "ブラッキー",
-    "blastoise": "カメックス",
-    "venusaur": "フシギバナ",
-    "moltres": "ファイヤー",
-    "zapdos": "サンダー",
-    "articuno": "フリーザー",
-    "bulbasaur": "フシギダネ",
-    "charmander": "ヒトカゲ",
-    "squirtle": "ゼニガメ",
-    "gardevoir": "サーナイト",
-    "snorlax": "カビゴン",
-    "lugia": "ルギア",
-    "lucario": "ルカリオ",
-    "gyarados": "ギャラドス",
-    "rayquaza": "レックウザ",
-    "greninja": "ゲッコウガ",
-    "alakazam": "フーディン",
+  pokemon: {
+    charizard: "リザードン",
+    pikachu: "ピカチュウ",
+    gengar: "ゲンガー",
+    eevee: "イーブイ",
+    mewtwo: "ミュウツー",
+    umbreon: "ブラッキー",
+    blastoise: "カメックス",
+    venusaur: "フシギバナ",
+    moltres: "ファイヤー",
+    zapdos: "サンダー",
+    articuno: "フリーザー",
+    bulbasaur: "フシギダネ",
+    charmander: "ヒトカゲ",
+    squirtle: "ゼニガメ",
+    gardevoir: "サーナイト",
+    snorlax: "カビゴン",
+    lugia: "ルギア",
+    lucario: "ルカリオ",
+    gyarados: "ギャラドス",
+    rayquaza: "レックウザ",
+    greninja: "ゲッコウガ",
+    alakazam: "フーディン",
     "ho-oh": "ホウオウ",
-    "dragonite": "カイリュー",
-    "tyranitar": "バンギラス",
-    "raichu": "ライチュウ",
-    "mimikyu": "ミミッキュ",
-    "espeon": "エーフィ",
-    "vaporeon": "シャワーズ",
-    "jolteon": "サンダース",
-    "flareon": "ブースター",
-    "leafeon": "リーフィア",
-    "glaceon": "グレイシア",
-    "sylveon": "ニンフィア",
-    "lapras": "ラプラス",
-    "ninetales": "キュウコン"
-  }
+    dragonite: "カイリュー",
+    tyranitar: "バンギラス",
+    raichu: "ライチュウ",
+    mimikyu: "ミミッキュ",
+    espeon: "エーフィ",
+    vaporeon: "シャワーズ",
+    jolteon: "サンダース",
+    flareon: "ブースター",
+    leafeon: "リーフィア",
+    glaceon: "グレイシア",
+    sylveon: "ニンフィア",
+    lapras: "ラプラス",
+    ninetales: "キュウコン",
+  },
 };

@@ -1,4 +1,137 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
 
-export const hubs: Translation<Strings["hubs"]> = {};
+export const hubs: Translation<Strings["hubs"]> = {
+  crumbs: {
+    label: "パンくずリスト",
+    home: "ホーム",
+    cards: "カード一覧",
+    pokemon: "ポケモンカード相場",
+  },
+  updated: "最終更新：{time} · 約15分ごとに自動更新",
+  credit: "ポケモンの画像はPokémon HOMEのもので、{link}経由で表示しています。",
+  browse: "タイトルからカードを探す",
+  market: {
+    grade: "グレード",
+    listed: "出品数",
+    lowestAsk: "最安値",
+    medianAsk: "中央値",
+    lowestCard: "最安のカード",
+    lowestPsa10: "PSA10の最安値",
+    onVenue: "{venue}で出品中",
+    byGrade: "グレード別の価格",
+    cheapest: "安い順",
+    top: "高額カード",
+  },
+  categoryMarket: {
+    empty: "いまUSDCで出品中の{noun}の鑑定品はありません。コレクターがトークン化して出品すると、ここに表示されます。",
+    emptyLink: "スキャナーで{noun}の出品を探す。",
+    listedNow: "現在の出品数",
+    graded: "鑑定品・USDC建て",
+    partial: {
+      other:
+        "今回の更新では、{noun}の出品{n}件のうち安い順に{read}件を読み込みました。ここの最安値はすべて正確ですが、中央値は推測せずに省いています。また、最安の1枚が読み込んだ範囲より高いグレードは表示されません。",
+    },
+    left: {
+      other: "ほかの{n}件は未鑑定、SOL建て、または保険評価額を大きく上回る価格のため、ここの価格には含めていません。",
+    },
+    thin: {
+      other: "いまUSDCで出品中の{noun}の鑑定品は{n}枚だけなので、新しい出品が1件あるだけでこの数字は変わります。",
+    },
+    byGradeTitle: "{noun}の鑑定品のグレード別出品価格",
+    byGradeNote:
+      "各グレードには、そのグレードの{noun}の鑑定品が、普通のカードから目玉カードまですべて入ります。どのカードかは、最安のカードを開いて確認してください。",
+    cheapestTitle: "{noun}の鑑定品を安い順に",
+    cheapestMore: "スキャナーで{noun}の出品を並べ替え・絞り込み",
+    topTitle: "{noun}の鑑定品を高い順に",
+  },
+  guideMarket: {
+    allVenues: "全マーケット",
+    venue: "マーケット",
+    venueGroup: "出品マーケット",
+    none: "いまUSDCで出品中の{name}の鑑定品はありません。",
+    noneOn: "いま{venue}にUSDCで出品中の{name}の鑑定品はありません。",
+    seeAll: { other: "スキャナーで{n}件すべてを見る。" },
+    gradedSlabs: "鑑定品",
+    priced: "USDC建て",
+    left: {
+      other: "ほかの{n}件はSOL建て、または保険評価額を大きく上回る価格のため、ここの価格には含めていません。",
+    },
+    everyListing: "スキャナーではすべての出品を見られます。",
+    byGradeTitle: "{name}のグレード別出品価格",
+    byGradeTitleOn: "{venue}での{name}のグレード別出品価格",
+    byGradeNote:
+      "各グレードには{name}のあらゆるカードがまとめて入るため、同じグレードでもまったく違うカードが混ざります。どのカードかは、最安のカードを開いて確認してください。",
+    cheapestTitle: "{name}の鑑定品を安い順に",
+    cheapestTitleOn: "{venue}の{name}の鑑定品を安い順に",
+    cheapestMore: "スキャナーで{name}の全出品を並べ替え・絞り込み",
+    cheapestMoreOn: "スキャナーで{venue}の{name}の全出品を並べ替え・絞り込み",
+    topTitle: "{name}の鑑定品を高い順に",
+    topTitleOn: "{venue}の{name}の鑑定品を高い順に",
+  },
+  category: {
+    kicker: "タイトル別 · トークン化された鑑定カード",
+    lede: "Collector CryptとMagic Edenでいま出品中の{noun}の鑑定品です。どれも保管庫にある本物の鑑定品で、Solana上のトークンを通じて所有します。グレードごとの最安値と中央値を確認し、気になるカードを開けばポップレポート、オファー、履歴を見られます。価格は現在の出品価格で、成約価格ではありません。",
+    ledeLowest:
+      "Collector CryptとMagic Edenでいま出品中の{noun}の鑑定品です。どれも保管庫にある本物の鑑定品で、Solana上のトークンを通じて所有します。グレードごとの最安値を確認し、気になるカードを開けばポップレポート、オファー、履歴を見られます。価格は現在の出品価格で、成約価格ではありません。",
+    pokemonTitle: "お目当てのポケモンがいますか？",
+    pokemonText: {
+      other: "リザードン、ピカチュウ、ブラッキーと、ほか{n}種類のポケモンに専用の相場ガイドがあり、グレードごとの最安値と中央値がわかります。",
+    },
+    pokemonAll: { other: "全{n}種類のポケモン相場ガイド" },
+    unavailable: "{noun}のリアルタイム出品を一時的に読み込めません。下のガイドはそのまま使えます。現在の出品は{scanner}で見られます。",
+    unavailableLink: "スキャナー",
+    aboutTitle: "{noun}の鑑定品について",
+    terms: "よく出てくる用語",
+    scannerMore: "スキャナーで{noun}の出品を探す",
+    glossaryMore: "鑑定カードとスラングの用語集",
+    explainerMore: "トークン化トレカのしくみ",
+    salesMore: "確認済みの最近の成約",
+    faqKicker: "{name}のよくある質問",
+    faqTitle: "疑問にお答えします。",
+    relatedTitle: "関連タイトル",
+    relatedName: "{name}",
+    relatedSub: "鑑定品の価格と現在の出品 →",
+    everyFranchise: "すべてのタイトル",
+    ldAbout: "{name}（トレーディングカード）",
+    ldListings: "出品中の{noun}の鑑定品",
+  },
+  index: {
+    kicker: "相場ガイド · 鑑定済みポケモンカード",
+    h1: "ポケモンカードの相場を、{accent}",
+    h1Accent: "ポケモンごとに。",
+    lede: "ポケモンを選ぶと、Collector CryptやMagic Edenに出品中のそのポケモンの鑑定品すべてと、グレードごとの最安値・中央値、いまマーケットで最も安いカードと最も高いカードが見られます。",
+    tile: "PSA10・PSA9・CGCの相場 →",
+    showsTitle: "各ガイドでわかること",
+    shows:
+      "各ガイドは、Collector CryptとMagic Edenにあるそのポケモンの鑑定品の出品をすべて読み込み、出品ごとにマーケットを表示して切り替えられるようにし、約15分ごとに更新します。USDC建ての出品価格をグレードごとにまとめ、各グレードの最安のカードにリンクし、最も安い鑑定品と最も高い鑑定品を一覧にします。価格は出品価格で、成約価格ではありません。",
+    checkerMore: "ポケモンカードの相場を調べる",
+    salesMore: "確認済みの最近の成約を見る",
+    ldGuides: "ポケモンカード相場ガイド",
+  },
+  guide: {
+    description:
+      "{name}のポケモンカード相場をグレード別に。Collector CryptとMagic EdenのPSA10、PSA9、CGC、BGS鑑定品の最安値と中央値。",
+    h1: "{name}のカード相場を{accent}",
+    h1Accent: "グレード別に。",
+    lede: "Collector Cryptがトークン化し、いまCollector CryptまたはMagic Edenに出品中の{name}の鑑定品すべてを、グレードごとの最安値と中央値つきで表示します。マーケットを切り替えて比べられます。価格はUSDC建ての現在の出品価格で、成約価格ではありません。",
+    kicker: "ポケモン相場ガイド · 鑑定品",
+    partial: "今回は一部の出品を読み込めませんでした",
+    unavailable: "{name}のリアルタイム出品を一時的に読み込めません。下のガイドはそのまま使えます。すべての出品はスキャナーで見られます。",
+    empty: "いま出品中の{name}の鑑定品はありません。",
+    howTitle: "{name}の価格の見方",
+    howPrintings:
+      "{name}はさまざまなカードに登場します。セット、年、カード番号、言語、ホロ加工、プロモなどが違います。同じグレードの{name}の鑑定品でも、別のカードなら価格が大きく違うことがあります。名前とグレードだけでなく、まったく同じカードどうしで比べましょう。",
+    howAsking:
+      "ここにあるのは出品価格、つまり売り手がいま希望している価格です。買い手が実際に払う額は、{sales}と各カードページの現在のオファーでわかります。保険評価額は参考値で、その価格で売れることを保証するものではありません。",
+    howAskingLink: "最近の成約",
+    howGrades:
+      "高いグレードほど通常はプレミアがつきますが、希少性はポップレポート、つまり鑑定会社がそのグレード以上で記録した枚数で決まります。ポップレポートは各カードページで見られます。",
+    checkerMore: "ポケモンカードの相場をチェック",
+    gradesMore: "PSA・CGC・BGSのグレード解説",
+    more: "ほかのポケモン相場ガイド",
+    loading: "相場ガイドを読み込み中",
+    ldName: "{name}のグレード別カード相場",
+    ldAbout: "{name}のポケモンカード",
+  },
+};

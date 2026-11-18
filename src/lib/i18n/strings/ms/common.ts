@@ -10,11 +10,15 @@ export const common: Translation<Strings["common"]> = {
   "guide": "Panduan",
   "new": "Baharu",
   "ripCta": "Buka pek →",
+  "homeLabel": "Laman utama Decard",
+  "mainNav": "Utama",
+  "sourceCode": "Kod sumber {name}",
+  "newSuffix": ", baharu",
   "tabs": {
-    "/": "Laman",
+    "/": "Utama",
     "/scanner": "Pengimbas",
-    "/rip": "Buka",
-    "/tape": "Pita langsung"
+    "/rip": "Buka pek",
+    "/tape": "Pita dagangan"
   },
   "groups": {
     "market": {
@@ -31,88 +35,126 @@ export const common: Translation<Strings["common"]> = {
   },
   "nav": {
     "/tape": {
-      "title": "Pita langsung",
-      "desc": "Jual, listing, dan bid di rantai"
+      "title": "Pita dagangan",
+      "desc": "Setiap jualan, penyenaraian dan bidaan on-chain"
     },
     "/sales": {
-      "title": "Penjualan terbaru",
-      "desc": "Transaksi menurut kartu, grade, dan harga"
+      "title": "Jualan terkini",
+      "desc": "Jualan selesai ikut kad, gred dan harga"
     },
     "/cards": {
-      "title": "Direktori kartu",
-      "desc": "Slab yang sedang dijual"
+      "title": "Direktori kad",
+      "desc": "Setiap slab yang dijual, ikut nama, set dan gred"
     },
     "/pokemon": {
       "title": "Harga Pokémon",
-      "desc": "Panduan harga per Pokémon"
+      "desc": "Panduan harga kad bergred bagi setiap Pokémon"
     },
     "/cards-token": {
       "title": "Token $CARDS",
-      "desc": "Harga, beli balik, dan burn"
+      "desc": "Harga, pembelian balik dan pembakaran"
     },
     "/rip": {
-      "title": "Buka paket",
-      "desc": "Isinya slab asli yang sudah dinilai"
+      "title": "Buka pek",
+      "desc": "Slab bergred sebenar dalam setiap pek"
     },
     "/gym": {
-      "desc": "Papan peringkat dan peluang"
+      "title": "Gym Buka Pek",
+      "desc": "Papan pendahulu dan peluang pek"
     },
     "/redeem": {
-      "title": "Tukar slab",
-      "desc": "Kirim kartu fisiknya"
+      "title": "Tebus slab",
+      "desc": "Hantar kad sebenar ke rumah anda"
     },
     "/luck#live": {
       "title": "Gacha langsung",
-      "desc": "Setiap tarikan saat terjadi"
+      "desc": "Setiap cabutan gacha sebaik sahaja berlaku"
     },
     "/luck": {
-      "title": "Analisis keberuntungan",
-      "desc": "Bandingkan tarikan dompet dengan peluang"
+      "title": "Penganalisis tuah cabutan",
+      "desc": "Ukur tuah cabutan dompet berbanding peluang"
     },
     "/guide": {
       "title": "Panduan",
-      "desc": "Grading, kelangkaan, dan istilah"
+      "desc": "Penggredan, kejarangan dan slanga pengumpul"
     },
     "/topics": {
       "title": "Topik",
-      "desc": "PSA, venue, olahraga, dan paket"
+      "desc": "PSA, CGC, platform, sukan dan buka pek"
     },
     "/tokenized-trading-cards": {
-      "title": "Kartu ter-token",
-      "desc": "Slab di brankas yang diperdagangkan di Solana"
+      "title": "Penjelasan kad bertoken",
+      "desc": "Cara slab dalam bilik kebal didagangkan di Solana"
     }
   },
+  "categories": {
+    "Pokemon": "Pokémon",
+    "One Piece": "One Piece",
+    "Dragon Ball": "Dragon Ball",
+    "Riftbound": "Riftbound",
+    "Marvel": "Marvel",
+    "Yu-Gi-Oh!": "Yu-Gi-Oh!",
+    "Magic The Gathering": "Magic: The Gathering",
+    "Lorcana": "Disney Lorcana",
+    "DC": "DC Comics",
+    "Gundam": "Gundam",
+    "Naruto": "Naruto",
+    "Union Arena": "Union Arena",
+    "Soccer": "Bola Sepak",
+    "Basketball": "Bola Keranjang",
+    "Football": "Bola Sepak Amerika",
+    "Baseball": "Besbol",
+    "Hockey": "Hoki",
+    "Vibes": "Vibes TCG"
+  },
+  "switcher": {
+    "button": "Tukar bahasa. Semasa: {name}",
+    "kicker": "Bahasa",
+    "title": "Pilih bahasa anda",
+    "hint": "Menu, panduan dan halaman bertukar bahasa. Nama kad, gred dan harga kekal seperti yang disenaraikan.",
+    "current": "Anda di sini",
+    "close": "Tutup"
+  },
   "footer": {
-    "blurb": "Pokédex percuma untuk kad graded yang ditoken, dibaca dari Collector Crypt dan rantai Solana.",
+    "blurb": "Mesti imbas semuanya. Pokédex percuma dan sumber terbuka untuk kad bergred bertoken di Solana, dengan penyenaraian langsung daripada Collector Crypt, Magic Eden dan Slabz.",
     "explore": "Terokai",
     "franchises": "Francais",
     "learn": "Belajar",
-    "disclaimer": "Buatan peminat, tidak bergabung dengan Nintendo, Creatures, GAME FREAK, The Pokémon Company, atau Collector Crypt. Data: API awam Collector Crypt dan Solana. Bukan nasihat kewangan.",
+    "openSource": "SUMBER TERBUKA · MIT",
+    "repoCta": "Beri bintang, fork, hantar PR ★",
+    "builtInPublic": "DIBINA SECARA TERBUKA",
+    "konami": "Psst: cuba ↑ ↑ ↓ ↓ ← → ← → B A.",
+    "disclaimer": "Buatan peminat dan tidak bergabung dengan Nintendo, Creatures, GAME FREAK, The Pokémon Company atau Collector Crypt. Data: API awam Collector Crypt dan RPC Solana. Bukan nasihat kewangan.",
     "links": {
-      "/scanner": "Pemindai listing",
-      "/cards": "Direktori kartu",
-      "/scanner?orderBy=deal": "Penawaran terbaik",
-      "/tape": "Pita langsung",
-      "/rip": "Buka paket",
-      "/gym": "Papan Rip Gym",
-      "/redeem": "Tukar slab",
+      "/scanner": "Pengimbas penyenaraian",
+      "/cards": "Direktori kad",
+      "/scanner?orderBy=deal": "Tawaran terbaik",
+      "/tape": "Pita dagangan",
+      "/rip": "Buka pek kad",
+      "/gym": "Papan pendahulu Gym Buka Pek",
+      "/redeem": "Tebus slab",
       "/luck#live": "Gacha langsung",
-      "/luck": "Analisis keberuntungan",
+      "/luck": "Penganalisis tuah cabutan",
       "/cards-token": "Token $CARDS",
-      "/sales": "Penjualan terbaru",
+      "/sales": "Jualan terkini",
       "/pokemon": "Harga Pokémon",
-      "/cards#all": "Semua kartu yang dijual",
-      "/tokenized-trading-cards": "Penjelasan kartu ter-token",
-      "/topics": "PSA, venue, dan topik",
-      "/guide": "Panduan",
-      "/guide#grading": "Apa itu grading?",
-      "/guide#buying-and-selling": "Skor penawaran"
+      "/cards#all": "Semua kad yang dijual",
+      "/tokenized-trading-cards": "Penjelasan kad bertoken",
+      "/topics": "PSA, platform dan topik",
+      "/guide": "Panduan Jurulatih",
+      "/guide#grading": "Apa itu penggredan?",
+      "/guide#buying-and-selling": "Skor tawaran"
     }
   },
   "notFound": {
-    "text": "404 liar muncul. Halaman ini tiada dalam Pokédex.",
-    "home": "Ke laman",
+    "text": "404 liar muncul! Halaman ini tiada dalam Pokédex.",
+    "home": "Lari ke laman utama",
     "scanner": "Buka pengimbas"
   },
-  "notice": "Nama kad, gred dan harga kekal dalam bahasa Inggeris. Pasaran yang ditunjukkan adalah sama."
+  "error": {
+    "text": "Alamak! Halaman ini pengsan. Satu sumber data tidak menjawab tepat pada masanya.",
+    "retry": "Guna Revive",
+    "home": "Kembali ke laman utama"
+  },
+  "notice": "Nama kad, gred dan harga kekal dalam bahasa Inggeris. Ini edisi terjemahan bagi pasaran yang sama."
 };

@@ -2,81 +2,183 @@ import type { Strings } from "../en";
 import type { Translation } from "../types";
 
 export const home: Translation<Strings["home"]> = {
-  "kicker": "Solana · dex kartu graded",
-  "live": "LANGSUNG",
-  "hero": { "lead": "", "scan": "pindai", "tail": "semuanya." },
-  "lede": "Listing langsung, skor penawaran, dan pergerakan dompet untuk kartu graded ter-token di Collector Crypt dan Magic Eden.",
-  "newKicker": "Baru di Decard",
-  "newTitle": "Buka paket, simpan slab asli.",
-  "typeKicker": "Pilih tipe",
-  "typeTitle": "Jelajah menurut waralaba.",
-  "typeSub": "Pokémon, One Piece, Dragon Ball, Riftbound, Marvel, kartu olahraga, dan lainnya: harga jual per grade.",
-  "faqKicker": "FAQ",
-  "faqTitle": "Pertanyaan, dijawab.",
-  "tipTitle": "TIPS PROFESOR",
-  "tip": "PSA 10 dengan populasi 12 berbeda dari PSA 10 yang semua orang punya. Sebelum membeli, lihat laporan populasi, gem rate, dan jarak harga dari nilai asuransi.",
-  "guideBtn": "Baca panduan",
-  "dealBtn": "Cari penawaran",
-  "title": "Buka paket, pindai pasar, dan tukar kartu graded di Solana",
-  "description": "Buka paket berisi slab PSA, CGC, dan BGS asli, cari harga terbaik di Collector Crypt, Magic Eden, dan Slabz, lalu kirim kartu fisiknya ke rumah. Pokémon, One Piece, olahraga, dan lainnya, plus pita transaksi langsung dan pelacak dompet.",
-  "faq": [
+  kicker: "Solana · dex kartu graded",
+  live: "LIVE",
+  hero: { lead: "Ayo", scan: "pindai", tail: "semua!" },
+  lede: "Listing live dari Collector Crypt, Magic Eden, dan Slabz, lengkap dengan skor diskon dan aktivitas setiap dompet, untuk kartu graded tokenisasi di Solana.",
+  newKicker: "Baru di Decard",
+  newTitle: "Buka pack, simpan slab asli.",
+  typeKicker: "Pilih tipemu",
+  typeTitle: "Jelajahi per waralaba.",
+  typeSub: "Kartu graded Pokémon, One Piece, Dragon Ball, Riftbound, Marvel, olahraga, dan lainnya: harga listing live per grade untuk setiap slab yang di-list di Collector Crypt, Magic Eden, dan Slabz.",
+  faqKicker: "FAQ Trainer",
+  faqTitle: "Ada pertanyaan? Ini jawabannya.",
+  tipTitle: "TIPS PROFESOR",
+  tip: "PSA 10 dengan populasi 12 itu beda kelas dengan PSA 10 yang dimiliki semua orang. Sebelum beli, cek pop report, gem rate, dan seberapa jauh harganya dari nilai asuransi.",
+  guideBtn: "Baca Panduan Trainer",
+  dealBtn: "Cari diskon",
+  title: "Buka pack, pindai pasar, dan redeem kartu graded di Solana",
+  description: "Buka pack berisi slab PSA, CGC, dan BGS asli, cari diskon di Collector Crypt, Magic Eden, dan Slabz, lalu kirim kartu fisiknya ke rumah. Pokémon, One Piece, olahraga, dan lainnya, plus transaksi live dan pelacak dompet.",
+  faq: [
     {
-      "q": "Apa itu Decard?",
-      "a": "Pemindai gratis dan open source untuk kartu graded Collector Crypt di Solana. Decard mengurutkan listing, membaca jual-beli di rantai, dan menampilkan populasi serta isi dompet."
+      q: "Apa itu Decard?",
+      a: "Pemindai dan pelacak gratis serta open source untuk kartu graded tokenisasi di Solana. Decard mengurutkan listing live dari Collector Crypt, Magic Eden, dan Slabz menurut skor diskon, mengurai setiap penjualan, listing, dan bid on-chain, serta menampilkan pop report dan kartu di dompet mana pun.",
     },
     {
-      "q": "Apa itu skor penawaran?",
-      "a": "Seberapa jauh harga USDC di bawah nilai asuransi, dari 0 sampai 100. Asuransi $100 dan harga $80 menghasilkan skor 20. Ini bukan janji untung."
+      q: "Apa itu skor diskon?",
+      a: "Seberapa jauh harga listing USDC di bawah nilai asuransi kartunya, dari 0 sampai 100. Kartu dengan nilai asuransi $100 yang di-list seharga $80 mendapat skor 20. Kalau pemindai diurutkan menurut diskon terbesar, diskon paling dalam muncul paling atas.",
     },
     {
-      "q": "Apakah Decard bagian dari Collector Crypt?",
-      "a": "Tidak. Decard independen. Data dibaca dari API publik dan blockchain Solana. Tombol beli mengarah ke Collector Crypt atau Magic Eden."
+      q: "Apakah Decard bagian dari Collector Crypt?",
+      a: "Bukan. Decard independen dan buatan penggemar. Decard membaca API marketplace publik Collector Crypt dan blockchain Solana, lalu mengarahkanmu ke Collector Crypt, Magic Eden, atau Slabz saat kamu mau membeli.",
     },
     {
-      "q": "Perlu daftar atau menghubungkan dompet?",
-      "a": "Tidak untuk melihat. Dompet hanya dipakai jika kamu membuka paket."
+      q: "Perlu daftar atau hubungkan dompet?",
+      a: "Tidak, kalau hanya untuk melihat-lihat. Pemindai, transaksi live, dan pelacak hanya membaca data: tanpa akun, tanpa menghubungkan dompet, dan tanpa API key. Tempel alamat Solana mana pun untuk melihat kartu graded dan aktivitas marketplace dompet itu. Hubungkan dompet hanya kalau kamu mau buka pack.",
     },
     {
-      "q": "Kartu apa saja yang dicakup?",
-      "a": "Setiap kartu graded yang dijual di Collector Crypt: Pokémon, One Piece, Riftbound, Dragon Ball, Lorcana, Magic, Yu-Gi-Oh!, Gundam, dan olahraga. Grader-nya PSA, CGC, BGS, dan lainnya."
+      q: "Kartu apa saja yang dicakup Decard?",
+      a: "Semua kartu graded tokenisasi yang di-list di Collector Crypt, Magic Eden, atau Slabz: Pokémon, One Piece, Riftbound, Dragon Ball, Lorcana, Magic: The Gathering, Yu-Gi-Oh!, Gundam, dan kartu olahraga, yang di-grade oleh PSA, CGC, Beckett (BGS), dan lembaga grading lain.",
     },
     {
-      "q": "Dari mana datanya?",
-      "a": "Listing, nilai asuransi, bid, dan populasi dari API publik Collector Crypt. Pita transaksi dibaca dari program marketplace di Solana. Tidak ada basis data sendiri."
-    }
+      q: "Datanya dari mana?",
+      a: "Listing, nilai asuransi, bid, dan pop report berasal dari API publik Collector Crypt. Transaksi live diurai dari program marketplace Collector Crypt di Solana. Tidak ada database: setiap angka dibaca secara live.",
+    },
   ],
-  "more": [
-    {
-      "href": "/pokemon-card-value-checker",
-      "label": "Cek harga kartu Pokémon"
+  more: [
+    { href: "/pokemon-card-value-checker", label: "Cek harga kartu Pokémon" },
+    { href: "/pokemon", label: "Harga kartu per Pokémon" },
+    { href: "/luck", label: "Cek hoki pull gacha" },
+    { href: "/cards-token", label: "Harga, buyback, dan burn $CARDS" },
+    { href: "/sales", label: "Penjualan terverifikasi terbaru" },
+    { href: "/cards", label: "Jelajahi semua kartu yang di-list" },
+    { href: "/tokenized-trading-cards", label: "Cara kerja kartu trading tokenisasi" },
+    { href: "/guide", label: "Semua istilah di Panduan Trainer" },
+  ],
+  stats: { listed: "Kartu di-list", floor: "Terendah", top: "Listing termahal" },
+  catch: {
+    unlisted: "Tidak di-list",
+    blip: "{card}, {price}",
+    blipUnder: "{card}, {price}, {under}% di bawah nilai asuransi",
+    throw: "Lempar Poké Ball untuk menangkap diskon",
+    throw3d: "Lempar Poké Ball untuk menangkap diskon acak",
+    caught: "Dapat! {card} berhasil ditangkap!",
+    insured: "asuransi {value}",
+    under: "{pct}% di bawah",
+    view: "Lihat kartu",
+    again: "Lempar lagi",
+    shaking: "Goyang... goyang...",
+    prompt: "Ketuk bolanya untuk menangkap diskon",
+    promptAgain: "Ketuk bolanya untuk melempar lagi",
+  },
+  ticker: {
+    label: "Listing baru",
+    loading: "Membaca pasar…",
+    empty: "Belum ada listing baru dalam beberapa menit terakhir.",
+  },
+  ripCard: {
+    title: "Buka pack kartu graded.",
+    hook: "Slab {psa}, {bgs}, atau {cgc} asli di setiap pack.",
+    body: "Pokémon, One Piece, Dragon Ball, Lorcana, dan olahraga, masing-masing dengan animasi pembukaan sendiri. Simpan slab-nya, atau jual balik dengan sekali ketuk.",
+    cta: "Buka pack",
+    gym: "{gym} papan peringkat dan peluang pack",
+    gymName: "Rip Gym:",
+    pulled: "Pull terbaru",
+    pullsLabel: "Pull terbaru di Decard",
+    idle: "Setiap pack berisi slab graded asli. Buka satu, dan pull-mu akan muncul di sini.",
+  },
+  redeemCard: {
+    eyebrow: "Redeem",
+    title: "Bawa slab-mu {em}",
+    titleEm: "pulang.",
+    body: "Dapat pull yang ingin kamu simpan? Redeem NFT-nya jadi slab graded asli, dikirim dari brankas sampai ke depan pintumu.",
+    cta: "Redeem kartu",
+    vault: "Brankas",
+    town: "Kotamu",
+  },
+  gachaCard: {
+    live: "Gacha live",
+    title: "Pack yang sedang dibuka saat ini.",
+    body: "Setiap pack Collector Crypt yang dibuka, langsung saat terjadi.",
+    cta: "Tonton gacha live",
+    score: "Cek skor pull-ku",
+    counting: "Menghitung pull…",
+    perMinute: { other: "{n} pull per menit" },
+    biggest: "hit terbesar baru-baru ini {multiple}, {card} {value}",
+  },
+  market: {
+    kicker: "Di pasar",
+    tabsLabel: "Listing",
+    tabs: {
+      deals: {
+        label: "Diskon terbesar",
+        title: "Di bawah nilai asuransi, {em}",
+        em: "diurutkan.",
+        sub: "Listing USDC live, diurutkan menurut seberapa jauh harganya di bawah nilai asuransi dari brankas. Makin penuh bar HP-nya, makin besar diskonnya.",
+        more: "Buka pemindai",
+      },
+      new: {
+        label: "Listing baru",
+        title: "Baru masuk pasar.",
+        sub: "Listing terbaru di Collector Crypt dan Magic Eden, langsung begitu masuk.",
+        more: "Lihat semua listing baru",
+      },
+      top: {
+        label: "Kelas sultan",
+        title: "Kartu termahal yang sedang di-list.",
+        sub: "Kartu impian dan Gem Mint, diurutkan dari harga tertinggi.",
+        more: "Lihat kelas sultan",
+      },
     },
-    {
-      "href": "/pokemon",
-      "label": "Harga per Pokémon"
+  },
+  onChain: {
+    kicker: "Langsung dari blockchain",
+    title: "Setiap aktivitas, saat itu juga.",
+    sub: "Diurai langsung dari program marketplace Collector Crypt: setiap penjualan, listing, dan bid.",
+    more: "Semua transaksi live",
+    gameBoy: "A dan B ganti aktivitas, SELECT menyembunyikan bot, START membuka semua transaksi live.",
+    moves: "Aktivitas terbaru",
+    quiet: "Pasar sedang sepi.",
+    bidsTitle: "Bid terpanas",
+    bidsSub: "Kartu yang sedang ramai ditawar, dengan bid live tertinggi.",
+    bids: { other: "{n} bid" },
+    ofInsured: "{pct}% dari asuransi",
+    noBids: "Tidak ada bid live dalam rentang terbaru.",
+  },
+  offline: {
+    title: "Dex sempat kehilangan sinyal.",
+    retry: "Coba lagi",
+    text: "Feed pasar tidak merespons. Biasanya pulih dalam beberapa detik.",
+  },
+  snapshot: {
+    kicker: "Ringkasan pasar",
+    title: "Pilih tipe, baca pasarnya.",
+    sub: "Jumlah kartu yang di-list, harga terendah, dan listing termahal untuk setiap kategori di Collector Crypt, Magic Eden, dan Slabz.",
+  },
+  dex: {
+    allVenues: "Semua marketplace",
+    venue: "Marketplace",
+    no: "No.{no}",
+    type: "Kategori {type}",
+    listed: "Di-list",
+    floor: "Terendah",
+    top: "Listing termahal",
+    floorCard: "Kartu termurah: {card} seharga {price}",
+    types: {
+      electric: "Listrik",
+      water: "Air",
+      fire: "Api",
+      grass: "Rumput",
+      psychic: "Psikis",
+      fighting: "Petarung",
+      dragon: "Naga",
+      fairy: "Peri",
+      ghost: "Hantu",
+      dark: "Kegelapan",
+      steel: "Baja",
+      ground: "Tanah",
+      flying: "Terbang",
+      normal: "Normal",
     },
-    {
-      "href": "/luck",
-      "label": "Analisis tarikan gacha"
-    },
-    {
-      "href": "/cards-token",
-      "label": "Harga dan burn $CARDS"
-    },
-    {
-      "href": "/sales",
-      "label": "Penjualan terbaru"
-    },
-    {
-      "href": "/cards",
-      "label": "Semua kartu yang dijual"
-    },
-    {
-      "href": "/tokenized-trading-cards",
-      "label": "Cara kerja kartu ter-token"
-    },
-    {
-      "href": "/guide",
-      "label": "Semua istilah"
-    }
-  ]
+  },
 };

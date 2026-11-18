@@ -46,7 +46,6 @@ export const fillers: string[] = [
   "koleksi",
   "grade",
   "graded",
-  "rookie",
   "versi",
   "bahasa",
   "jepang",

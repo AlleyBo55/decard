@@ -1,4 +1,137 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
 
-export const hubs: Translation<Strings["hubs"]> = {};
+export const hubs: Translation<Strings["hubs"]> = {
+  crumbs: {
+    label: "Laluan navigasi",
+    home: "Laman utama",
+    cards: "Kad",
+    pokemon: "Harga kad Pokémon",
+  },
+  updated: "Dikemas kini {time} · dimuat semula kira-kira setiap 15 minit",
+  credit: "Imej Pokémon daripada Pokémon HOME, melalui {link}.",
+  browse: "Layari kad ikut francais",
+  market: {
+    grade: "GRED",
+    listed: "DISENARAIKAN",
+    lowestAsk: "HARGA MINTA TERENDAH",
+    medianAsk: "HARGA MINTA MEDIAN",
+    lowestCard: "KAD PALING MURAH",
+    lowestPsa10: "PSA 10 TERENDAH",
+    onVenue: "di {venue}",
+    byGrade: "Harga ikut gred",
+    cheapest: "Termurah dahulu",
+    top: "Puncak pasaran",
+  },
+  categoryMarket: {
+    empty: "Tiada kad {noun} bergred yang disenaraikan dalam USDC buat masa ini. Slab baharu akan muncul di sini apabila ia ditokenkan dan disenaraikan oleh pengumpul.",
+    emptyLink: "Cari penyenaraian {noun} dalam pengimbas.",
+    listedNow: "DIJUAL SEKARANG",
+    graded: "BERGRED, DALAM USDC",
+    partial: {
+      other:
+        "Kemas kini kali ini membaca {read} penyenaraian {noun} termurah daripada {n} kesemuanya. Setiap harga minta terendah di sini tepat, tetapi median ditinggalkan, bukan diteka, dan gred yang salinan termurahnya lebih mahal daripada penyenaraian tersebut tidak dipaparkan.",
+    },
+    left: {
+      other: "{n} penyenaraian lagi belum digred, diberi harga dalam SOL atau jauh melebihi nilai insurans, jadi ia tidak dikira dalam harga ini.",
+    },
+    thin: {
+      other: "Hanya {n} kad {noun} bergred disenaraikan dalam USDC buat masa ini, jadi satu penyenaraian baharu sahaja boleh mengubah angka ini.",
+    },
+    byGradeTitle: "Harga kad {noun} bergred yang disenaraikan",
+    byGradeNote:
+      "Setiap gred menghimpunkan semua kad {noun} pada gred itu, merangkumi kad biasa hingga kad buruan, jadi buka kad paling murah untuk melihat kad mana sebenarnya.",
+    cheapestTitle: "Kad {noun} bergred paling murah",
+    cheapestMore: "Susun dan tapis penyenaraian {noun} dalam pengimbas",
+    topTitle: "Harga minta tertinggi kad {noun}",
+  },
+  guideMarket: {
+    allVenues: "Semua platform",
+    venue: "PLATFORM",
+    venueGroup: "Platform penyenaraian",
+    none: "Tiada slab {name} bergred yang disenaraikan dalam USDC buat masa ini.",
+    noneOn: "Tiada slab {name} bergred di {venue} yang disenaraikan dalam USDC buat masa ini.",
+    seeAll: { other: "Lihat kesemua {n} dalam pengimbas." },
+    gradedSlabs: "SLAB BERGRED",
+    priced: "HARGA DALAM USDC",
+    left: {
+      other: "{n} penyenaraian lagi diberi harga dalam SOL atau jauh melebihi nilai insurans, jadi ia tidak dikira dalam harga ini.",
+    },
+    everyListing: "Pengimbas memaparkan setiap penyenaraian.",
+    byGradeTitle: "Harga penyenaraian {name} bagi setiap gred",
+    byGradeTitleOn: "Harga penyenaraian {name} bagi setiap gred di {venue}",
+    byGradeNote:
+      "Setiap gred menghimpunkan semua cetakan {name}, jadi satu gred boleh merangkumi kad yang sangat berbeza. Buka kad paling murah untuk melihat kad mana sebenarnya.",
+    cheapestTitle: "Kad {name} bergred paling murah",
+    cheapestTitleOn: "Kad {name} bergred paling murah di {venue}",
+    cheapestMore: "Susun dan tapis setiap penyenaraian {name} dalam pengimbas",
+    cheapestMoreOn: "Susun dan tapis setiap penyenaraian {name} di {venue} dalam pengimbas",
+    topTitle: "Harga minta tertinggi bagi {name}",
+    topTitleOn: "Harga minta tertinggi bagi {name} di {venue}",
+  },
+  category: {
+    kicker: "Hab francais · kad bergred bertoken",
+    lede: "Kad {noun} bergred yang sedang disenaraikan di Collector Crypt dan Magic Eden. Setiap satu ialah slab sebenar dalam bilik kebal, dimiliki melalui token di Solana. Lihat harga minta terendah dan median bagi setiap gred, kemudian buka mana-mana kad untuk melihat laporan pop, bidaan dan sejarahnya. Harga ialah harga minta langsung, bukan jualan selesai.",
+    ledeLowest:
+      "Kad {noun} bergred yang sedang disenaraikan di Collector Crypt dan Magic Eden. Setiap satu ialah slab sebenar dalam bilik kebal, dimiliki melalui token di Solana. Lihat harga minta terendah bagi setiap gred, kemudian buka mana-mana kad untuk melihat laporan pop, bidaan dan sejarahnya. Harga ialah harga minta langsung, bukan jualan selesai.",
+    pokemonTitle: "Mencari Pokémon tertentu?",
+    pokemonText: {
+      other: "Charizard, Pikachu, Umbreon dan {n} lagi mempunyai panduan harga sendiri, dengan harga minta terendah dan median bagi setiap gred.",
+    },
+    pokemonAll: { other: "Kesemua {n} panduan harga Pokémon" },
+    unavailable: "Penyenaraian {noun} langsung tidak tersedia buat sementara waktu. Panduan di bawah masih terpakai, dan {scanner} memaparkan penyenaraian semasa.",
+    unavailableLink: "pengimbas",
+    aboutTitle: "Tentang kad {noun} bergred",
+    terms: "ISTILAH BERKAITAN",
+    scannerMore: "Cari penyenaraian {noun} dalam pengimbas",
+    glossaryMore: "Glosari kad bergred dan slanga",
+    explainerMore: "Cara kad dagangan bertoken berfungsi",
+    salesMore: "Jualan terkini yang disahkan",
+    faqKicker: "Soalan lazim {name}",
+    faqTitle: "Soalan anda, dijawab.",
+    relatedTitle: "Francais berkaitan",
+    relatedName: "Kad {name}",
+    relatedSub: "Harga bergred dan penyenaraian langsung →",
+    everyFranchise: "Semua francais",
+    ldAbout: "Kad dagangan {name}",
+    ldListings: "Kad {noun} bergred yang disenaraikan sekarang",
+  },
+  index: {
+    kicker: "Panduan harga · kad Pokémon bergred",
+    h1: "Harga kad Pokémon, {accent}",
+    h1Accent: "Pokémon demi Pokémon.",
+    lede: "Pilih satu Pokémon untuk melihat setiap slab bergrednya yang disenaraikan di Collector Crypt atau Magic Eden, harga minta terendah dan median bagi setiap gred, serta kad paling murah dan paling bernilai di pasaran sekarang.",
+    tile: "Harga PSA 10, PSA 9 dan CGC →",
+    showsTitle: "Apa yang dipaparkan setiap panduan",
+    shows:
+      "Setiap panduan membaca semua penyenaraian bergred Pokémon itu di Collector Crypt dan Magic Eden, melabelkan platform setiap penyenaraian, membolehkan anda bertukar antara platform, dan dimuat semula kira-kira setiap 15 minit. Ia mengumpulkan harga minta USDC ikut gred, memaut ke kad paling murah bagi setiap gred, dan menyenaraikan slab paling murah dan paling bernilai. Harga yang ditunjukkan ialah harga minta, bukan jualan selesai.",
+    checkerMore: "Cari nilai mana-mana kad Pokémon",
+    salesMore: "Lihat jualan terkini yang disahkan",
+    ldGuides: "Panduan harga kad Pokémon",
+  },
+  guide: {
+    description:
+      "Harga langsung kad Pokémon {name} ikut gred: harga minta terendah dan median bagi slab PSA 10, PSA 9, CGC dan BGS di Collector Crypt dan Magic Eden.",
+    h1: "Harga kad {name} {accent}",
+    h1Accent: "ikut gred.",
+    lede: "Setiap slab {name} bergred yang ditokenkan oleh Collector Crypt dan sedang disenaraikan, di Collector Crypt atau Magic Eden, dengan harga minta terendah dan median bagi setiap gred. Tukar platform untuk membandingkannya. Harga ialah harga minta USDC langsung, bukan jualan selesai.",
+    kicker: "Panduan harga Pokémon · slab bergred",
+    partial: "sesetengah penyenaraian tidak dapat dibaca kali ini",
+    unavailable: "Penyenaraian {name} langsung tidak tersedia buat sementara waktu. Panduan di bawah masih terpakai, dan pengimbas memaparkan setiap penyenaraian.",
+    empty: "Tiada slab {name} bergred yang disenaraikan buat masa ini.",
+    howTitle: "Cara membaca harga {name}",
+    howPrintings:
+      "{name} muncul pada banyak kad yang berbeza: set, tahun, nombor kad, bahasa, kemasan holo dan promo. Dua slab {name} dengan gred yang sama boleh berbeza jauh harganya kerana ia cetakan yang berlainan, jadi bandingkan kad yang tepat, bukan sekadar nama dan gred.",
+    howAsking:
+      "Ini ialah harga minta: harga yang dikehendaki penjual hari ini. {sales} dan bidaan langsung di halaman setiap kad menunjukkan harga yang benar-benar dibayar oleh pembeli. Nilai insurans ialah rujukan, bukan harga jualan yang dijamin.",
+    howAskingLink: "Jualan terkini",
+    howGrades:
+      "Gred yang lebih tinggi biasanya lebih mahal, tetapi kejarangan dilihat pada laporan populasi: berapa banyak salinan yang direkodkan oleh penggred pada gred itu dan ke atas. Setiap halaman kad memaparkannya.",
+    checkerMore: "Semak nilai mana-mana kad Pokémon",
+    gradesMore: "Penjelasan gred PSA, CGC dan BGS",
+    more: "Lagi panduan harga Pokémon",
+    loading: "Memuatkan panduan harga",
+    ldName: "Harga kad {name} ikut gred",
+    ldAbout: "Kad dagangan Pokémon {name}",
+  },
+};

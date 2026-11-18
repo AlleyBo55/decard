@@ -2,117 +2,151 @@ import type { Strings } from "../en";
 import type { Translation } from "../types";
 
 export const common: Translation<Strings["common"]> = {
-  "skip": "Lewati ke isi",
-  "language": "Bahasa",
-  "search": "Cari",
-  "close": "Tutup menu",
-  "more": "Lainnya",
-  "guide": "Panduan",
-  "new": "Baru",
-  "ripCta": "Buka paket →",
-  "tabs": {
+  skip: "Langsung ke konten",
+  language: "Bahasa",
+  search: "Cari",
+  close: "Tutup menu",
+  more: "Lainnya",
+  guide: "Panduan",
+  new: "Baru",
+  ripCta: "Buka pack →",
+  homeLabel: "Beranda Decard",
+  mainNav: "Utama",
+  sourceCode: "Kode sumber {name}",
+  newSuffix: ", baru",
+  tabs: {
     "/": "Beranda",
     "/scanner": "Pemindai",
-    "/rip": "Buka",
-    "/tape": "Pita langsung"
+    "/rip": "Buka pack",
+    "/tape": "Transaksi",
   },
-  "groups": {
-    "market": {
-      "label": "Pasar",
-      "blurb": "Harga dan transaksi"
-    },
-    "play": {
-      "label": "Main",
-      "blurb": "Paket dan tarikan"
-    },
-    "learn": {
-      "label": "Pelajari"
-    }
+  groups: {
+    market: { label: "Pasar", blurb: "Harga dan transaksi" },
+    play: { label: "Main", blurb: "Pack dan pull" },
+    learn: { label: "Pelajari" },
   },
-  "nav": {
+  nav: {
     "/tape": {
-      "title": "Pita langsung",
-      "desc": "Jual, listing, dan bid di rantai"
+      title: "Transaksi live",
+      desc: "Semua penjualan, listing, dan bid on-chain",
     },
     "/sales": {
-      "title": "Penjualan terbaru",
-      "desc": "Transaksi menurut kartu, grade, dan harga"
+      title: "Penjualan terbaru",
+      desc: "Penjualan tuntas per kartu, grade, dan harga",
     },
     "/cards": {
-      "title": "Direktori kartu",
-      "desc": "Slab yang sedang dijual"
+      title: "Direktori kartu",
+      desc: "Semua slab yang di-list, per nama, set, dan grade",
     },
     "/pokemon": {
-      "title": "Harga Pokémon",
-      "desc": "Panduan harga per Pokémon"
+      title: "Harga Pokémon",
+      desc: "Panduan harga kartu graded per Pokémon",
     },
     "/cards-token": {
-      "title": "Token $CARDS",
-      "desc": "Harga, beli balik, dan burn"
+      title: "Token $CARDS",
+      desc: "Harga, buyback, dan burn",
     },
     "/rip": {
-      "title": "Buka paket",
-      "desc": "Isinya slab asli yang sudah dinilai"
+      title: "Buka pack",
+      desc: "Slab graded asli di setiap pack",
     },
     "/gym": {
-      "desc": "Papan peringkat dan peluang"
+      title: "Rip Gym",
+      desc: "Papan peringkat dan peluang pack",
     },
     "/redeem": {
-      "title": "Tukar slab",
-      "desc": "Kirim kartu fisiknya"
+      title: "Redeem slab",
+      desc: "Kirim kartu aslinya ke rumah",
     },
     "/luck#live": {
-      "title": "Gacha langsung",
-      "desc": "Setiap tarikan saat terjadi"
+      title: "Gacha live",
+      desc: "Setiap pull gacha saat terjadi",
     },
     "/luck": {
-      "title": "Analisis keberuntungan",
-      "desc": "Bandingkan tarikan dompet dengan peluang"
+      title: "Cek hoki pull",
+      desc: "Bandingkan pull sebuah dompet dengan peluangnya",
     },
     "/guide": {
-      "title": "Panduan",
-      "desc": "Grading, kelangkaan, dan istilah"
+      title: "Panduan",
+      desc: "Grading, rarity, dan istilah kolektor",
     },
     "/topics": {
-      "title": "Topik",
-      "desc": "PSA, venue, olahraga, dan paket"
+      title: "Topik",
+      desc: "PSA, CGC, marketplace, olahraga, dan buka pack",
     },
     "/tokenized-trading-cards": {
-      "title": "Kartu ter-token",
-      "desc": "Slab di brankas yang diperdagangkan di Solana"
-    }
+      title: "Penjelasan kartu tokenisasi",
+      desc: "Cara slab di brankas diperdagangkan di Solana",
+    },
   },
-  "footer": {
-    "blurb": "Pokédex gratis dan terbuka untuk kartu graded yang ditokenisasi, dibaca dari Collector Crypt dan rantai Solana.",
-    "explore": "Jelajah",
-    "franchises": "Waralaba",
-    "learn": "Pelajari",
-    "disclaimer": "Buatan penggemar, tidak berafiliasi dengan Nintendo, Creatures, GAME FREAK, The Pokémon Company, atau Collector Crypt. Data: API publik Collector Crypt dan Solana. Bukan nasihat keuangan.",
-    "links": {
+  categories: {
+    "Pokemon": "Pokémon",
+    "One Piece": "One Piece",
+    "Dragon Ball": "Dragon Ball",
+    "Riftbound": "Riftbound",
+    "Marvel": "Marvel",
+    "Yu-Gi-Oh!": "Yu-Gi-Oh!",
+    "Magic The Gathering": "Magic: The Gathering",
+    "Lorcana": "Disney Lorcana",
+    "DC": "DC Comics",
+    "Gundam": "Gundam",
+    "Naruto": "Naruto",
+    "Union Arena": "Union Arena",
+    "Soccer": "Sepak bola",
+    "Basketball": "Bola basket",
+    "Football": "American football",
+    "Baseball": "Bisbol",
+    "Hockey": "Hoki es",
+    "Vibes": "Vibes TCG",
+  },
+  switcher: {
+    button: "Ganti bahasa. Saat ini: {name}",
+    kicker: "Bahasa",
+    title: "Pilih bahasamu",
+    hint: "Menu, panduan, dan halaman ikut berganti bahasa. Nama kartu, grade, dan harga tetap sesuai listing.",
+    current: "Kamu di sini",
+    close: "Tutup",
+  },
+  footer: {
+    blurb: "Ayo pindai semua! Pokédex gratis dan open source untuk kartu graded tokenisasi di Solana, dengan listing live dari Collector Crypt, Magic Eden, dan Slabz.",
+    explore: "Jelajah",
+    franchises: "Waralaba",
+    learn: "Pelajari",
+    openSource: "OPEN SOURCE · MIT",
+    repoCta: "Kasih star, fork, lalu kirim PR ★",
+    builtInPublic: "DIBANGUN SECARA TERBUKA",
+    konami: "Psst: coba ↑ ↑ ↓ ↓ ← → ← → B A.",
+    disclaimer: "Buatan penggemar dan tidak berafiliasi dengan Nintendo, Creatures, GAME FREAK, The Pokémon Company, atau Collector Crypt. Data: API publik Collector Crypt dan RPC Solana. Bukan nasihat keuangan.",
+    links: {
       "/scanner": "Pemindai listing",
       "/cards": "Direktori kartu",
-      "/scanner?orderBy=deal": "Penawaran terbaik",
-      "/tape": "Pita langsung",
-      "/rip": "Buka paket",
-      "/gym": "Papan Rip Gym",
-      "/redeem": "Tukar slab",
-      "/luck#live": "Gacha langsung",
-      "/luck": "Analisis keberuntungan",
+      "/scanner?orderBy=deal": "Diskon terbesar",
+      "/tape": "Transaksi live",
+      "/rip": "Buka pack kartu",
+      "/gym": "Papan peringkat Rip Gym",
+      "/redeem": "Redeem slab",
+      "/luck#live": "Gacha live",
+      "/luck": "Cek hoki pull",
       "/cards-token": "Token $CARDS",
       "/sales": "Penjualan terbaru",
       "/pokemon": "Harga Pokémon",
-      "/cards#all": "Semua kartu yang dijual",
-      "/tokenized-trading-cards": "Penjelasan kartu ter-token",
-      "/topics": "PSA, venue, dan topik",
-      "/guide": "Panduan",
+      "/cards#all": "Semua kartu yang di-list",
+      "/tokenized-trading-cards": "Penjelasan kartu tokenisasi",
+      "/topics": "PSA, marketplace, dan topik",
+      "/guide": "Panduan Trainer",
       "/guide#grading": "Apa itu grading?",
-      "/guide#buying-and-selling": "Skor penawaran"
-    }
+      "/guide#buying-and-selling": "Skor diskon",
+    },
   },
-  "notFound": {
-    "text": "404 liar muncul. Halaman ini tidak ada di Pokédex.",
-    "home": "Ke beranda",
-    "scanner": "Buka pemindai"
+  notFound: {
+    text: "404 liar muncul! Halaman ini tidak ada di Pokédex.",
+    home: "Kabur ke beranda",
+    scanner: "Buka pemindai",
   },
-  "notice": "Nama kartu, grade, dan harga tetap dalam bahasa Inggris. Pasar yang ditampilkan sama."
+  error: {
+    text: "Aduh! Halaman ini pingsan. Salah satu sumber data tidak merespons tepat waktu.",
+    retry: "Pakai Revive",
+    home: "Kembali ke beranda",
+  },
+  notice: "Nama kartu, grade, dan harga tetap dalam bahasa Inggris. Ini edisi terjemahan dari pasar yang sama.",
 };

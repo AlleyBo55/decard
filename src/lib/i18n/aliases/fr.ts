@@ -1,5 +1,12 @@
 // French names for the subjects in ./entities.ts, keyed by entity key. Rules: the top of entities.ts.
 export const names: Record<string, string[]> = {
+  "franchise:soccer": ["Foot"],
+  "franchise:basketball": ["Basket-ball"],
+  "franchise:football": ["Football américain", "Foot américain", "Foot US"],
+  "franchise:baseball": ["Base-ball"],
+  "franchise:hockey": ["Hockey sur glace"],
+
+  // Noms français des Pokémon.
   charizard: ["Dracaufeu"],
   gengar: ["Ectoplasma"],
   eevee: ["Évoli"],
@@ -11,12 +18,14 @@ export const names: Record<string, string[]> = {
   bulbasaur: ["Bulbizarre"],
   zapdos: ["Électhor"],
   dragonite: ["Dracolosse"],
+  psyduck: ["Psykokwak"],
   snorlax: ["Ronflex"],
   squirtle: ["Carapuce"],
   articuno: ["Artikodin"],
   greninja: ["Amphinobi"],
   gyarados: ["Léviator"],
   espeon: ["Mentali"],
+  meowth: ["Miaouss"],
   mimikyu: ["Mimiqui"],
   jolteon: ["Voltali"],
   sylveon: ["Nymphali"],
@@ -27,7 +36,63 @@ export const names: Record<string, string[]> = {
   glaceon: ["Givrali"],
   lapras: ["Lokhlass"],
   ninetales: ["Feunard"],
-  "spider-man": ["Homme-Araignée"],
+
+  // Doublage français : Sangoku, Sangohan, Sangoten, Freezer.
+  goku: ["Sangoku", "Son Goku"],
+  gohan: ["Sangohan", "Son Gohan"],
+  goten: ["Sangoten", "Son Goten"],
+  vegito: ["Vegeto", "Vegetto"],
+  frieza: ["Freezer"],
+
+  "spider-man": ["Homme-Araignée", "Spiderman"],
+  "fantastic-four": ["Les Quatre Fantastiques", "Quatre Fantastiques", "4 Fantastiques"],
+  "silver-surfer": ["Le Surfer d'Argent", "Surfer d'Argent"],
+
+  "green-lantern": ["Lanterne Verte"],
+  "justice-league": ["Ligue des Justiciers"],
+
+  // Noms officiels du JCC en français.
+  "dark-magician": ["Magicien Sombre"],
+  "dark-magician-girl": ["Magicienne des Ténèbres"],
+  "blue-eyes-white-dragon": ["Dragon Blanc aux Yeux Bleus"],
+  "red-eyes-black-dragon": ["Dragon Noir aux Yeux Rouges"],
+  "winged-dragon-of-ra": ["Dragon Ailé de Râ"],
+  "slifer-the-sky-dragon": ["Slifer le Dragon Céleste"],
+
+  "the-one-ring": ["L'Anneau Unique", "Anneau Unique"],
+  "black-lotus": ["Lotus Noir"],
+
+  "snow-white": ["Blanche-Neige"],
+  "tinker-bell": ["Fée Clochette", "Clochette"],
+  maleficent: ["Maléfique"],
+
+  "lionel-messi": ["La Pulga"],
+  "cristiano-ronaldo": ["CR7"],
+  "zinedine-zidane": ["Zizou"],
+
+  "victor-wembanyama": ["Wemby"],
 };
 
-export const fillers: string[] = ["carte", "prix"];
+export const fillers: string[] = [
+  "carte",
+  "cartes",
+  "prix",
+  "cote",
+  "valeur",
+  "vaut",
+  "combien",
+  "acheter",
+  "vendre",
+  "vente",
+  "gradée",
+  "gradé",
+  "notée",
+  "scellée",
+  "neuve",
+  "édition",
+  "officielle",
+  "japonaise",
+  "anglaise",
+  "française",
+  "recrue",
+];
