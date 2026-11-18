@@ -1,4 +1,172 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
 
-export const explainer: Translation<Strings["explainer"]> = {};
+export const explainer: Translation<Strings["explainer"]> = {
+  meta: {
+    section: "Tokeniserte samlekort",
+    tags: ["Collector Crypt", "tokeniserte samlekort", "onchain-TCG", "Solana", "graderte kort"],
+  },
+  ld: {
+    about: ["Tokeniserte samlekort", "Collector Crypt", "Solana", "Samlekortspill"],
+  },
+  breadcrumb: {
+    label: "Brødsmulesti",
+    page: "Tokeniserte samlekort",
+  },
+  hero: {
+    kicker: "Graderte kort · Solana · onchain-TCG",
+    h1: "Tokeniserte samlekort, {accent}",
+    h1Accent: "forklart.",
+    lede: "Et gradert Pokémon-, One Piece- eller sportskort kan ligge beskyttet i et hvelv mens eierskapet flyttes på Solana. Her er hvordan modellen fungerer, hvordan Collector Crypt lagrer graderte kort i hvelv og tokeniserer dem, og hvordan du undersøker et kort før du handler det.",
+    scan: "Skann live annonser",
+    glossary: "Åpne ordlisten for graderte kort",
+    author: "Decard-bidragsytere",
+    byline: "Av {author} · Publisert og gjennomgått {date} · 10 minutters lesing · Uavhengig, ikke finansiell rådgivning",
+  },
+  pillars: [
+    { label: "FYSISK", text: "En profesjonelt gradert slab blir værende i hvelvet." },
+    { label: "ONCHAIN", text: "En unik Solana-eiendel registrerer det overførbare eierskapet." },
+    { label: "INNLØSBAR", text: "Eieren kan følge oppbevarerens prosess for å få kortet." },
+  ],
+  whatIs: {
+    title: "Hva er et tokenisert samlekort?",
+    intro: "Et tokenisert samlekort kobler en unik blokkjede-eiendel til et fysisk samleobjekt som en oppbevarer har. Den fysiske slaben trenger ikke å krysse landet hver gang eierskapet endres. I stedet flyttes onchain-eiendelen mellom lommebøker, og kortet bak blir liggende i oppbevaring til en eier løser det inn.",
+    redeemable: "Dette er forskjellig fra et rent digitalt samleobjekt. Collector Crypt sier at kort-eiendelene deres er fysisk innløsbare: en samler kan levere inn et kvalifisert gradert kort og få den tilsvarende eiendelen, eller brenne eiendelen ved uttak slik at det fysiske kortet kan sendes. Les gjennom gjeldende {product}, {deposit} og {withdraw} før du handler, siden oppbevaring, kvalifisering, kostnader og tidsbruk kan endre seg.",
+    productLink: "produktbeskrivelsen fra Collector Crypt",
+    depositLink: "innleveringsprosess",
+    withdrawLink: "uttaksprosess",
+    noteTitle: "TOKEN ≠ SELVE SLABEN",
+    note: "Eiendelen er den overførbare onchain-oppføringen knyttet til kortet i hvelvet. Innløsningen avhenger av oppbevareren, kortets status og plattformens gjeldende vilkår.",
+  },
+  platform: {
+    title: "Slik fungerer Collector Crypt på Solana",
+    intro: "Collector Crypt kombinerer kortoppbevaring med en markedsplass på Solana. Ifølge dokumentasjonen må innleverte kort allerede være gradert. Etter inspeksjon og hvelvlagring får innleveren en NFT som representerer kortet. Markedsplassen bruker USDC til kjøp og SOL til nettverksgebyrer.",
+    step: "TRINN {n}",
+    steps: [
+      { title: "Gradere og lagre i hvelv", text: "En kvalifisert slab inspiseres og lagres; identiteten omfatter detaljer som sett, serienummer, graderingsselskap, karakter og sertifisering." },
+      { title: "Representere eierskap", text: "En unik eiendel i en Solana-lommebok peker til det kortet mens den fysiske slaben blir værende i oppbevaring." },
+      { title: "Handle", text: "En eier kan legge ut eiendelen for salg. Collector Crypt beskriver annonser som uten escrow: eiendelen blir i selgerens lommebok til et salg." },
+      { title: "Løse inn", text: "Eieren starter uttaket, brenner onchain-eiendelen og betaler aktuell frakt slik at oppbevareren kan sende slaben." },
+    ],
+    broader: "Den bredere modellen kalles ofte tokeniserte samleobjekter eller real-world assets (RWA). En {link} beskriver flere plattformer som bruker onchain-eierskap mens fysiske gjenstander blir i oppbevaring. Hver plattform har ulike vilkår, så «tokenisert» alene sier ikke hvem som har gjenstanden eller nøyaktig hvilke innløsningsgarantier som gjelder.",
+    solanaLink: "oversikt fra Solana Foundation",
+  },
+  research: {
+    title: "Slik undersøker du et tokenisert gradert kort",
+    intro: "En god annonse er mer enn en kjent figur og en lav pris. Sjekk disse feltene sammen:",
+    fields: [
+      { term: "Identitet", meaning: "Sjekk år, sett, kortnummer, språk, parallell og autografstatus. Utgivelser som ligner, kan ha svært ulik verdi." },
+      { term: "Karakter og sertifikat", meaning: "Bekreft graderingsselskapet, den numeriske karakteren og sertifikatnummeret. Følg Decards sertifikatlenke til graderingsselskapet når den finnes." },
+      { term: "Populasjon", meaning: "Populasjonsrapporten teller hvor mange eksemplarer graderingsselskapet har registrert på denne karakteren og høyere. Lav populasjon kan støtte knapphet, men skaper ikke etterspørsel." },
+      { term: "Pris og forsikringsverdi", meaning: "Se på forsikringsverdien som én referanse som følger med kortet, ikke som en garantert salgspris eller en fullstendig takst." },
+      { term: "Bud og aktivitet", meaning: "Live bud, siste salg og endringer i annonsen avslører mer om likviditeten enn en utlagt pris alene." },
+      { term: "Oppbevaring og innløsning", meaning: "Sjekk nåværende oppbevarer, rett til uttak, fraktpris, begrensninger på destinasjoner og forventet tid på markedsplassen." },
+    ],
+    population: "PSA beskriver sin {link} som oversikten over hvor mange gjenstander selskapet har gradert på hver karakter. Decard viser oppgitt populasjon for karakteren, populasjon høyere, total populasjon og gem-rate når Collector Crypt oppgir dem.",
+    psaLink: "Population Report",
+  },
+  dealScore: {
+    title: "Decards kuppscore",
+    intro: "Kuppscore er en snarvei for å rangere annonser priset i USDC. Den måler hvor langt under kortets forsikringsverdi den utlagte prisen ligger:",
+    formulaLabel: "FORMEL",
+    formula: "(1 − utlagt pris ÷ forsikringsverdi) × 100",
+    insured: "FORSIKRET",
+    listed: "LAGT UT",
+    score: "KUPPSCORE",
+    limits: "Poengsummen er begrenset fra 0 til 100. Den vises bare når et kort har en forsikringsverdi og en USDC-annonse, fordi Decard ikke gjetter en dollarpris for SOL-annonser når kupp rangeres. En score på 20 betyr «lagt ut 20 % under forsikringsverdien», ikke «verdt 20 % mer» og ikke «garantert gevinst».",
+    more: "Åpne live-rangeringen over de beste kuppene",
+  },
+  terms: {
+    title: "TCG, NFT, RWA eller krypto-samlekort?",
+    labels: "Disse merkelappene overlapper, men svarer på ulike spørsmål. {tcg} betyr samlekortspill og beskriver kategorier som Pokémon, One Piece eller Magic: The Gathering. {nft} beskriver en unik blokkjede-eiendel. {rwa} understreker at eiendelen er knyttet til noe fysisk. «Krypto-samlekort» er uformelt og kan også bety et kort som bare finnes digitalt.",
+    tcg: "TCG",
+    nft: "NFT",
+    rwa: "RWA",
+    tccNote: "{tcc} brukes noen ganger uformelt for «trading card crypto», men har ingen enhetlig betydning i kortmarkedet. «Tokeniserte samlekort» eller «onchain TCG-samleobjekter» beskriver denne kategorien tydeligere.",
+    tcc: "TCC",
+    best: "For modellen Decard følger, er {phrase} det minst tvetydige uttrykket: en konkret, profesjonelt gradert fysisk slab representert onchain mens den er i oppbevaring.",
+    phrase: "tokenisert gradert samlekort",
+  },
+  risks: {
+    title: "Hva tokenet ikke fjerner",
+    item: "{title} {text}",
+    items: [
+      { title: "Markedsrisiko.", text: "En annonse, en forsikringsverdi eller et tidligere salg garanterer ikke hva en annen kjøper vil betale. Kort som handles lite, kan ha stort sprik mellom utlagte priser og bud som faktisk kan utføres." },
+      { title: "Oppbevaringsrisiko.", text: "Det fysiske kortet oppbevares av en oppbevarer. Sjekk hvem som har det, forsikringsordningen og hva som skjer hvis plattformen eller oppbevareren får et problem." },
+      { title: "Innløsningsrisiko.", text: "Fraktgebyrer, støttede destinasjoner, skatter, forsinkelser og kortets kvalifisering kan endre seg. Kort i partnerhvelv kan ta lengre tid å sende." },
+      { title: "Metadatarisiko.", text: "Feil data om sett, parallell, karakter eller sertifikat kan forvrenge sammenligninger. Sjekk slaben og graderingsselskapets oppføring i stedet for å stole på én skjerm." },
+      { title: "Wallet- og kontraktsrisiko.", text: "Transaksjoner på markedsplassen krever signaturer fra lommeboken. Les hver transaksjon, beskytt seed-frasene dine og bruk offisielle lenker." },
+    ],
+  },
+  decard: {
+    title: "Hva Decard bidrar med",
+    intro: "Collector Crypt leverer eiendelene og markedsplassen. Decard er et uavhengig undersøkelsesgrensesnitt bygd på offentlige data. Det kombinerer markedsplasskatalogen med onchain-aktivitet, slik at en samler går fra å oppdage til å undersøke uten å koble til en lommebok.",
+    features: [
+      { title: "Annonseskanner", text: "Rangerer annonser etter kuppscore, pris eller hvor ferske de er, på tvers av Collector Crypt og Magic Eden." },
+      { title: "Kortsider", text: "Samler kortets identitet, karakter, sertifikat, forsikringsverdi, populasjonsrapport, annonse, bud og historikk." },
+      { title: "Live-handel", text: "Dekoder nylige markedsplassinstruksjoner fra Collector Crypt til salg, annonser, prisendringer og bud." },
+      { title: "Lommeboksporing", text: "Viser de graderte kortene og dekodet markedsplassaktivitet knyttet til en hvilken som helst Solana-adresse." },
+    ],
+    data: "Decard har ingen database og ingen privat markedsindekser. Annonser, forsikringsverdier, bud og populasjonsdata kommer fra det offentlige API-et til Collector Crypt; aktiviteten kommer fra markedsplassprogrammet til Collector Crypt på Solana. Korte cacher reduserer belastningen, så tall kan henge etter med noen sekunder. Se {guide} for alle felter og begrensninger.",
+    guideLink: "Trenerguiden",
+  },
+  faq: {
+    title: "Ofte stilte spørsmål",
+    items: [
+      {
+        q: "Er et tokenisert samlekort det samme som et digitalt kort?",
+        a: "Nei. I modellen som omtales her, representerer en unik onchain-eiendel et profesjonelt gradert fysisk kort som ligger i et hvelv. Tokenet kan flyttes mellom lommebøker mens slaben blir i oppbevaring, og eieren kan følge plattformens prosess for å løse inn det fysiske kortet.",
+      },
+      {
+        q: "Er dette et TCG, NFT, RWA eller krypto-samlekort?",
+        a: "Det kan beskrives med alle fire begrepene, men de betyr ulike ting. TCG angir kortkategorien, NFT beskriver den unike onchain-eiendelen, og RWA beskriver koblingen til en fysisk gjenstand. Tokenisert samlekort er det klareste samlebegrepet.",
+      },
+      {
+        q: "Garanterer en høy Decard-kuppscore gevinst?",
+        a: "Nei. Den måler bare rabatten mellom en USDC-annonse og forsikringsverdien fra Collector Crypt. Den beviser ikke etterspørsel, likviditet, ekthet utover de viste dataene, framtidig salgspris eller økonomien i en innløsning.",
+      },
+      {
+        q: "Trenger jeg en lommebok for å bruke Decard?",
+        a: "Nei. Decard er et undersøkelsesverktøy bare til visning. Du trenger en kompatibel Solana-lommebok, USDC og SOL bare når du velger å handle på en markedsplass som Collector Crypt.",
+      },
+      {
+        q: "Hvor henter Decard kort- og markedsdataene sine?",
+        a: "Annonser, kortdetaljer, forsikringsverdier, bud og populasjonsrapporter kommer fra det offentlige API-et til Collector Crypt. Markedsaktiviteten kommer fra markedsplassprogrammet til Collector Crypt på Solana. Decard har ingen database eller privat indekser.",
+      },
+    ],
+  },
+  sources: {
+    title: "Kilder og metode",
+    intro: "Denne guiden oppsummerer plattformmodellen; vilkårene på markedsplassen styres av de opprinnelige tilbyderne. Sjekk disse kildene for oppdaterte driftsdetaljer:",
+    links: {
+      product: "produktinformasjon fra Collector Crypt",
+      market: "brukerveiledning for Collector Crypt-markedsplassen",
+      deposit: "levere inn kort hos Collector Crypt",
+      withdraw: "ta ut kort fra Collector Crypt",
+      solana: "Solana-oversikt over tokeniserte kort og samleobjekter",
+      psa: "PSA Population Report (innlogging kan kreves)",
+      code: "Decards kildekode og beregningslogikk",
+    },
+  },
+  cta: {
+    title: "KLAR TIL Å UNDERSØKE ET KORT?",
+    text: "Skann markedet live, og åpne så et kort for å sjekke karakter, populasjon, bud og historikk.",
+    deals: "Finn kupp live",
+    tape: "Se live-handelen",
+  },
+  aside: {
+    label: "På denne siden",
+    title: "PÅ DENNE SIDEN",
+    toc: {
+      whatIs: "Tokeniserte kort",
+      platform: "Collector Crypt",
+      research: "Sjekkliste",
+      dealScore: "Kuppscore",
+      terms: "TCG, NFT og RWA",
+      risks: "Risikoer",
+      decard: "Slik fungerer Decard",
+      faq: "FAQ",
+      sources: "Kilder",
+    },
+  },
+};

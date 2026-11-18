@@ -1,4 +1,172 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
 
-export const explainer: Translation<Strings["explainer"]> = {};
+export const explainer: Translation<Strings["explainer"]> = {
+  meta: {
+    section: "Carte da collezione tokenizzate",
+    tags: ["Collector Crypt", "carte da collezione tokenizzate", "TCG onchain", "Solana", "carte gradate"],
+  },
+  ld: {
+    about: ["Carte da collezione tokenizzate", "Collector Crypt", "Solana", "Giochi di carte collezionabili"],
+  },
+  breadcrumb: {
+    label: "Percorso di navigazione",
+    page: "Carte da collezione tokenizzate",
+  },
+  hero: {
+    kicker: "Carte gradate · Solana · TCG onchain",
+    h1: "Carte da collezione tokenizzate, {accent}",
+    h1Accent: "spiegate.",
+    lede: "Una carta gradata di Pokémon, One Piece o sport può restare protetta nel caveau mentre la sua proprietà si muove su Solana. Ecco come funziona questo modello, come Collector Crypt custodisce e tokenizza le carte gradate e come studiare una carta prima di scambiarla.",
+    scan: "Scansiona gli annunci in tempo reale",
+    glossary: "Apri il glossario delle carte gradate",
+    author: "Collaboratori di Decard",
+    byline: "Di {author} · Pubblicato e verificato il {date} · Lettura di 10 minuti · Indipendente, non è consulenza finanziaria",
+  },
+  pillars: [
+    { label: "FISICO", text: "Uno slab gradato professionalmente resta custodito nel caveau." },
+    { label: "ONCHAIN", text: "Un asset unico su Solana registra il diritto di proprietà trasferibile." },
+    { label: "RISCATTABILE", text: "Il proprietario può seguire la procedura del custode per ricevere la carta." },
+  ],
+  whatIs: {
+    title: "Che cos'è una carta da collezione tokenizzata?",
+    intro: "Una carta da collezione tokenizzata collega un asset unico su blockchain a un oggetto fisico da collezione tenuto da un custode. Lo slab fisico non deve attraversare il paese a ogni cambio di proprietà. L'asset onchain passa invece tra wallet, e la carta sottostante resta in deposito finché un proprietario non la riscatta.",
+    redeemable: "Questo è diverso da un oggetto da collezione puramente digitale. Collector Crypt dichiara che i suoi asset di carte sono riscattabili fisicamente: un collezionista può depositare una carta gradata idonea e ricevere l'asset corrispondente, oppure bruciare quell'asset durante il prelievo per far spedire la carta fisica. Leggi la {product}, il {deposit} e il {withdraw} aggiornati prima di operare, perché custodia, idoneità, costi e tempi possono cambiare.",
+    productLink: "descrizione del prodotto di Collector Crypt",
+    depositLink: "processo di deposito",
+    withdrawLink: "processo di prelievo",
+    noteTitle: "IL TOKEN ≠ LO SLAB STESSO",
+    note: "L'asset è il record onchain trasferibile collegato alla carta nel caveau. Il riscatto dipende dal custode, dallo stato della carta e dai termini attuali della piattaforma.",
+  },
+  platform: {
+    title: "Come funziona Collector Crypt su Solana",
+    intro: "Collector Crypt unisce la custodia delle carte a un marketplace su Solana. Secondo la sua documentazione, le carte depositate devono essere già gradate. Dopo l'ispezione e la messa in caveau, chi deposita riceve un NFT che rappresenta la carta. Il marketplace usa USDC per gli acquisti e SOL per le commissioni di rete.",
+    step: "PASSO {n}",
+    steps: [
+      { title: "Gradare e custodire", text: "Uno slab idoneo viene ispezionato e conservato; la sua identità include dettagli come set, numero di serie, ente di grading, voto e certificazione." },
+      { title: "Rappresentare la proprietà", text: "Un asset unico in un wallet Solana punta a quella carta mentre lo slab fisico resta in custodia." },
+      { title: "Scambiare", text: "Un holder può mettere in vendita l'asset. Collector Crypt descrive gli annunci come senza escrow: l'asset resta nel wallet del venditore fino alla vendita." },
+      { title: "Riscattare", text: "Il proprietario avvia il prelievo, brucia l'asset onchain e paga la spedizione prevista così il custode può inviare lo slab." },
+    ],
+    broader: "Il modello più ampio è spesso chiamato oggetti da collezione tokenizzati o real-world asset (RWA). La {link} descrive diverse piattaforme che usano la proprietà onchain mentre gli oggetti fisici restano in custodia. Ogni piattaforma ha termini diversi, quindi “tokenizzato” da solo non dice chi detiene l'oggetto né quali garanzie di riscatto valgono esattamente.",
+    solanaLink: "panoramica della Solana Foundation",
+  },
+  research: {
+    title: "Come valutare una carta gradata tokenizzata",
+    intro: "Un buon annuncio è più di un personaggio familiare e di un prezzo basso. Controlla questi campi insieme:",
+    fields: [
+      { term: "Identità", meaning: "Verifica l'anno, il set, il numero della carta, la lingua, la parallela e l'eventuale autografo. Uscite dall'aspetto simile possono avere valori molto diversi." },
+      { term: "Voto e certificato", meaning: "Conferma l'ente di grading, il voto numerico e il numero di certificazione. Segui il link al certificato di Decard verso l'ente quando disponibile." },
+      { term: "Popolazione", meaning: "Il report di popolazione conta quanti esemplari l'ente di grading ha registrato a questo voto e superiori. Una popolazione bassa può indicare scarsità, ma non crea domanda." },
+      { term: "Prezzo e valore assicurato", meaning: "Considera il valore assicurato come un riferimento fornito con la carta, non come un prezzo di vendita garantito o una perizia completa." },
+      { term: "Offerte e attività", meaning: "Le offerte in tempo reale, le vendite recenti e le modifiche agli annunci dicono di più sulla liquidità del solo prezzo richiesto." },
+      { term: "Custodia e riscatto", meaning: "Controlla il custode attuale, l'idoneità al prelievo, il costo di spedizione, le restrizioni sulle destinazioni e i tempi previsti sul marketplace." },
+    ],
+    population: "PSA descrive il suo {link} come il registro di quanti oggetti ha gradato a ciascun voto. Decard mostra la popolazione del voto indicata, la popolazione superiore, la popolazione totale e il gem rate quando Collector Crypt li fornisce.",
+    psaLink: "Population Report",
+  },
+  dealScore: {
+    title: "Il punteggio affare di Decard",
+    intro: "Il punteggio affare è una scorciatoia per ordinare gli annunci in USDC. Misura quanto il prezzo richiesto è sotto il valore assicurato della carta:",
+    formulaLabel: "FORMULA",
+    formula: "(1 − prezzo dell'annuncio ÷ valore assicurato) × 100",
+    insured: "ASSICURATO",
+    listed: "IN VENDITA",
+    score: "PUNTEGGIO AFFARE",
+    limits: "Il punteggio è limitato da 0 a 100. Appare solo quando una carta ha un valore assicurato e un annuncio in USDC, perché Decard non stima un prezzo in dollari per gli annunci in SOL quando ordina gli affari. Un punteggio di 20 significa “in vendita al 20% sotto il valore assicurato”, non “vale il 20% in più” né “profitto garantito”.",
+    more: "Apri la classifica in tempo reale dei migliori affari",
+  },
+  terms: {
+    title: "TCG, NFT, RWA o carta crypto?",
+    labels: "Queste etichette si sovrappongono, ma rispondono a domande diverse. {tcg} significa gioco di carte collezionabili e descrive categorie come Pokémon, One Piece o Magic: The Gathering. {nft} descrive un asset unico su blockchain. {rwa} sottolinea che l'asset è collegato a qualcosa di fisico. “Carta crypto” è informale e può anche indicare una carta che esiste solo in digitale.",
+    tcg: "TCG",
+    nft: "NFT",
+    rwa: "RWA",
+    tccNote: "{tcc} a volte si usa in modo informale per “trading card crypto”, ma non ha un significato coerente nel mercato delle carte. “Carte da collezione tokenizzate” o “oggetti da collezione TCG onchain” descrivono questa categoria in modo più chiaro.",
+    tcc: "TCC",
+    best: "Per il modello che Decard segue, {phrase} è l'espressione meno ambigua: uno slab fisico specifico, gradato professionalmente e rappresentato onchain mentre è in custodia.",
+    phrase: "carta da collezione gradata e tokenizzata",
+  },
+  risks: {
+    title: "Cosa non elimina il token",
+    item: "{title} {text}",
+    items: [
+      { title: "Rischio di mercato.", text: "Un annuncio, un valore assicurato o una vendita passata non garantiscono quanto pagherà un altro acquirente. Le carte poco scambiate possono avere un ampio divario tra prezzi richiesti e offerte eseguibili." },
+      { title: "Rischio di custodia.", text: "La carta fisica è tenuta da un custode. Verifica chi la detiene, come è gestita l'assicurazione e cosa succede se la piattaforma o il custode ha un problema." },
+      { title: "Rischio di riscatto.", text: "Costi di spedizione, destinazioni supportate, tasse, ritardi e idoneità della carta possono cambiare. Le carte nei caveau partner possono richiedere più tempo per la spedizione." },
+      { title: "Rischio sui metadati.", text: "Dati errati su set, parallela, voto o certificato possono falsare i confronti. Verifica lo slab e il registro dell'ente di grading invece di affidarti a una sola schermata." },
+      { title: "Rischio di wallet e contratti.", text: "Le transazioni sul marketplace richiedono firme dal wallet. Leggi ogni transazione, proteggi le seed phrase e usa i link ufficiali." },
+    ],
+  },
+  decard: {
+    title: "Cosa aggiunge Decard",
+    intro: "Collector Crypt fornisce gli asset e il marketplace. Decard è un'interfaccia di ricerca indipendente basata su dati pubblici. Unisce il catalogo del marketplace all'attività onchain, così un collezionista passa dalla scoperta alla verifica senza collegare un wallet.",
+    features: [
+      { title: "Scanner degli annunci", text: "Ordina gli annunci per punteggio affare, prezzo o novità su Collector Crypt e Magic Eden." },
+      { title: "Pagine delle carte", text: "Riuniscono identità della carta, voto, certificato, valore assicurato, report di popolazione, annuncio, offerte e cronologia." },
+      { title: "Operazioni in diretta", text: "Decodifica le istruzioni recenti del marketplace di Collector Crypt in vendite, annunci, cambi di prezzo e offerte." },
+      { title: "Tracker dei wallet", text: "Mostra le carte gradate e l'attività decodificata del marketplace associate a qualsiasi indirizzo Solana." },
+    ],
+    data: "Decard non ha un database né un indicizzatore di mercato privato. Annunci, valori assicurati, offerte e dati di popolazione arrivano dall'API pubblica di Collector Crypt; l'attività arriva dal programma del marketplace di Collector Crypt su Solana. Cache brevi riducono il carico, quindi i numeri possono essere in ritardo di qualche secondo. Vedi la {guide} per ogni campo e limite.",
+    guideLink: "Guida dell'Allenatore",
+  },
+  faq: {
+    title: "Domande frequenti",
+    items: [
+      {
+        q: "Una carta da collezione tokenizzata è uguale a una carta digitale?",
+        a: "No. Nel modello descritto qui, un asset onchain unico rappresenta una carta fisica gradata professionalmente e tenuta in un caveau. Il token può passare tra wallet mentre lo slab resta in custodia, e il proprietario può seguire la procedura della piattaforma per riscattare la carta fisica.",
+      },
+      {
+        q: "È un TCG, un NFT, un RWA o una carta crypto?",
+        a: "Si può descrivere con tutti e quattro i termini, ma significano cose diverse. TCG indica la categoria della carta, NFT descrive l'asset onchain unico e RWA descrive il legame con un oggetto fisico. Carta da collezione tokenizzata è il termine complessivo più chiaro.",
+      },
+      {
+        q: "Un punteggio affare alto di Decard garantisce un profitto?",
+        a: "No. Misura solo lo sconto tra un annuncio in USDC e il valore assicurato di Collector Crypt. Non dimostra domanda, liquidità, autenticità oltre ai dati mostrati, prezzo di vendita futuro o convenienza del riscatto.",
+      },
+      {
+        q: "Mi serve un wallet per usare Decard?",
+        a: "No. Decard è uno strumento di ricerca in sola lettura. Un wallet Solana compatibile, USDC e SOL ti servono solo quando scegli di operare su un marketplace come Collector Crypt.",
+      },
+      {
+        q: "Da dove prende Decard i dati sulle carte e sul mercato?",
+        a: "Annunci, dettagli delle carte, valori assicurati, offerte e report di popolazione arrivano dall'API pubblica di Collector Crypt. L'attività di mercato arriva dal programma del marketplace di Collector Crypt su Solana. Decard non ha un database né un indicizzatore privato.",
+      },
+    ],
+  },
+  sources: {
+    title: "Fonti e metodologia",
+    intro: "Questa guida riassume il modello della piattaforma; i termini del marketplace sono controllati dai provider originali. Controlla queste fonti per i dettagli operativi attuali:",
+    links: {
+      product: "informazioni sul prodotto di Collector Crypt",
+      market: "guida utente del marketplace di Collector Crypt",
+      deposit: "depositare carte su Collector Crypt",
+      withdraw: "prelevare carte da Collector Crypt",
+      solana: "panoramica di Solana su carte e oggetti da collezione tokenizzati",
+      psa: "PSA Population Report (potrebbe servire l'accesso)",
+      code: "codice sorgente di Decard e logica di calcolo",
+    },
+  },
+  cta: {
+    title: "PRONTO A STUDIARE UNA CARTA?",
+    text: "Scansiona il mercato in tempo reale, poi apri una carta per verificarne voto, popolazione, offerte e cronologia.",
+    deals: "Trova affari in tempo reale",
+    tape: "Guarda le operazioni in diretta",
+  },
+  aside: {
+    label: "In questa pagina",
+    title: "IN QUESTA PAGINA",
+    toc: {
+      whatIs: "Carte tokenizzate",
+      platform: "Collector Crypt",
+      research: "Checklist di verifica",
+      dealScore: "Punteggio affare",
+      terms: "TCG, NFT e RWA",
+      risks: "Rischi",
+      decard: "Come funziona Decard",
+      faq: "FAQ",
+      sources: "Fonti",
+    },
+  },
+};

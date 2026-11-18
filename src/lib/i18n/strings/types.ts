@@ -16,10 +16,17 @@ export type ClientStrings = Omit<Strings, ServerOnlyKey>;
 export type Translation<T> = T extends readonly unknown[]
   ? T
   : T extends { other: string }
-    ? PluralForms
+    ? Exclude<keyof T, PluralKey> extends never
+      ? PluralForms
+      : { [K in keyof T]?: Translation<T[K]> }
     : T extends object
       ? { [K in keyof T]?: Translation<T[K]> }
       : T;
 
-/** A plural ({ one, other } in English) takes the forms its own language needs: Russian adds few and many. */
+type PluralKey = "zero" | "one" | "two" | "few" | "many" | "other";
+
+/**
+ * A plural ({ one, other } in English: only plural-category keys) takes the forms its own language
+ * needs: Russian adds few and many. An object that merely has an `other` key among others is not one.
+ */
 type PluralForms = { zero?: string; one?: string; two?: string; few?: string; many?: string; other?: string };

@@ -118,7 +118,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!hub) return {};
   const lang = asLocale(raw);
   const seo = pokemonSeo(lang, hub.slug, hub.name);
-  const called = alsoCalled(lang, `/pokemon/${hub.slug}`);
+  const called = alsoCalled(lang, `/pokemon/${hub.slug}`, [localPokemonName(lang, hub.slug, hub.name)]);
   const baseDescription = description(lang, hub);
   const withNames = called && `${baseDescription} ${called}`.length <= 170 ? `${baseDescription} ${called}` : baseDescription;
   return pageMetadata({
@@ -289,8 +289,8 @@ export default async function PokemonHubPage({ params }: Props) {
             {lang === "en" ? fmt(s.lede, { name: hub.name }) : seo.lede}
           </p>
           {lang !== "en" && <p className="text-sm text-ink-mute">{t.common.notice}</p>}
-          {alsoCalled(lang, `/pokemon/${hub.slug}`) && (
-            <p className="text-base text-ink-soft">{alsoCalled(lang, `/pokemon/${hub.slug}`)}</p>
+          {alsoCalled(lang, `/pokemon/${hub.slug}`, [localPokemonName(lang, hub.slug, hub.name)]) && (
+            <p className="text-base text-ink-soft">{alsoCalled(lang, `/pokemon/${hub.slug}`, [localPokemonName(lang, hub.slug, hub.name)])}</p>
           )}
           {data && (
             <p className="text-sm text-ink-mute">

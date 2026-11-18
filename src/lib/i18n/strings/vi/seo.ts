@@ -2,74 +2,75 @@ import type { Strings } from "../en";
 import type { Translation } from "../types";
 
 export const seo: Translation<Strings["seo"]> = {
-  "pages": {
+  pages: {
     "/scanner": {
-      "title": "Máy quét thẻ graded",
-      "description": "Niêm yết trên Collector Crypt và Magic Eden, xếp theo điểm, giá hoặc độ mới."
+      title: "Thẻ graded đang bán, xếp theo điểm deal",
+      description: "Mọi niêm yết thẻ graded trên Collector Crypt, Magic Eden và Slabz, xếp theo điểm deal, giá hoặc độ mới. Lọc theo Pokémon, One Piece, Riftbound và hơn thế."
     },
     "/cards": {
-      "title": "Danh mục thẻ graded",
-      "description": "Mọi thẻ graded đang rao, với tên, điểm, bộ và năm."
+      title: "Danh mục thẻ graded: Pokémon, PSA và hơn thế",
+      description: "Xem thẻ graded đang niêm yết theo tên chính xác, điểm, bộ, năm, số thẻ và danh mục, gồm cả thẻ Pokémon và slab PSA."
     },
     "/tape": {
-      "title": "Băng giao dịch trực tiếp",
-      "description": "Bán, niêm yết và trả giá của Collector Crypt khi chúng lên Solana."
+      title: "Giao dịch thẻ graded trực tiếp",
+      description: "Mọi lượt bán, niêm yết và trả giá thẻ graded trên sàn Collector Crypt, giải mã trực tiếp kèm thẻ, điểm, giá và ví. Lọc bỏ bot trả giá hàng loạt."
     },
     "/luck": {
-      "title": "Phân tích vận mở gói",
-      "description": "So lượt mở của một ví với tỉ lệ đã công bố."
+      title: "Phân tích may mắn lượt quay gacha",
+      description: "Chấm điểm mọi lượt quay gacha Collector Crypt đã xác minh trong một ví, hoặc một lượt riêng, so với thẻ và tỉ lệ từng hạng lúc lượt quay được trao."
     },
     "/guide": {
-      "title": "Cẩm nang thẻ graded",
-      "description": "Chấm điểm, PSA, CGC, BGS, population, slab và từ người sưu tầm dùng."
+      title: "Thuật ngữ thẻ: PSA vs CGC, tiếng lóng và crypto",
+      description: "Bảng thuật ngữ dễ hiểu cho thẻ graded token hóa: PSA vs CGC vs BGS, báo cáo pop, SIR và manga rare, cùng tiếng lóng sưu tầm và Solana trên X."
     },
     "/pokemon-card-value-checker": {
-      "title": "Xem giá thẻ Pokémon",
-      "description": "So giá hỏi, giá bảo hiểm và điểm PSA, CGC hoặc BGS. Giá hỏi không phải thẩm định."
+      title: "Tra giá thẻ Pokémon: giá chào bán và giá PSA",
+      description: "Tra giá chào bán, giá trị bảo hiểm và điểm của thẻ Pokémon. So sánh slab PSA, CGC và BGS từ niêm yết trực tiếp, miễn phí, không cần đăng nhập."
     },
     "/pokemon": {
-      "title": "Giá thẻ Pokémon theo từng con",
-      "description": "Giá graded cho từng Pokémon: PSA, CGC và BGS."
+      title: "Giá thẻ Pokémon theo từng Pokémon: bảng giá graded",
+      description: "Bảng giá thẻ graded cho {count} Pokémon, từ Charizard, Pikachu đến Umbreon, Gengar: giá chào bán PSA, CGC và BGS trực tiếp theo từng điểm."
     },
     "/sales": {
-      "title": "Giao dịch thẻ graded gần đây",
-      "description": "Giao dịch Collector Crypt đã chốt trên Solana, với thẻ, điểm và giá."
+      title: "Giao dịch thẻ graded gần đây trên Solana",
+      description: "Giao dịch đã chốt mới nhất của thẻ Pokémon graded và thẻ token hóa khác trên sàn Collector Crypt: thẻ, điểm, giá, người mua, người bán và giao dịch Solana."
     },
     "/tokenized-trading-cards": {
-      "title": "Thẻ sưu tầm token hóa trên Solana",
-      "description": "Slab trong kho giao dịch thành token thế nào, và đổi thẻ thì hàng được gửi ra sao."
+      title: "Thẻ sưu tầm token hóa trên Solana là gì",
+      description: "Thẻ graded token hóa trên Solana hoạt động thế nào: lưu ký trong kho, NFT thẻ, giao dịch USDC, giá trị bảo hiểm, điểm deal, báo cáo pop, quy đổi và rủi ro."
     },
     "/cards-token": {
-      "title": "Giá, mua lại và đốt $CARDS",
-      "description": "Giá và cung của $CARDS, và doanh thu gói mua lại rồi đốt bao nhiêu."
+      title: "Token $CARDS: giá, mua lại và đốt",
+      description: "Giá CARDS trực tiếp, doanh thu gacha Collector Crypt mua lại và đốt bao nhiêu CARDS, tổng đã đốt, đợt mở khóa 29/11 và tình trạng niêm yết Coinbase."
     },
     "/rip": {
-      "title": "Mở gói thẻ graded",
-      "description": "Mở gói và nhận slab thật, đã được PSA, CGC hoặc BGS chấm."
+      title: "Mở pack thẻ graded: Pokémon, One Piece và hơn thế",
+      description: "Mở pack bí ẩn chứa thẻ graded thật trên Decard, vận hành bởi Slabz: Pokémon, One Piece, Dragon Ball, thể thao. Xem tỉ lệ, trả bằng USDC, bán lại một chạm."
     },
     "/gym": {
-      "title": "Bảng xếp hạng và tỉ lệ Rip Gym",
-      "description": "Bảng xếp hạng và tỉ lệ của các gói thẻ graded."
+      title: "Giải đấu mở pack: bảng xếp hạng và tỉ lệ pack Slabz",
+      description: "Bảng xếp hạng mở pack Slabz: huấn luyện viên Decard như người thách đấu Gym, mọi người chơi Slabz trực tiếp, mỗi pack là một Gym theo tỉ lệ Sử thi, Huyền thoại."
     },
     "/redeem": {
-      "title": "Đổi NFT lấy slab vật lý",
-      "description": "Đốt token và gửi slab PSA, CGC hoặc BGS. Cước tính bằng USDC."
+      title: "Đổi NFT thẻ graded lấy slab thật, gửi về tận nhà",
+      description: "Đổi NFT lấy slab graded thật: chọn quốc gia, nhận báo giá vận chuyển trực tiếp, rồi đốt NFT và trả phí vận chuyển bằng USDC. Theo dõi từ kho đến tận nhà."
     },
     "/topics": {
-      "title": "Chủ đề, sàn và thương hiệu",
-      "description": "PSA, CGC, BGS, đổi thẻ, mở gói và giá trực tiếp của từng thương hiệu."
+      title: "Chủ đề thẻ graded: hãng chấm điểm, sàn, dòng thẻ",
+      description: "Hướng dẫn về PSA, CGC, BGS, slab, quy đổi và mở pack, cùng trang giá trực tiếp cho Pokémon, One Piece, Riftbound, Marvel, thể thao và mọi dòng thẻ khác."
     }
   },
-  "hub": {
-    "title": "Giá thẻ {name} đã graded",
-    "description": "Giá slab {name} PSA, CGC và BGS trên Collector Crypt và Magic Eden.",
-    "h1": "Giá và niêm yết thẻ {name}",
-    "intro": "Thẻ {name} đã graded đang rao bán. Slab thật nằm trong kho, giao dịch bằng token trên Solana và có thể đổi lấy thẻ."
+  hub: {
+    title: "Giá thẻ {name} graded và niêm yết trực tiếp",
+    description: "Giá trực tiếp của slab {name} graded trên Solana: giá chào bán PSA, CGC và BGS trên Collector Crypt, Magic Eden và Slabz.",
+    h1: "Thẻ {name}: giá graded và niêm yết trực tiếp",
+    intro: "Thẻ {name} graded đang niêm yết. Mỗi thẻ là một slab thật nằm trong kho, sở hữu qua một token trên Solana."
   },
-  "mon": {
-    "title": "Giá thẻ {name}: PSA 10 và PSA 9",
-    "description": "Giá thẻ Pokémon {name} theo điểm: PSA 10, PSA 9, CGC và BGS.",
-    "h1": "Giá thẻ {name}",
-    "lede": "Mọi slab {name} đang rao, với giá thấp nhất và trung vị cho từng điểm."
-  }
+  mon: {
+    title: "Giá thẻ {name}: PSA 10, PSA 9 và giá graded",
+    description: "Giá thẻ Pokémon {name} trực tiếp theo điểm: giá chào bán PSA 10, PSA 9, CGC và BGS trên Collector Crypt và Magic Eden.",
+    h1: "Giá thẻ {name}",
+    lede: "Mọi slab {name} graded đang niêm yết, kèm giá chào bán thấp nhất và trung vị cho từng điểm."
+  },
+  pokemon: {}
 };

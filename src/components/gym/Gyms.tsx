@@ -89,10 +89,10 @@ export function Gyms({ data, league, decard }: { data: GymPacks; league?: SlabzL
                 aria-pressed={only === u.id}
                 onClick={() => setOnly(only === u.id ? null : u.id)}
                 style={{ ["--c" as string]: u.glow, ["--ci" as string]: u.ink }}
-                title={fmt(s.universeTitle, { universe: u.name, badge: t.gym.badges[u.id] })}
+                title={fmt(s.universeTitle, { universe: t.rip.universeNames[u.id] ?? u.name, badge: t.gym.badges[u.id] })}
               >
                 <GymBadge u={u.id} size={26} />
-                {u.name} <span className="gy-case-n">{n}</span>
+                {t.rip.universeNames[u.id] ?? u.name} <span className="gy-case-n">{n}</span>
               </button>
             ))}
           </div>
@@ -200,7 +200,7 @@ function GymCard({ g, metric, pool, heat, ours, span }: { g: Gym; metric: GymMet
           {rankPost && <span className="sr-only">{rankPost}</span>}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="gy-gym-kind">{fmt(s.kind, { universe: g.u.name, badge: t.gym.badges[g.u.id] })}</p>
+          <p className="gy-gym-kind">{fmt(s.kind, { universe: t.rip.universeNames[g.u.id] ?? g.u.name, badge: t.gym.badges[g.u.id] })}</p>
           <h3 className="rw-display gy-gym-name">{name}</h3>
         </div>
         <GymBadge u={g.u.id} size={50} labelled className="gy-gym-badge" />

@@ -61,7 +61,7 @@ const TOPIC: Partial<Record<string, Partial<Record<Locale, { h1: string } & Seo>
     zh: { h1: "用代币赎回实物壳", title: "把代币化卡牌赎回成实物", description: "销毁 NFT 后，PSA、CGC 或 BGS 实物会被寄出。" },
     id: { h1: "Tukar token dengan slab fisik", title: "Tukar kartu ter-token dengan slab fisik", description: "Bakar NFT-nya dan slab PSA, CGC, atau BGS dikirim." },
     es: { h1: "Canjea el token por el slab físico", title: "Canjear una carta tokenizada por el slab", description: "Quemar el NFT envía el slab físico de PSA, CGC o BGS." },
-    fr: { h1: "Échanger le token contre le slab", title: "Racheter une carte tokenisée contre le slab", description: "Brûler le NFT envoie le slab physique PSA, CGC ou BGS." },
+    fr: { h1: "Échanger le token contre le slab", title: "Échanger une carte tokenisée contre le slab", description: "Brûler le NFT envoie le slab physique PSA, CGC ou BGS." },
     de: { h1: "Token gegen den physischen Slab", title: "Tokenisierte Karte gegen den Slab einlösen", description: "Das NFT zu verbrennen verschickt den physischen PSA-, CGC- oder BGS-Slab." },
   },
   "sports-cards-on-solana": {

@@ -180,8 +180,8 @@ export default async function CategoryHubPage({ params }: Props) {
           {template ? template.intro : fmt(view?.complete ? s.lede : s.ledeLowest, { noun })}
         </p>
         {lang !== "en" && <p className="text-sm text-ink-mute">{t.common.notice}</p>}
-        {alsoCalled(lang, `/cards/${hub.slug}`) && (
-          <p className="max-w-3xl text-base text-ink-soft">{alsoCalled(lang, `/cards/${hub.slug}`)}</p>
+        {alsoCalled(lang, `/cards/${hub.slug}`, [name]) && (
+          <p className="max-w-3xl text-base text-ink-soft">{alsoCalled(lang, `/cards/${hub.slug}`, [name])}</p>
         )}
         {view && (
           <p className="text-sm text-ink-mute">

@@ -247,23 +247,33 @@ if (process.env.NODE_ENV !== "production" && problems.size > 0) {
 }
 
 /**
- * The query in the English Collector Crypt's search matches. A query without a local name or
- * nickname comes back unchanged ("charizard base set"). Otherwise the longest names become their
- * English search text, and filler words, grades and words in scripts the English listing names
- * never use are dropped: "jeki kartu tcg" → "Shanks", "kairyuu psa 10" → "Dragonite",
- * "リザードンex" → "Charizard ex", "cartas hombre araña" → "Spider-Man".
+ * The query in the English Collector Crypt's search matches. An English query with no local name,
+ * non-English filler word or other script comes back unchanged ("charizard base set",
+ * "charizard psa 10"). Otherwise the longest names become their English search text, and filler
+ * words, grades and words in scripts the English listing names never use are dropped:
+ * "jeki kartu tcg" → "Shanks", "kairyuu psa 10" → "Dragonite", "リザードンex" → "Charizard ex",
+ * "cartas hombre araña" → "Spider-Man", "thẻ charizard" → "Charizard". A franchise's name goes
+ * when a subject is named too: "kartu one piece jeki" → "Shanks".
  */
 export function marketSearch(raw: string): string {
   const s = raw.normalize("NFKC");
   const tokens = tokenize(s);
-  const out: { text: string; start: number; end: number; last: number }[] = [];
+  // `franchise` marks a franchise's own name ("Baseball", "One Piece"): dropped when a subject is named.
+  const out: { text: string; start: number; end: number; last: number; franchise?: boolean; subject?: boolean }[] = [];
   let hit = false;
+  // Text the English listing names can't contain was dropped (a non-English filler word, a word in
+  // another script): the query as typed would find nothing, so the cleaned one goes out instead.
+  let foreign = false;
   let grade = 0;
   const take = (target: Target, typed: string) => {
     grade = target.kind === "filler" && GRADERS.has(fold(typed, false)) ? 2 : 0;
-    if (target.kind === "filler") return;
+    if (target.kind === "filler") {
+      foreign ||= target.from !== "en";
+      return;
+    }
     hit ||= target.kind === "alias";
-    out.push({ text: target.search, start: -1, end: -1, last: -1 });
+    const franchise = target.key.startsWith("franchise:");
+    out.push({ text: target.search, start: -1, end: -1, last: -1, franchise, subject: !franchise });
   };
   for (let i = 0; i < tokens.length; ) {
     const t = tokens[i];
@@ -286,6 +296,7 @@ export function marketSearch(raw: string): string {
     const before = i > 0 ? s.slice(tokens[i - 1].end, t.start) : "";
     i++;
     if (t.glued) {
+      foreign = true;
       // Longest name starting at each character; the characters between names are dropped.
       for (let p = 0; p < t.fold.length; ) {
         let len = Math.min(maxInner, t.fold.length - p);
@@ -310,7 +321,10 @@ export function marketSearch(raw: string): string {
       continue;
     }
     grade = 0;
-    if (!LATIN_OR_DIGIT.test(t.fold)) continue;
+    if (!LATIN_OR_DIGIT.test(t.fold)) {
+      foreign = true;
+      continue;
+    }
     // Neighbouring kept words stay as typed, separators included ("4/102", "base set").
     const prev = out[out.length - 1];
     if (prev && prev.last === i - 2) {
@@ -319,9 +333,13 @@ export function marketSearch(raw: string): string {
       prev.text = s.slice(prev.start, prev.end);
     } else out.push({ text: s.slice(t.start, t.end), start: t.start, end: t.end, last: i - 1 });
   }
-  if (!hit) return raw;
+  if (!hit && !foreign) return raw;
+  // A named subject already picks out its franchise, and many listing names don't spell the
+  // franchise out: "การ์ดเบสบอล โอทานิ" searches "Shohei Ohtani", not "Baseball Shohei Ohtani".
+  const pieces = out.some((piece) => piece.subject) ? out.filter((piece) => !piece.franchise) : out;
+  if (pieces.length === 0) return raw;
   const seen = new Set<string>();
-  return out
+  return pieces
     .map((piece) => piece.text)
     .filter((text) => !seen.has(text.toLowerCase()) && seen.add(text.toLowerCase()))
     .join(" ");
@@ -335,8 +353,13 @@ export function aliasNames(locale: Locale, href: string): string[] {
   return entity ? (DISPLAY.get(entity.key)?.[locale] ?? []).slice(0, 8) : [];
 }
 
-export function alsoCalled(locale: Locale, href: string): string | null {
-  const names = aliasNames(locale, href);
+/**
+ * "Also called Jeki, Topi Jerami." for a page, or null. `shown` is the name the page already prints
+ * in this language (the local franchise or Pokémon name), so the line never repeats it.
+ */
+export function alsoCalled(locale: Locale, href: string, shown: string[] = []): string | null {
+  const skip = new Set(shown.map((name) => words(name).join(" ")));
+  const names = aliasNames(locale, href).filter((name) => !skip.has(words(name).join(" ")));
   if (names.length === 0) return null;
   return `${ALSO[locale]} ${names.join(", ")}.`;
 }

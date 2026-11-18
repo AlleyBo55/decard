@@ -1,4 +1,172 @@
 import type { Strings } from "../en";
 import type { Translation } from "../types";
 
-export const explainer: Translation<Strings["explainer"]> = {};
+export const explainer: Translation<Strings["explainer"]> = {
+  meta: {
+    section: "Getokeniseerde verzamelkaarten",
+    tags: ["Collector Crypt", "getokeniseerde verzamelkaarten", "onchain TCG", "Solana", "gegradeerde kaarten"],
+  },
+  ld: {
+    about: ["Getokeniseerde verzamelkaarten", "Collector Crypt", "Solana", "Ruilkaartspellen"],
+  },
+  breadcrumb: {
+    label: "Kruimelpad",
+    page: "Getokeniseerde verzamelkaarten",
+  },
+  hero: {
+    kicker: "Gegradeerde kaarten · Solana · onchain TCG",
+    h1: "Getokeniseerde verzamelkaarten, {accent}",
+    h1Accent: "uitgelegd.",
+    lede: "Een gegradeerde Pokémon-, One Piece- of sportkaart kan beschermd in een kluis blijven terwijl het eigendom op Solana wordt verhandeld. Dit is hoe dat model werkt, hoe Collector Crypt gegradeerde kaarten in de kluis bewaart en tokeniseert, en hoe je een kaart onderzoekt voordat je hem verhandelt.",
+    scan: "Scan de live listings",
+    glossary: "Open de woordenlijst voor gegradeerde kaarten",
+    author: "Decard-bijdragers",
+    byline: "Door {author} · Gepubliceerd en gecontroleerd op {date} · Leestijd 10 minuten · Onafhankelijk, geen financieel advies",
+  },
+  pillars: [
+    { label: "FYSIEK", text: "Een professioneel gegradeerde slab blijft in de kluis bewaard." },
+    { label: "ONCHAIN", text: "Een uniek Solana-asset legt het overdraagbare eigendom vast." },
+    { label: "INWISSELBAAR", text: "De eigenaar kan het proces van de bewaarder volgen om de kaart te ontvangen." },
+  ],
+  whatIs: {
+    title: "Wat is een getokeniseerde verzamelkaart?",
+    intro: "Een getokeniseerde verzamelkaart verbindt een uniek blockchain-asset met een fysiek verzamelobject dat een bewaarder bijhoudt. De fysieke slab hoeft niet bij elke eigendomswisseling het land door te reizen. In plaats daarvan beweegt het onchain-asset tussen wallets, en blijft de onderliggende kaart in opslag tot een eigenaar hem inwisselt.",
+    redeemable: "Dit verschilt van een puur digitaal verzamelobject. Collector Crypt zegt dat zijn kaart-assets fysiek inwisselbaar zijn: een verzamelaar kan een in aanmerking komende gegradeerde kaart inleveren en het bijbehorende asset ontvangen, of dat asset bij de opname verbranden zodat de fysieke kaart verstuurd kan worden. Lees de actuele {product}, {deposit} en {withdraw} voordat je iets doet, want bewaring, geschiktheid, kosten en doorlooptijd kunnen veranderen.",
+    productLink: "productbeschrijving van Collector Crypt",
+    depositLink: "inleverproces",
+    withdrawLink: "opnameproces",
+    noteTitle: "TOKEN ≠ DE SLAB ZELF",
+    note: "Het asset is de overdraagbare onchain-registratie die aan de kaart in de kluis is gekoppeld. De inwisseling hangt af van de bewaarder, de status van de kaart en de huidige voorwaarden van het platform.",
+  },
+  platform: {
+    title: "Hoe Collector Crypt werkt op Solana",
+    intro: "Collector Crypt combineert kaartbewaring met een marktplaats op Solana. Volgens de documentatie moeten ingeleverde kaarten al gegradeerd zijn. Na controle en opslag in de kluis ontvangt de inleveraar een NFT die de kaart vertegenwoordigt. De marktplaats gebruikt USDC voor aankopen en SOL voor netwerkkosten.",
+    step: "STAP {n}",
+    steps: [
+      { title: "Graderen en opslaan", text: "Een in aanmerking komende slab wordt gecontroleerd en opgeslagen; de identiteit bevat gegevens zoals set, serienummer, gradingbedrijf, grade en certificering." },
+      { title: "Eigendom vastleggen", text: "Een uniek asset in een Solana-wallet verwijst naar die kaart terwijl de fysieke slab in bewaring blijft." },
+      { title: "Verhandelen", text: "Een houder kan het asset te koop zetten. Collector Crypt beschrijft listings als zonder escrow: het asset blijft in de wallet van de verkoper tot een verkoop." },
+      { title: "Inwisselen", text: "De eigenaar start een opname, verbrandt het onchain-asset en betaalt de verzendkosten zodat de bewaarder de slab kan versturen." },
+    ],
+    broader: "Het bredere model wordt vaak getokeniseerde verzamelobjecten of real-world assets (RWA) genoemd. Het {link} beschrijft meerdere platforms die onchain-eigendom gebruiken terwijl fysieke items in bewaring blijven. Elk platform heeft andere voorwaarden, dus “getokeniseerd” alleen zegt niet wie het item heeft of welke inwisselgaranties er precies gelden.",
+    solanaLink: "overzicht van de Solana Foundation",
+  },
+  research: {
+    title: "Hoe je een getokeniseerde gegradeerde kaart onderzoekt",
+    intro: "Een goede listing is meer dan een bekend personage en een lage prijs. Bekijk deze velden samen:",
+    fields: [
+      { term: "Identiteit", meaning: "Controleer het jaar, de set, het kaartnummer, de taal, de parallel en of er een handtekening is. Releases die op elkaar lijken, kunnen heel verschillende waarden hebben." },
+      { term: "Grade en certificaat", meaning: "Bevestig het gradingbedrijf, de numerieke grade en het certificaatnummer. Volg de certlink van Decard naar het gradingbedrijf als die er is." },
+      { term: "Populatie", meaning: "Het pop report telt hoeveel exemplaren het gradingbedrijf op deze grade en hoger heeft geregistreerd. Een lage populatie kan schaarste onderbouwen, maar creëert geen vraag." },
+      { term: "Prijs en verzekerde waarde", meaning: "Beschouw de verzekerde waarde als één referentie die bij de kaart hoort, niet als een gegarandeerde verkoopprijs of een volledige taxatie." },
+      { term: "Biedingen en activiteit", meaning: "Live biedingen, recente verkopen en wijzigingen in de listing zeggen meer over de liquiditeit dan een vraagprijs alleen." },
+      { term: "Bewaring en inwisseling", meaning: "Controleer de huidige bewaarder, of opname mogelijk is, de verzendkosten, bestemmingsbeperkingen en de verwachte doorlooptijd op de marktplaats." },
+    ],
+    population: "PSA beschrijft zijn {link} als het overzicht van hoeveel items het per grade heeft gegradeerd. Decard toont de gerapporteerde populatie van de grade, populatie hoger, totale populatie en gem rate wanneer Collector Crypt die levert.",
+    psaLink: "Population Report",
+  },
+  dealScore: {
+    title: "De dealscore van Decard",
+    intro: "De dealscore is een snelle manier om listings in USDC te rangschikken. Hij meet hoever de vraagprijs onder de verzekerde waarde van de kaart ligt:",
+    formulaLabel: "FORMULE",
+    formula: "(1 − vraagprijs ÷ verzekerde waarde) × 100",
+    insured: "VERZEKERD",
+    listed: "TE KOOP",
+    score: "DEALSCORE",
+    limits: "De score is begrensd van 0 tot 100. Hij verschijnt alleen als een kaart een verzekerde waarde en een USDC-listing heeft, omdat Decard geen dollarprijs schat voor SOL-listings bij het rangschikken van deals. Een score van 20 betekent “te koop voor 20% onder de verzekerde waarde”, niet “20% meer waard” en niet “gegarandeerde winst”.",
+    more: "Open de live ranglijst met de beste deals",
+  },
+  terms: {
+    title: "TCG, NFT, RWA of crypto-kaart?",
+    labels: "Deze labels overlappen, maar beantwoorden verschillende vragen. {tcg} betekent ruilkaartspel en beschrijft categorieën zoals Pokémon, One Piece of Magic: The Gathering. {nft} beschrijft een uniek blockchain-asset. {rwa} benadrukt dat het asset aan iets fysieks is gekoppeld. “Crypto-kaart” is informeel en kan ook een kaart betekenen die alleen digitaal bestaat.",
+    tcg: "TCG",
+    nft: "NFT",
+    rwa: "RWA",
+    tccNote: "{tcc} wordt soms informeel gebruikt voor “trading card crypto”, maar heeft geen consistente betekenis in de kaartmarkt. “Getokeniseerde verzamelkaarten” of “onchain TCG-verzamelobjecten” beschrijven deze categorie duidelijker.",
+    tcc: "TCC",
+    best: "Voor het model dat Decard volgt, is {phrase} de minst dubbelzinnige term: een specifieke, professioneel gegradeerde fysieke slab die onchain wordt weergegeven terwijl hij in bewaring is.",
+    phrase: "getokeniseerde gegradeerde verzamelkaart",
+  },
+  risks: {
+    title: "Wat de token niet wegneemt",
+    item: "{title} {text}",
+    items: [
+      { title: "Marktrisico.", text: "Een listing, een verzekerde waarde of een eerdere verkoop garandeert niet wat een andere koper zal betalen. Bij weinig verhandelde kaarten kan het verschil tussen vraagprijzen en uitvoerbare biedingen groot zijn." },
+      { title: "Bewaringsrisico.", text: "De fysieke kaart wordt door een bewaarder gehouden. Controleer wie hem bewaart, hoe de verzekering is geregeld en wat er gebeurt als het platform of de bewaarder een probleem heeft." },
+      { title: "Inwisselingsrisico.", text: "Verzendkosten, ondersteunde bestemmingen, belastingen, vertragingen en of een kaart in aanmerking komt, kunnen veranderen. Kaarten in partnerkluizen kunnen langer duren om te versturen." },
+      { title: "Metadatarisico.", text: "Verkeerde gegevens over set, parallel, grade of certificaat kunnen vergelijkingen vertekenen. Controleer de slab en de registratie van het gradingbedrijf in plaats van op één scherm te vertrouwen." },
+      { title: "Wallet- en contractrisico.", text: "Transacties op de marktplaats vereisen wallethandtekeningen. Lees elke transactie, bescherm je seed phrases en gebruik officiële links." },
+    ],
+  },
+  decard: {
+    title: "Wat Decard toevoegt",
+    intro: "Collector Crypt levert de assets en de marktplaats. Decard is een onafhankelijke onderzoeksinterface op basis van openbare data. Het combineert de marktplaatscatalogus met onchain-activiteit, zodat een verzamelaar van ontdekken naar onderzoek gaat zonder een wallet te koppelen.",
+    features: [
+      { title: "Listingscanner", text: "Rangschikt listings op dealscore, prijs of versheid over Collector Crypt en Magic Eden." },
+      { title: "Kaartpagina's", text: "Brengen kaartidentiteit, grade, certificaat, verzekerde waarde, pop report, listing, biedingen en historie samen." },
+      { title: "Live feed", text: "Decodeert recente marktplaatsinstructies van Collector Crypt naar verkopen, listings, prijswijzigingen en biedingen." },
+      { title: "Wallettracker", text: "Toont de gegradeerde kaarten en gedecodeerde marktplaatsactiviteit bij elk Solana-adres." },
+    ],
+    data: "Decard heeft geen database en geen private marktindexer. Listings, verzekerde waarden, biedingen en populatiegegevens komen uit de openbare API van Collector Crypt; de activiteit komt uit het marktplaatsprogramma van Collector Crypt op Solana. Korte caches verlagen de belasting, dus cijfers kunnen enkele seconden achterlopen. Zie de {guide} voor elk veld en elke beperking.",
+    guideLink: "Trainersgids",
+  },
+  faq: {
+    title: "Veelgestelde vragen",
+    items: [
+      {
+        q: "Is een getokeniseerde verzamelkaart hetzelfde als een digitale kaart?",
+        a: "Nee. In het model dat hier wordt besproken, staat een uniek onchain-asset voor een professioneel gegradeerde fysieke kaart die in een kluis ligt. De token kan tussen wallets bewegen terwijl de slab in bewaring blijft, en de eigenaar kan het proces van het platform volgen om de fysieke kaart in te wisselen.",
+      },
+      {
+        q: "Is dit een TCG, NFT, RWA of crypto-kaart?",
+        a: "Je kunt het met alle vier de termen beschrijven, maar ze betekenen iets anders. TCG duidt de kaartcategorie aan, NFT beschrijft het unieke onchain-asset en RWA beschrijft de link met een fysiek item. Getokeniseerde verzamelkaart is al met al de duidelijkste term.",
+      },
+      {
+        q: "Garandeert een hoge Decard-dealscore winst?",
+        a: "Nee. Hij meet alleen de korting tussen een USDC-listing en de verzekerde waarde van Collector Crypt. Hij bewijst geen vraag, liquiditeit, echtheid buiten de getoonde gegevens, toekomstige verkoopprijs of de kosten en baten van inwisseling.",
+      },
+      {
+        q: "Heb ik een wallet nodig om Decard te gebruiken?",
+        a: "Nee. Decard is een onderzoekstool die alleen leest. Je hebt alleen een compatibele Solana-wallet, USDC en SOL nodig wanneer je ervoor kiest om te handelen op een marktplaats zoals Collector Crypt.",
+      },
+      {
+        q: "Waar haalt Decard zijn kaart- en marktgegevens vandaan?",
+        a: "Listings, kaartgegevens, verzekerde waarden, biedingen en pop reports komen uit de openbare API van Collector Crypt. De marktactiviteit komt uit het marktplaatsprogramma van Collector Crypt op Solana. Decard heeft geen database of private indexer.",
+      },
+    ],
+  },
+  sources: {
+    title: "Bronnen en methodologie",
+    intro: "Deze gids vat het platformmodel samen; de voorwaarden van de marktplaats worden bepaald door de oorspronkelijke aanbieders. Raadpleeg deze bronnen voor actuele operationele details:",
+    links: {
+      product: "productinformatie van Collector Crypt",
+      market: "gebruikersgids voor de Collector Crypt-marktplaats",
+      deposit: "kaarten inleveren bij Collector Crypt",
+      withdraw: "kaarten opnemen bij Collector Crypt",
+      solana: "Solana-overzicht van getokeniseerde kaarten en verzamelobjecten",
+      psa: "PSA Population Report (inloggen kan nodig zijn)",
+      code: "Decard-broncode en rekenlogica",
+    },
+  },
+  cta: {
+    title: "KLAAR OM EEN KAART TE ONDERZOEKEN?",
+    text: "Scan de live markt en open daarna een kaart om de grade, populatie, biedingen en historie te controleren.",
+    deals: "Vind live deals",
+    tape: "Bekijk de live feed",
+  },
+  aside: {
+    label: "Op deze pagina",
+    title: "OP DEZE PAGINA",
+    toc: {
+      whatIs: "Getokeniseerde kaarten",
+      platform: "Collector Crypt",
+      research: "Onderzoekschecklist",
+      dealScore: "Dealscore",
+      terms: "TCG, NFT en RWA",
+      risks: "Risico's",
+      decard: "Hoe Decard werkt",
+      faq: "FAQ",
+      sources: "Bronnen",
+    },
+  },
+};
