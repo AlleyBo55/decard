@@ -11,8 +11,15 @@ export function register() {
   if (process.env.NODE_ENV !== "production" || process.env.NEXT_PHASE === "phase-production-build") return;
   // Neither is awaited: register must return before the server takes requests.
   void import("@/lib/catalog")
-    .then(({ getCatalog }) => getCatalog())
-    .catch(() => {}); // walk() logs its own failure, and the next request retries
+    .then(({ getCatalog }) => {
+      // walk() logs its own failure, and the next call retries.
+      const refresh = () => getCatalog().catch(() => {});
+      void refresh();
+      // Asked hourly, the list is re-read every ~6 hours (FRESH_MS) and never expires after a quiet
+      // day, so the sitemap and /cards never wait on a cold walk.
+      setInterval(refresh, 60 * 60_000).unref();
+    })
+    .catch(() => {});
   setTimeout(() => void warmGuides(), 10_000).unref();
 }
 
